@@ -1,0 +1,80 @@
+package # hide from PAUSE(The [Perl programming] Authors Upload Server)
+        strict;
+
+$VERSION =
+$VERSION = '0.01';
+
+BEGIN {
+    my @pragma = grep -e, map {"$_/" . __FILE__} @INC;
+    my %pragma = map { $_ => 1 } @pragma;
+    if (@pragma >= 2) {
+        my $pragma = join "\n", sort keys %pragma;
+        CORE::warn <<END;
+****************************************************
+                   C A U T I O N
+
+             CONFLICT strict.pm PRAGMA
+
+$pragma
+****************************************************
+END
+    }
+}
+
+sub import {
+}
+
+sub unimport {
+}
+
+1;
+__END__
+
+=pod
+
+=head1 NAME
+
+strict - dummy strict.pm
+
+=head1 SYNOPSIS
+
+    use strict;
+    no strict;
+
+    use strict qw(vars refs subs);
+    no strict qw(vars refs subs);
+
+=head1 ABSTRACT
+
+This file helps to make your perl interpreter modern.
+
+=head1 DEPENDENCIES
+
+This software requires perl5.00503 or later.
+
+=head1 AUTHOR
+
+INABA Hitoshi E<lt>ina@cpan.orgE<gt>
+
+This project was originated by INABA Hitoshi.
+
+=head1 LICENSE AND COPYRIGHT
+
+This software is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See L<perlartistic>.
+
+This software is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=head1 ACKNOWLEDGEMENTS
+
+This software was made referring to software and the document that the
+following hackers or persons had made.
+I am thankful to all persons.
+
+ Sebastien Aperghis-Tramoni, warnings-compat
+ http://search.cpan.org/dist/warnings-compat/
+
+=cut
+
