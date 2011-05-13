@@ -8,6 +8,13 @@ my $__FILE__ = __FILE__;
 use Char::Latin2;
 print "1..34\n";
 
+if ($^O eq 'MacOS') {
+    for my $tno (1.. 34) {
+        print "ok - $tno # SKIP $^X $0\n";
+    }
+    exit;
+}
+
 # 引数 0 個
 
 eval q{ open(); };
@@ -123,6 +130,9 @@ else {
 if ($] =~ /^5\.006/) {
     print "ok - 8 # SKIP open(FILE,'>:crlf','open.txt'); $^X $__FILE__\n";
 }
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
+    print "ok - 8 # SKIP open(FILE,'>:crlf','open.txt'); $^X $__FILE__\n";
+}
 else {
     open(FILE,'>:crlf','open.txt');
     print FILE "A" x 8;
@@ -147,6 +157,9 @@ else {
 if ($] =~ /^5\.006/) {
     print "ok - 9 # SKIP open(FILE,'>>:crlf','open.txt'); $^X $__FILE__\n";
 }
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
+    print "ok - 9 # SKIP open(FILE,'>>:crlf','open.txt'); $^X $__FILE__\n";
+}
 else {
     open(FILE,'>>:crlf','open.txt');
     print FILE "A" x 9;
@@ -169,6 +182,9 @@ else {
 # 引数 3 個 <:crlf, ベアワード
 
 if ($] =~ /^5\.006/) {
+    print "ok - 10 # SKIP open(FILE,'<:crlf','open.txt'); $^X $__FILE__\n";
+}
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
     print "ok - 10 # SKIP open(FILE,'<:crlf','open.txt'); $^X $__FILE__\n";
 }
 else {
@@ -275,6 +291,9 @@ else {
 if ($] =~ /^5\.006/) {
     print "ok - 14 # SKIP open(FILE,'>:crlf:encoding(latin2)','open.txt'); $^X $__FILE__\n";
 }
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
+    print "ok - 14 # SKIP open(FILE,'>:crlf:encoding(latin2)','open.txt'); $^X $__FILE__\n";
+}
 else {
     open(FILE,'>:crlf:encoding(latin2)','open.txt');
     print FILE "A" x 14;
@@ -299,6 +318,9 @@ else {
 if ($] =~ /^5\.006/) {
     print "ok - 15 # SKIP open(FILE,'>>:crlf:encoding(latin2)','open.txt'); $^X $__FILE__\n";
 }
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
+    print "ok - 15 # SKIP open(FILE,'>>:crlf:encoding(latin2)','open.txt'); $^X $__FILE__\n";
+}
 else {
     open(FILE,'>>:crlf:encoding(latin2)','open.txt');
     print FILE "A" x 15;
@@ -321,6 +343,9 @@ else {
 # 引数 3 個 <:crlf:encoding(latin2), ベアワード
 
 if ($] =~ /^5\.006/) {
+    print "ok - 16 # SKIP open(FILE,'<:crlf:encoding(latin2)','open.txt'); $^X $__FILE__\n";
+}
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
     print "ok - 16 # SKIP open(FILE,'<:crlf:encoding(latin2)','open.txt'); $^X $__FILE__\n";
 }
 else {
@@ -469,6 +494,9 @@ else {
 if ($] =~ /^5\.006/) {
     print "ok - 23 # SKIP open(my \$fh,'>:crlf','open.txt'); $^X $__FILE__\n";
 }
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
+    print "ok - 23 # SKIP open(my \$fh,'>:crlf','open.txt'); $^X $__FILE__\n";
+}
 else {
     open(my $fh,'>:crlf','open.txt');
     print $fh "A" x 23;
@@ -493,6 +521,9 @@ else {
 if ($] =~ /^5\.006/) {
     print "ok - 24 # SKIP open(my \$fh,'>>:crlf','open.txt'); $^X $__FILE__\n";
 }
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
+    print "ok - 24 # SKIP open(my \$fh,'>>:crlf','open.txt'); $^X $__FILE__\n";
+}
 else {
     open(my $fh,'>>:crlf','open.txt');
     print $fh "A" x 24;
@@ -515,6 +546,9 @@ else {
 # 引数 3 個 <:crlf, 未定義の値が格納された変数
 
 if ($] =~ /^5\.006/) {
+    print "ok - 25 # SKIP open(my \$fh,'<:crlf','open.txt'); $^X $__FILE__\n";
+}
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
     print "ok - 25 # SKIP open(my \$fh,'<:crlf','open.txt'); $^X $__FILE__\n";
 }
 else {
@@ -621,6 +655,9 @@ else {
 if ($] =~ /^5\.006/) {
     print "ok - 29 # SKIP open(my \$fh,'>:crlf:encoding(latin2)','open.txt'); $^X $__FILE__\n";
 }
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
+    print "ok - 29 # SKIP open(my \$fh,'>:crlf:encoding(latin2)','open.txt'); $^X $__FILE__\n";
+}
 else {
     open(my $fh,'>:crlf:encoding(latin2)','open.txt');
     print $fh "A" x 29;
@@ -645,6 +682,9 @@ else {
 if ($] =~ /^5\.006/) {
     print "ok - 30 # SKIP open(my \$fh,'>>:crlf:encoding(latin2)','open.txt'); $^X $__FILE__\n";
 }
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
+    print "ok - 30 # SKIP open(my \$fh,'>>:crlf:encoding(latin2)','open.txt'); $^X $__FILE__\n";
+}
 else {
     open(my $fh,'>>:crlf:encoding(latin2)','open.txt');
     print $fh "A" x 30;
@@ -667,6 +707,9 @@ else {
 # 引数 3 個 <:crlf:encoding(latin2), 未定義の値が格納された変数
 
 if ($] =~ /^5\.006/) {
+    print "ok - 31 # SKIP open(my \$fh,'<:crlf:encoding(latin2)','open.txt'); $^X $__FILE__\n";
+}
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
     print "ok - 31 # SKIP open(my \$fh,'<:crlf:encoding(latin2)','open.txt'); $^X $__FILE__\n";
 }
 else {

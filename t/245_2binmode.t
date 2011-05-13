@@ -8,6 +8,13 @@ my $__FILE__ = __FILE__;
 use Char::Latin2;
 print "1..10\n";
 
+if ($^O eq 'MacOS') {
+    for my $tno (1.. 10) {
+        print "ok - $tno # SKIP $^X $0\n";
+    }
+    exit;
+}
+
 # 引数 0 個
 
 eval q{ binmode(); };
@@ -79,6 +86,9 @@ else {
 if ($] =~ /^5\.006/) {
     print "ok - 6 # SKIP binmode(FILE,':crlf'); $^X $__FILE__ ($^O)\n";
 }
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
+    print "ok - 6 # SKIP binmode(FILE,':crlf'); $^X $__FILE__ ($^O)\n";
+}
 else {
     open(FILE,'>binmode.txt');
     binmode(FILE,':crlf');
@@ -96,6 +106,9 @@ else {
 # 引数 2 個 :crlf, ファイルハンドルが格納された変数
 
 if ($] =~ /^5\.006/) {
+    print "ok - 7 # SKIP binmode(\$fh,':crlf'); $^X $__FILE__ ($^O)\n";
+}
+elsif (($] =~ /^5\.005/) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
     print "ok - 7 # SKIP binmode(\$fh,':crlf'); $^X $__FILE__ ($^O)\n";
 }
 else {

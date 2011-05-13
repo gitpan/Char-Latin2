@@ -1,5 +1,18 @@
 Revision history for this software.
 
+0.73  2011/05/12 00:00:00
+	- hexadecimal escape sequence, \x{HHHHHH} in double-quote-like contexts.
+	- octal escape sequence, \o{OOOOOO} in double-quote-like contexts.
+	- support tr///r, y///r.
+	- support s///r.
+	- rewrite 'use strict;' to 'use strict; no strict qw(refs);'.
+	- fix m/$var/i: m/[$VAR$var]/ to m/@{[Esjis::ignorecase($var)]}/.
+	- fix s//code/e, s//code/ee, s//code/eee, ...
+	- support Windows-1252.
+	- PASS all tests on perl 5.00503 of Solaris8.
+	- PASS all tests on perl 5.00503 of TURBOLINUX WORKSTATION Japanese 6.0 Limited Edition.
+	; created by INABA Hitoshi
+
 0.72  2011/03/04 00:00:00
 	- change name Sjis to Char::Sjis.
 	- support Latin-2, Latin-3, Latin-4, Latin-5, Latin-6, Latin-7, Latin-8, Latin-9.
@@ -91,7 +104,7 @@ Revision history for this software.
 	- support TAP(Test Anything Protocol).
 	- add ShiftJIS::Regexp's test.
 	- rename Makefile.PL to pMakefile.PL(Poor Makefile.PL) for DOS like system.
-	- standard Makefile.PL for UNIX.
+	- standard Makefile.PL for UNIX like system.
 	- warn if chdir "\x5c" ended path on $^W is true.
 	; created by INABA Hitoshi
 
@@ -131,7 +144,7 @@ Revision history for this software.
 
 0.50  2010/03/07 00:00:00
 	- correct INFOMIXV6ALS to INFORMIXV6ALS (sorry!! forgive me!! ;X).
-	- add UNIX shell escape.
+	- add UNIX like system's shell escape.
 	- glob @ARGV when [?*] included only.
 	- avoid warning in Esjis::e.
 	- flock on write and read script.

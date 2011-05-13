@@ -137,3 +137,10 @@ t/252_jscripter.t
 t/253_jscripter.t
 t/254_lc.t
 t/255_uc.t
+t/256_hexbrace.t
+t/257_octbrace.t
+t/258_option_tr_r.t
+t/259_option_s_r.t
+t/260_strict.t
+t/261_option_m.t
+t/262_option_s.t

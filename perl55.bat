@@ -1,10 +1,11 @@
 @echo off
-rem version 1.0.5
+rem version 1.0.6
 rem ======================================================================
 rem 
-rem  perl55 -  execute perlscript on the perl5.5 without %PATH% settings
+rem  perl55 - execute perlscript on the perl5.5 without %PATH% settings
+rem           (poor App::perlbrew)
 rem 
-rem  Copyright (c) 2008, 2009 INABA Hitoshi (ina@cpan.org)
+rem  Copyright (c) 2008, 2009, 2011 INABA Hitoshi (ina@cpan.org)
 rem 
 rem ======================================================================
 
@@ -195,7 +196,7 @@ The world wants practical solutions anytime.
 
 =head1 NAME
 
-perl55 - execute perlscript on the perl5.5 without %PATH% settings
+perl55 - execute perlscript on the perl5.5 without %PATH% settings (poor App::perlbrew)
 
 =head1 SYNOPSIS
 
