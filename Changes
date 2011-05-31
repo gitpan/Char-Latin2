@@ -1,5 +1,10 @@
 Revision history for this software.
 
+0.74  2011/06/01 00:00:00
+	- remove Esjis::k_ test.
+	- fix s#foo#\\#, s#foo#\\#g, s'foo'\\' and s'foo'\\'g.
+	; created by INABA Hitoshi
+
 0.73  2011/05/12 00:00:00
 	- hexadecimal escape sequence, \x{HHHHHH} in double-quote-like contexts.
 	- octal escape sequence, \o{OOOOOO} in double-quote-like contexts.

@@ -18,7 +18,7 @@ use Elatin2;
 
 BEGIN { eval q{ use vars qw($VERSION) } }
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.73 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.74 $ =~ m/(\d+)/oxmsg;
 
 # poor Symbol.pm - substitute of real Symbol.pm
 BEGIN {
@@ -3514,9 +3514,13 @@ sub e_s2_q {
 
     $slash = 'div';
 
-    my @char = $string =~ m/ \G ([\$\@\/\\]|$q_char) /oxmsg;
+    my @char = $string =~ m/ \G (\\\\|[\$\@\/\\]|$q_char) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
         if (0) {
+        }
+
+        # not escape \\
+        elsif ($char[$i] =~ m{\A \\\\ \z}oxms) {
         }
 
         # escape $ @ / and \
@@ -3568,40 +3572,11 @@ sub e_sub {
         $e_modifier--;
     }
     else {
-        my $q_replacement = '';
         if ($delimiter2 eq "'") {
-            $q_replacement = e_s2_q('qq', '/',         '/',             $replacement);
+            $e_replacement = e_s2_q('qq', '/',         '/',             $replacement);
         }
         else {
-            $q_replacement = e_qq  ('qq', $delimiter2, $end_delimiter2, $replacement);
-        }
-
-        # escape replacement string
-        if ($q_replacement !~ m/'/oxms) {
-            $e_replacement = e_q('eval ',  "'", "'", $q_replacement); # --> q' '
-        }
-        elsif ($q_replacement !~ m{/}oxms) {
-            $e_replacement = e_q('eval q', '/', '/', $q_replacement); # --> q/ /
-        }
-        elsif ($q_replacement !~ m/\#/oxms) {
-            $e_replacement = e_q('eval q', '#', '#', $q_replacement); # --> q# #
-        }
-        elsif ($q_replacement !~ m/[\<\>]/oxms) {
-            $e_replacement = e_q('eval q', '<', '>', $q_replacement); # --> q< >
-        }
-        elsif ($q_replacement !~ m/[\(\)]/oxms) {
-            $e_replacement = e_q('eval q', '(', ')', $q_replacement); # --> q( )
-        }
-        elsif ($q_replacement !~ m/[\{\}]/oxms) {
-            $e_replacement = e_q('eval q', '{', '}', $q_replacement); # --> q{ }
-        }
-        else {
-            for my $char (qw( ! " $ % & * + . : = ? @ ^ ` | ~ ), "\x00".."\x1F", "\x7F", "\xFF") {
-                if ($q_replacement !~ m/\Q$char\E/xms) {
-                    $e_replacement = e_q('eval q', $char, $char, $q_replacement);
-                    last;
-                }
-            }
+            $e_replacement = e_qq  ('qq', $delimiter2, $end_delimiter2, $replacement);
         }
     }
 

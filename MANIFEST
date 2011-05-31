@@ -144,3 +144,5 @@ t/259_option_s_r.t
 t/260_strict.t
 t/261_option_m.t
 t/262_option_s.t
+t/263_s.t
+t/264_s.t
