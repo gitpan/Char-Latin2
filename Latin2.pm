@@ -18,7 +18,7 @@ use Elatin2;
 
 BEGIN { eval q{ use vars qw($VERSION) } }
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.74 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.75 $ =~ m/(\d+)/oxmsg;
 
 # poor Symbol.pm - substitute of real Symbol.pm
 BEGIN {
@@ -4433,132 +4433,6 @@ Back to and see 'Escaping Your Script'. Enjoy hacking!!
   warnings.pm_ --> warnings.pm
   warnings/register.pm_ --> warnings/register.pm
 
-  To be compatible with Perl5.6 on perl5.005, script is converted as follows.
-
-  --------------------------------------------------------------------
-  Before          After                  in BEGIN { } of Elatin2.pm
-  --------------------------------------------------------------------
-  binmode(...);   Elatin2::binmode(...);   *CORE::GLOBAL::binmode = ...
-  open(...);      Elatin2::open(...);      *CORE::GLOBAL::open    = ...
-  --------------------------------------------------------------------
-
-=over 2
-
-=item * binmode (Perl5.6 emulation on perl5.005)
-
-  binmode(FILEHANDLE, $disciplines);
-  binmode(FILEHANDLE);
-  binmode($filehandle, $disciplines);
-  binmode($filehandle);
-
-  * two arguments
-
-  If you are using perl5.005 other than MacPerl, Latin2 software emulate perl5.6's
-  binmode function. Only the point is here. See also perlfunc/binmode for details.
-
-  This function arranges for the FILEHANDLE to have the semantics specified by the
-  $disciplines argument. If $disciplines is omitted, ':raw' semantics are applied
-  to the filehandle. If FILEHANDLE is an expression, the value is taken as the
-  name of the filehandle or a reference to a filehandle, as appropriate.
-  The binmode function should be called after the open but before any I/O is done
-  on the filehandle. The only way to reset the mode on a filehandle is to reopen
-  the file, since the various disciplines may have treasured up various bits and
-  pieces of data in various buffers.
-
-  The ":raw" discipline tells Perl to keep its cotton-pickin' hands off the data.
-  For more on how disciplines work, see the open function.
-
-=item * open (Perl5.6 emulation on perl5.005)
-
-  open(FILEHANDLE, $mode, $expr);
-  open(FILEHANDLE, $expr);
-  open(FILEHANDLE);
-  open(my $filehandle, $mode, $expr);
-  open(my $filehandle, $expr);
-  open(my $filehandle);
-
-  * autovivification filehandle
-  * three arguments
-
-  If you are using perl5.005, Latin2 software emulate perl5.6's open function.
-  Only the point is here. See also perlfunc/open for details.
-
-  As that example shows, the FILEHANDLE argument is often just a simple identifier
-  (normally uppercase), but it may also be an expression whose value provides a
-  reference to the actual filehandle. (The reference may be either a symbolic
-  reference to the filehandle name or a hard reference to any object that can be
-  interpreted as a filehandle.) This is called an indirect filehandle, and any
-  function that takes a FILEHANDLE as its first argument can handle indirect
-  filehandles as well as direct ones. But open is special in that if you supply
-  it with an undefined variable for the indirect filehandle, Perl will automatically
-  define that variable for you, that is, autovivifying it to contain a proper
-  filehandle reference.
-
-  {
-      my $fh;                   # (uninitialized)
-      open($fh, ">logfile")     # $fh is autovivified
-          or die "Can't create logfile: $!";
-          ...                   # do stuff with $fh
-  }                             # $fh closed here
-
-  The my $fh declaration can be readably incorporated into the open:
-
-  open my $fh, ">logfile" or die ...
-
-  The > symbol you've been seeing in front of the filename is an example of a mode.
-  Historically, the two-argument form of open came first. The recent addition of
-  the three-argument form lets you separate the mode from the filename, which has
-  the advantage of avoiding any possible confusion between the two. In the following
-  example, we know that the user is not trying to open a filename that happens to
-  start with ">". We can be sure that they're specifying a $mode of ">", which opens
-  the file named in $expr for writing, creating the file if it doesn't exist and
-  truncating the file down to nothing if it already exists:
-
-  open(LOG, ">", "logfile") or die "Can't create logfile: $!";
-
-  With the one- or two-argument form of open, you have to be careful when you use
-  a string variable as a filename, since the variable may contain arbitrarily
-  weird characters (particularly when the filename has been supplied by arbitrarily
-  weird characters on the Internet). If you're not careful, parts of the filename
-  might get interpreted as a $mode string, ignorable whitespace, a dup specification,
-  or a minus.
-  Here's one historically interesting way to insulate yourself:
-
-  $path =~ s#^([ ])#./$1#;
-  open (FH, "< $path\0") or die "can't open $path: $!";
-
-  But that's still broken in several ways. Instead, just use the three-argument
-  form of open to open any arbitrary filename cleanly and without any (extra)
-  security risks:
-
-  open(FH, "<", $path) or die "can't open $path: $!";
-
-  As of the 5.6 release of Perl, you can specify binary mode in the open function
-  without a separate call to binmode. As part of the $mode
-  argument (but only in the three-argument form), you may specify various input
-  and output disciplines.
-  To do the equivalent of a binmode, use the three argument form of open and stuff
-  a discipline of :raw in after the other $mode characters:
-
-  open(FH, "<:raw", $path) or die "can't open $path: $!";
-
-  Table 1. I/O Disciplines
-  -------------------------------------------------
-  Discipline      Meaning
-  -------------------------------------------------
-  :raw            Binary mode; do no processing
-  :crlf           Text mode; Intuit newlines
-                  (DOS-like system only)
-  :encoding(...)  Legacy encoding
-  -------------------------------------------------
-
-  You'll be able to stack disciplines that make sense to stack, so, for instance,
-  you could say:
-
-  open(FH, "<:crlf:encoding(Latin2)", $path) or die "can't open $path: $!";
-
-=back
-
 =head1 Ignore Pragmas And Modules
 
   -----------------------------------------------------------
@@ -4596,7 +4470,6 @@ Back to and see 'Escaping Your Script'. Enjoy hacking!!
 
   Comment out pragma to ignore utf8 environment, and Elatin2.pm provides these
   functions.
-
 
 =over 2
 

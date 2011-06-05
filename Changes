@@ -1,5 +1,9 @@
 Revision history for this software.
 
+0.75  2011/06/05 00:00:00
+	- remove Esjis::binmode and Esjis::open (it's a bad idea).
+	; created by INABA Hitoshi
+
 0.74  2011/06/01 00:00:00
 	- remove Esjis::k_ test.
 	- fix s#foo#\\#, s#foo#\\#g, s'foo'\\' and s'foo'\\'g.

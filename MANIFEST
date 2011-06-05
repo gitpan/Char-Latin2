@@ -125,8 +125,6 @@ t/194_jperlre.t
 t/196_sadahiro.t
 t/198_sadahiro.t
 t/199_sadahiro.t
-t/244_3open.t
-t/245_2binmode.t
 t/246_utf8.t
 t/247_bytes.t
 t/248_jscripter.t
