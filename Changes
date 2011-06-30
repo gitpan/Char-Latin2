@@ -1,5 +1,19 @@
 Revision history for this software.
 
+0.76  2011/06/30 00:00:00
+	- import $fix_drive_relative_paths from File::DosGlob/1.04.
+	- support regexp metasymbols \C and \R in regexp.
+	- support regexp metasymbol \N \N{3} \N{3,} \N{3,5}.
+	- \N{CHARNAME} means literal N{CHARNAME}.
+	- \p{PROP} means literal p{PROP}.
+	- \P{PROP} means literal P{PROP}.
+	- \X means literal X.
+	- support POSIX-style character classes.
+	- modifier /a /d /l /u and /aa of regexp makes die.
+	- use 5.12.0; --> use 5.12.0; no strict qw(refs);
+	- remove test 201_kanji.t,202_kanji.t,203_kanji.t,204_kanji.t,205_glob.t,210_chmod.t,211_chown.t,212_dbmopen.t,214_glob.t,216_open.t,217_qx.t,218_rename.t,221_sysopen.t,222_system.t,223_truncate.t,225_utime.t,226_chdir.t,227_chmod.t,228_chown.t,229_glob.t,230_mkdir.t,232_qx.t,233_rename.t,234_rmdir.t,235_system.t and 236_utime.t from EUCJP,UTF2,OldUTF8.
+	; created by INABA Hitoshi
+
 0.75  2011/06/05 00:00:00
 	- remove Esjis::binmode and Esjis::open (it's a bad idea).
 	; created by INABA Hitoshi

@@ -144,3 +144,11 @@ t/261_option_m.t
 t/262_option_s.t
 t/263_s.t
 t/264_s.t
+t/265_c.t
+t/266_r.t
+t/267_n.t
+t/268_n.t
+t/269_p.t
+t/270_x.t
+t/271_posix.t
+t/272_posix.t

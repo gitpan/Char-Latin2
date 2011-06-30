@@ -1,8 +1,8 @@
 ######################################################################
 #
-# pMakefile.pl - Makefile.pl of Perl Poor Tools
+# pMakefile.PL - Makefile.PL of Perl Poor Tools
 #
-# Copyright (c) 2008, 2009, 2010 INABA Hitoshi <ina@cpan.org>
+# Copyright (c) 2008, 2009, 2010, 2011 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
 use strict;
