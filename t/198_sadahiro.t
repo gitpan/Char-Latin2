@@ -17,4 +17,3 @@ print "ok - 1 $^X $__FILE__ (NULL)\n";
 
 __END__
 
-http://search.cpan.org/dist/Latin-2-Regexp/

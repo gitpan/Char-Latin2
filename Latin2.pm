@@ -18,7 +18,7 @@ use Elatin2;
 
 BEGIN { eval q{ use vars qw($VERSION) } }
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.76 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.78 $ =~ m/(\d+)/oxmsg;
 
 # poor Symbol.pm - substitute of real Symbol.pm
 BEGIN {
@@ -4323,17 +4323,17 @@ What's this software good for ...
 
 =over 2
 
-=item * Possible to handle raw Latin-2 values
+=item * Upper Compatibility like Perl4 to Perl5
 
-=item * Backward compatibility of data, script and how to
+=item * Maximum Portability like jcode.pl
 
-=item * Only Latin2.pm and Elatin2.pm, other modules are unnecessary
+=item * Handles Raw Latin-2, No UTF8 flag like JPerl
 
-=item * No UTF8 flag, perlunitut and perluniadvice
+=item * Remains One Interpreter like Encode module
 
-=item * No C programming (for maintain JPerl)
+=item * Code Set Independent like Ruby
 
-=item * Independent from binary file (CPU, OS, perl version, 32bit/64bit)
+=item * There's more than one way to do it like Perl itself
 
 =back
 
@@ -4577,6 +4577,7 @@ Back to and see 'Escaping Your Script'. Enjoy hacking!!
   Before                    After
   -----------------------------------------------------------
   use strict;               use strict; no strict qw(refs);
+  use 5.12.0;               use 5.12.0; no strict qw(refs);
   require utf8;             # require utf8;
   require bytes;            # require bytes;
   require charnames;        # require charnames;
@@ -4875,21 +4876,21 @@ programming environment like at that time.
  January 1900 (really so?)
  Pages: 670
  ISBN 10: 1-56592-149-6 | ISBN 13: 9781565921498
- http://oreilly.com/catalog/9781565921498/
+ http://shop.oreilly.com/product/9781565921498.do
 
  Programming Perl, Third Edition
  By Larry Wall, Tom Christiansen, Jon Orwant
  Third Edition  July 2000
  Pages: 1104
- ISBN 10: 0-596-00027-8 | ISBN 13:9780596000271
- http://www.oreilly.com/catalog/pperl3/index.html
+ ISBN 10: 0-596-00027-8 | ISBN 13: 9780596000271
+ http://shop.oreilly.com/product/9780596000271.do
 
  Perl Cookbook, Second Edition
  By Tom Christiansen, Nathan Torkington
  Second Edition  August 2003
  Pages: 964
  ISBN 10: 0-596-00313-7 | ISBN 13: 9780596003135
- http://oreilly.com/catalog/9780596003135/index.html
+ http://shop.oreilly.com/product/9780596003135.do
 
  Perl in a Nutshell, Second Edition
  By Stephen Spainhour, Ellen Siever, Nathan Patwardhan
@@ -4897,14 +4898,14 @@ programming environment like at that time.
  Pages: 760
  Series: In a Nutshell
  ISBN 10: 0-596-00241-6 | ISBN 13: 9780596002411
- http://oreilly.com/catalog/9780596002411/index.html
+ http://shop.oreilly.com/product/9780596002411.do
 
  Learning Perl on Win32 Systems
  By Randal L. Schwartz, Erik Olson, Tom Christiansen
  August 1997
  Pages: 306
  ISBN 10: 1-56592-324-3 | ISBN 13: 9781565923249
- http://oreilly.com/catalog/9781565923249/
+ http://shop.oreilly.com/product/9781565923249.do
 
  Learning Perl, Fifth Edition
  By Randal L. Schwartz, Tom Phoenix, brian d foy
@@ -4912,51 +4913,48 @@ programming environment like at that time.
  Pages: 352
  Print ISBN:978-0-596-52010-6 | ISBN 10: 0-596-52010-7
  Ebook ISBN:978-0-596-10316-3 | ISBN 10: 0-596-10316-6
- http://oreilly.com/catalog/9780596520113/
+ http://shop.oreilly.com/product/9780596520113.do
 
  Perl RESOURCE KIT UNIX EDITION
  Futato, Irving, Jepson, Patwardhan, Siever
  ISBN 10: 1-56592-370-7
+ http://shop.oreilly.com/product/9781565923706.do
 
  Understanding Japanese Information Processing
  By Ken Lunde
  January 1900
  Pages: 470
  ISBN 10: 1-56592-043-0 | ISBN 13: 9781565920439
- http://oreilly.com/catalog/9781565920439/
+ http://shop.oreilly.com/product/9781565920439.do
 
  CJKV Information Processing
  Chinese, Japanese, Korean & Vietnamese Computing
  By Ken Lunde
  First Edition  January 1999
  Pages: 1128
- ISBN 10: 1-56592-224-7 | ISBN 13:9781565922242
- http://www.oreilly.com/catalog/cjkvinfo/index.html
- ISBN 4-87311-108-0
- http://www.oreilly.co.jp/books/4873111080/
+ ISBN 10: 1-56592-224-7 | ISBN 13: 9781565922242
+ http://shop.oreilly.com/product/9781565922242.do
 
  Mastering Regular Expressions, Second Edition
  By Jeffrey E. F. Friedl
  Second Edition  July 2002
  Pages: 484
  ISBN 10: 0-596-00289-0 | ISBN 13: 9780596002893
- http://oreilly.com/catalog/9780596002893/index.html
+ http://shop.oreilly.com/product/9780596002893.do
 
  Mastering Regular Expressions, Third Edition
  By Jeffrey E. F. Friedl
  Third Edition  August 2006
  Pages: 542
  ISBN 10: 0-596-52812-4 | ISBN 13:9780596528126
- http://www.oreilly.com/catalog/regex3/index.html
- ISBN 978-4-87311-359-3
- http://www.oreilly.co.jp/books/9784873113593/
+ http://shop.oreilly.com/product/9780596528126.do
 
  Regular Expressions Cookbook
  By Jan Goyvaerts, Steven Levithan
  May 2009
  Pages: 512
  ISBN 10:0-596-52068-9 | ISBN 13: 978-0-596-52068-7
- http://oreilly.com/catalog/9780596520694/
+ http://shop.oreilly.com/product/9780596520694.do
 
  PERL PUROGURAMINGU
  Larry Wall, Randal L.Schwartz, Yoshiyuki Kondo
@@ -4974,7 +4972,7 @@ programming environment like at that time.
  1993 Aug
  Pages: 172
  T1008901080816 ZASSHI 08901-8
- http://ascii.asciimw.jp/books/magazines/unix.shtml
+ http://ascii.asciimw.jp/books/books/detail/978-4-7561-5008-0.shtml
 
  MacPerl Power and Ease
  By Vicki Brown, Chris Nandor
@@ -5007,9 +5005,10 @@ I am thankful to all persons.
 
  Kazumasa Utashiro, jcode.pl
  ftp://ftp.iij.ad.jp/pub/IIJ/dist/utashiro/perl/
+ http://log.utashiro.com/pub/2006/07/jkondo_a580.html
 
  Jeffrey E. F. Friedl, Mastering Regular Expressions
- http://www.oreilly.com/catalog/regex/index.html
+ http://regex.info/
 
  SADAHIRO Tomoyuki, The right way of using Shift_JIS
  http://homepage1.nifty.com/nomenclator/perl/shiftjis.htm
@@ -5024,7 +5023,7 @@ I am thankful to all persons.
  http://www.rakunet.org/tsnet/TSabc/18/546.html
 
  Hiroaki Izumi, Perl5.8/Perl5.10 is not useful on the Windows.
- http://www.aritia.org/hizumi/perl/perlwin.html
+ http://www.aritia.jp/hizumi/perl/perlwin.html
 
  TSUKAMOTO Makio, Perl memo/file path of Windows
  http://digit.que.ne.jp/work/wiki.cgi?Perl%E3%83%A1%E3%83%A2%2FWindows%E3%81%A7%E3%81%AE%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%83%91%E3%82%B9
@@ -5051,7 +5050,8 @@ I am thankful to all persons.
 
  Dan Kogai, Encode module
  http://search.cpan.org/dist/Encode/
- http://www.dan.co.jp/~dankogai/yapcasia2006/slide.html (404 Slide Not Found)
+ http://www.archive.org/details/YAPCAsia2006TokyoPerl58andUnicodeMythsFactsandChanges (video)
+ http://yapc.g.hatena.ne.jp/jkondo/ (audio)
 
  Juerd, Perl Unicode Advice
  http://juerd.nl/site.plp/perluniadvice

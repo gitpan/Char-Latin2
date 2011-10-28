@@ -1,5 +1,14 @@
 Revision history for this software.
 
+0.78  2011/10/28 00:00:00
+	- support Windows-1258.
+	- update documents and URL.
+	; created by INABA Hitoshi
+
+0.77  2011/07/27 00:00:00
+	- support KOI8-R, KOI8-U, US-ASCII.
+	; created by INABA Hitoshi
+
 0.76  2011/06/30 00:00:00
 	- import $fix_drive_relative_paths from File::DosGlob/1.04.
 	- support regexp metasymbols \C and \R in regexp.

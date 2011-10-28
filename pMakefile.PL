@@ -107,16 +107,22 @@ for my $target (@ARGV) {
     elsif ($target eq 'install') {
 
         # install *.pm files to /Perl/site/lib
-        my($perl_site_lib) = grep(m{/site/}xmsi, @INC);
-        for (grep m/ \. pm \z /xmsi, @file) {
-            if (m#^(.+)/#) {
-                print STDERR "copy $_ $perl_site_lib/$1\n";
-                mkpath("$perl_site_lib/$1", 0, 0777) unless -d "$perl_site_lib/$1";
-                copy($_, "$perl_site_lib/$1");
-            }
-            else {
-                print STDERR "copy $_ $perl_site_lib\n";
-                copy($_, $perl_site_lib);
+        my $perl_site_lib = '';
+        if (($perl_site_lib) = grep(m{site_perl}xms, reverse @INC)) {
+        }
+        elsif (($perl_site_lib) = grep(m{site}xms, reverse @INC)) {
+        }
+        if ($perl_site_lib ne '') {
+            for (grep m/ \. pm \z /xmsi, @file) {
+                if (m#^(.+)/#) {
+                    print STDERR "copy $_ $perl_site_lib/$1\n";
+                    mkpath("$perl_site_lib/$1", 0, 0777) unless -d "$perl_site_lib/$1";
+                    copy($_, "$perl_site_lib/$1");
+                }
+                else {
+                    print STDERR "copy $_ $perl_site_lib\n";
+                    copy($_, $perl_site_lib);
+                }
             }
         }
 
@@ -127,7 +133,7 @@ for my $target (@ARGV) {
             next if m/(?: pmake | ptar )                \.bat $/xmsi;
             if (m#^(.+)/#) {
                 print STDERR "copy $_ $perl_bin/$1\n";
-                mkpath("$perl_site_lib/$1", 0, 0777) unless -d "$perl_site_lib/$1";
+                mkpath("$perl_bin/$1", 0, 0777) unless -d "$perl_bin/$1";
                 copy($_, "$perl_bin/$1");
             }
             else {
