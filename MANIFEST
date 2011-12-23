@@ -152,3 +152,4 @@ t/269_p.t
 t/270_x.t
 t/271_posix.t
 t/272_posix.t
+t/273_posix.t

@@ -1,5 +1,9 @@
 Revision history for this software.
 
+0.79  2011/12/23 00:00:00
+	- fix m/[[:lower:]]/i, m/[[:upper:]]/i, m/[[:^lower:]]/i and m/[[:^upper:]]/i.
+	; created by INABA Hitoshi
+
 0.78  2011/10/28 00:00:00
 	- support Windows-1258.
 	- update documents and URL.
