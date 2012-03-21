@@ -1,5 +1,13 @@
 Revision history for this software.
 
+0.80  2012/03/22 00:00:00
+	- support byte-oriented regexp //b, m//b, m''b, s///b, s'''b, qr//b, qr''b, split(//b), split(m//b), split(m''b), split(qr//b) and split(qr''b).
+	- support match once only ??, m??, ??b and m??b.
+	- support literal null string pattern.
+	- support $`, $PREMATCH, ${^PREMATCH}, $&, $MATCH, ${^MATCH}, &', $POSTMATCH and ${^POSTMATCH}.
+	- add perl516.bat.
+	; created by INABA Hitoshi
+
 0.79  2011/12/23 00:00:00
 	- fix m/[[:lower:]]/i, m/[[:upper:]]/i, m/[[:^lower:]]/i and m/[[:^upper:]]/i.
 	; created by INABA Hitoshi

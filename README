@@ -19,6 +19,7 @@ SYNOPSIS
       perl510   yourscript.pl  wild*  *card  and  '*quote*'  on MSWin32
       perl512   yourscript.pl  wild*  *card  and  '*quote*'  on MSWin32
       perl514   yourscript.pl  wild*  *card  and  '*quote*'  on MSWin32
+      perl516   yourscript.pl  wild*  *card  and  '*quote*'  on MSWin32
       perl64    yourscript.pl  wild*  *card  and  '*quote*'  on MSWin32
 
 DESCRIPTION
@@ -58,6 +59,7 @@ To install this software without make, type the following:
    perl510  pmake.bat install  --- install to Perl5.10
    perl512  pmake.bat install  --- install to Perl5.12
    perl514  pmake.bat install  --- install to Perl5.14
+   perl516  pmake.bat install  --- install to Perl5.16
    perl64   pmake.bat install  --- install to Perl64
 
    Rename and install strict.pm_ of this distribution to strict.pm if your system
@@ -78,6 +80,7 @@ PROGRAM COMPOSITION
    perl510.bat           --- find and run perl5.10 without %PATH% settings
    perl512.bat           --- find and run perl5.12 without %PATH% settings
    perl514.bat           --- find and run perl5.14 without %PATH% settings
+   perl516.bat           --- find and run perl5.16 without %PATH% settings
    perl64.bat            --- find and run perl64   without %PATH% settings
    strict.pm_            --- dummy strict.pm
    warnings.pm_          --- poor warnings.pm

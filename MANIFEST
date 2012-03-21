@@ -11,6 +11,7 @@ perl58.bat
 perl510.bat
 perl512.bat
 perl514.bat
+perl516.bat
 perl64.bat
 Changes
 Makefile.PL
@@ -153,3 +154,16 @@ t/270_x.t
 t/271_posix.t
 t/272_posix.t
 t/273_posix.t
+t/305_null_regexp.t
+t/306_prematch.t
+t/307_match.t
+t/308_postmatch.t
+t/309_prematch.t
+t/310_match.t
+t/311_postmatch.t
+t/312_prematch.t
+t/313_match.t
+t/314_postmatch.t
+t/315_prematch.t
+t/316_match.t
+t/317_postmatch.t

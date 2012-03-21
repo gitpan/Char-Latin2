@@ -5,7 +5,7 @@ rem
 rem  perl512 - execute perlscript on the perl5.12 without %PATH% settings
 rem           (poor App::perlbrew)
 rem 
-rem  Copyright (c) 2008, 2009, 2011 INABA Hitoshi (ina@cpan.org)
+rem  Copyright (c) 2008, 2009, 2011, 2012 INABA Hitoshi (ina@cpan.org)
 rem 
 rem ======================================================================
 

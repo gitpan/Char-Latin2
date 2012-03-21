@@ -206,7 +206,7 @@ for my $target (@ARGV) {
 #-----------------------------------------------------------------------------
 # Sunday December 21, 2008 07:38 PM 
 # Fixing world writable files in tarball before upload to CPAN [ #38127 ]
-# http://use.perl.org/~bart/journal/38127
+# http://use.perl.org/~bart/journal/38127 (dead link)
 #-----------------------------------------------------------------------------
 #                   $tar->add_files("$tardir/$file");
 #-----------------------------------------------------------------------------
