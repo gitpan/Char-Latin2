@@ -5,6 +5,8 @@ Elatin2.pm
 strict.pm_
 warnings.pm_
 warnings/register.pm_
+feature.pm_
+perl5.bat
 perl55.bat
 perl56.bat
 perl58.bat
@@ -13,6 +15,16 @@ perl512.bat
 perl514.bat
 perl516.bat
 perl64.bat
+aperl58.bat
+aperl510.bat
+aperl512.bat
+aperl514.bat
+aperl516.bat
+sperl58.bat
+sperl510.bat
+sperl512.bat
+sperl514.bat
+sperl516.bat
 Changes
 Makefile.PL
 pMakefile.PL
@@ -167,3 +179,8 @@ t/314_postmatch.t
 t/315_prematch.t
 t/316_match.t
 t/317_postmatch.t
+t/318_foldcase.t
+t/319_sqlite.t
+t/320_split.t
+t/321_perlrecharclass.t
+t/322_perlre_v.t

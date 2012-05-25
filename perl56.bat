@@ -1,8 +1,8 @@
 @echo off
-rem version 1.0.6
+rem version 1.0.7
 rem ======================================================================
 rem 
-rem  perl56 - execute perlscript on the perl5.6 without %PATH% settings
+rem  perl56 - execute perlscript on ActivePerl 5.8 or Strawbery Perl 5.8 without %PATH% settings
 rem           (poor App::perlbrew)
 rem 
 rem  Copyright (c) 2008, 2009, 2011, 2012 INABA Hitoshi (ina@cpan.org)
@@ -196,7 +196,7 @@ The world wants practical solutions anytime.
 
 =head1 NAME
 
-perl56 - execute perlscript on the perl5.6 without %PATH% settings (poor App::perlbrew)
+perl56 - execute perlscript on ActivePerl 5.8 or Strawbery Perl 5.8 without %PATH% settings (poor App::perlbrew)
 
 =head1 SYNOPSIS
 
@@ -255,7 +255,11 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 =head1 SEE ALSO
 
-perl
+ActivePerl
+http://www.activestate.com/activeperl
+
+Strawberry Perl
+http://strawberryperl.com/
 
 =cut
 
