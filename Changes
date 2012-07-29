@@ -1,5 +1,11 @@
 Revision history for this software.
 
+0.82  2012/07/29 00:00:00
+	- support Strawberry Perl 5.16.0.
+	- support ActivePerl 5.16.0.
+	- support variables in character class in regular expression.
+	; created by INABA Hitoshi
+
 0.81  2012/05/25 00:00:00
 	- support fold case escape \F and function fc().
 	- support scalar context of Esjis::stat, Esjis::stat_, Esjis::lstat, and Esjis::lstat_.

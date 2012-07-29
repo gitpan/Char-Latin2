@@ -184,3 +184,7 @@ t/319_sqlite.t
 t/320_split.t
 t/321_perlrecharclass.t
 t/322_perlre_v.t
+t/323_charclass_p.t
+t/324_charclass_n.t
+t/329_charclass_pi.t
+t/330_charclass_ni.t
