@@ -1,5 +1,17 @@
 Revision history for this software.
 
+0.83  2012/09/29 00:00:00
+	- support Strawberry Perl 5.16.1.
+	- support ActivePerl 5.16.1.
+	- support x64 of ActivePerl and Strawberry Perl.
+	- new ver.sion.0 check (match or die).
+	- fix $_ !~ s/regexp/replacement/.
+	- remove ESCAPE_SECOND_OCTET on single byte encoding.
+	- escape left brace on un-escaping of \N{...}, \p{...}, and \P{...}.
+	- remove "distribution_type: script" from META.yml.
+	- add perl64512.bat, perl64514.bat, perl64516.bat, aperl64512.bat, aperl64514.bat, aperl64516.bat, sperl64512.bat, sperl64514.bat, and sperl64516.bat.
+	; created by INABA Hitoshi
+
 0.82  2012/07/29 00:00:00
 	- support Strawberry Perl 5.16.0.
 	- support ActivePerl 5.16.0.

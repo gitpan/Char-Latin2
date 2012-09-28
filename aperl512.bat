@@ -2,7 +2,7 @@
 rem version 1.0.7
 rem ======================================================================
 rem 
-rem  aperl512 - execute perlscript on ActivePerl 5.8 without %PATH% settings
+rem  aperl512 - execute perlscript on ActivePerl 5.12 without %PATH% settings
 rem           (poor App::perlbrew)
 rem 
 rem  Copyright (c) 2008, 2009, 2011, 2012 INABA Hitoshi (ina@cpan.org)
@@ -146,7 +146,7 @@ The world wants practical solutions anytime.
 
 =head1 NAME
 
-aperl512 - execute perlscript on ActivePerl 5.8 without %PATH% settings (poor App::perlbrew)
+aperl512 - execute perlscript on ActivePerl 5.12 without %PATH% settings (poor App::perlbrew)
 
 =head1 SYNOPSIS
 
@@ -154,13 +154,13 @@ B<aperl512> [perlscript.pl]
 
 =head1 DESCRIPTION
 
-This software is useful when ActivePerl 5.8 and other version of perl are on the one
-computer. Do not set perl5.12's bin directory to %PATH%.
+This software is useful when ActivePerl 5.12 and other version of perl are on the one
+computer. Do not set perl 5.12's bin directory to %PATH%.
 
-It is necessary to install perl5.12 in "\Perl512\bin" directory of the drive of
-either. This software is executed by perl5.12, and find the perl5.12 and execute it.
+It is necessary to install perl 5.12 in "\Perl512\bin" directory of the drive of
+either. This software is executed by perl 5.12, and find the perl 5.12 and execute it.
 
- Find perl5.12 order by,
+ Find perl 5.12 order by,
      Z:\Perl512\bin\perl.exe
      Y:\Perl512\bin\perl.exe
      X:\Perl512\bin\perl.exe
@@ -173,7 +173,7 @@ When found it at last, set its path to environment variable APERL512BIN.
 =head1 EXAMPLES
 
     C:\> aperl512 foo.pl
-    [..execute foo.pl by perl5.12..]
+    [..execute foo.pl by perl 5.12..]
 
 =head1 BUGS AND LIMITATIONS
 

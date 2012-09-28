@@ -154,13 +154,13 @@ B<sperl58> [perlscript.pl]
 
 =head1 DESCRIPTION
 
-This software is useful when perl5.8 and other version of perl are on the one
-computer. Do not set perl5.8's bin directory to %PATH%.
+This software is useful when perl 5.8 and other version of perl are on the one
+computer. Do not set perl 5.8's bin directory to %PATH%.
 
-It is necessary to install perl5.8 in "\Perl58\bin" directory of the drive of
-either. This software is executed by perl5.8, and find the perl5.8 and execute it.
+It is necessary to install perl 5.8 in "\Perl58\bin" directory of the drive of
+either. This software is executed by perl 5.8, and find the perl 5.8 and execute it.
 
- Find perl5.8 order by,
+ Find perl 5.8 order by,
      Z:\strawberry\Perl58\bin\perl.exe
      Y:\strawberry\Perl58\bin\perl.exe
      X:\strawberry\Perl58\bin\perl.exe
@@ -173,7 +173,7 @@ When found it at last, set its path to environment variable SPERL58BIN.
 =head1 EXAMPLES
 
     C:\> sperl58 foo.pl
-    [..execute foo.pl by perl5.8..]
+    [..execute foo.pl by perl 5.8..]
 
 =head1 BUGS AND LIMITATIONS
 

@@ -21,12 +21,24 @@ rem %APERL512BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
     %APERL514BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
 rem %APERL516BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
 rem %APERL518BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
+
+rem %APERL64512BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
+rem %APERL64514BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
+rem %APERL64516BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
+rem %APERL64518BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
+
 rem %SPERL58BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
 rem %SPERL510BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
 rem %SPERL512BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
 rem %SPERL514BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
 rem %SPERL516BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
 rem %SPERL518BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
+
+rem %SPERL64512BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
+rem %SPERL64514BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
+rem %SPERL64516BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
+rem %SPERL64518BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
+
 goto END
 
 :WinNT
@@ -39,12 +51,24 @@ rem %APERL512BIN% %*
     %APERL514BIN% %*
 rem %APERL516BIN% %*
 rem %APERL518BIN% %*
+
+rem %APERL64512BIN% %*
+rem %APERL64514BIN% %*
+rem %APERL64516BIN% %*
+rem %APERL64518BIN% %*
+
 rem %SPERL58BIN% %*
 rem %SPERL510BIN% %*
 rem %SPERL512BIN% %*
 rem %SPERL514BIN% %*
 rem %SPERL516BIN% %*
 rem %SPERL518BIN% %*
+
+rem %SPERL64512BIN% %*
+rem %SPERL64514BIN% %*
+rem %SPERL64516BIN% %*
+rem %SPERL64518BIN% %*
+
 exit /b %ERRORLEVEL%
 goto END
 
@@ -62,11 +86,11 @@ B<perl5> [perlscript.pl]
 
 =head1 DESCRIPTION
 
-This software is useful when perl5 and other version of perl are on the one
-computer. Do not set perl5's bin directory to %PATH%.
+This software is useful when perl 5 and other version of perl are on the one
+computer. Do not set perl 5's bin directory to %PATH%.
 
-It is necessary to install perl5 in "\Perl5xx\bin" directory of the drive of
-either. This software is executed by perl5, and find the perl5 and execute it.
+It is necessary to install perl 5 in "\Perl5xx\bin" directory of the drive of
+either. This software is executed by perl 5, and find the perl 5 and execute it.
 
 =head1 EXAMPLES
 

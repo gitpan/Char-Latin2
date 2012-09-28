@@ -2,7 +2,7 @@
 rem version 1.0.7
 rem ======================================================================
 rem 
-rem  perl56 - execute perlscript on ActivePerl 5.8 or Strawbery Perl 5.8 without %PATH% settings
+rem  perl56 - execute perlscript on ActivePerl 5.6 or Strawbery Perl 5.6 without %PATH% settings
 rem           (poor App::perlbrew)
 rem 
 rem  Copyright (c) 2008, 2009, 2011, 2012 INABA Hitoshi (ina@cpan.org)
@@ -196,7 +196,7 @@ The world wants practical solutions anytime.
 
 =head1 NAME
 
-perl56 - execute perlscript on ActivePerl 5.8 or Strawbery Perl 5.8 without %PATH% settings (poor App::perlbrew)
+perl56 - execute perlscript on ActivePerl 5.6 or Strawbery Perl 5.6 without %PATH% settings (poor App::perlbrew)
 
 =head1 SYNOPSIS
 
@@ -204,13 +204,13 @@ B<perl56> [perlscript.pl]
 
 =head1 DESCRIPTION
 
-This software is useful when perl5.6 and other version of perl are on the one
-computer. Do not set perl5.6's bin directory to %PATH%.
+This software is useful when perl 5.6 and other version of perl are on the one
+computer. Do not set perl 5.6's bin directory to %PATH%.
 
-It is necessary to install perl5.6 in "\Perl56\bin" directory of the drive of
-either. This software is executed by perl5.6, and find the perl5.6 and execute it.
+It is necessary to install perl 5.6 in "\Perl56\bin" directory of the drive of
+either. This software is executed by perl 5.6, and find the perl 5.6 and execute it.
 
- Find perl5.6 order by,
+ Find perl 5.6 order by,
      Z:\Perl56\bin\perl.exe
      Y:\Perl56\bin\perl.exe
      X:\Perl56\bin\perl.exe
@@ -230,7 +230,7 @@ When found it at last, set its path to environment variable PERL56BIN.
 =head1 EXAMPLES
 
     C:\> perl56 foo.pl
-    [..execute foo.pl by perl5.6..]
+    [..execute foo.pl by perl 5.6..]
 
 =head1 BUGS AND LIMITATIONS
 
