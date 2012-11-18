@@ -27,9 +27,9 @@ BEGIN {
 # (and so on)
 
 BEGIN { eval q{ use vars qw($VERSION) } }
-$VERSION = sprintf '%d.%02d', q$Revision: 0.83 $ =~ /(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.84 $ =~ /(\d+)/oxmsg;
 
-use Char::Elatin2;
+BEGIN { require Char::Elatin2; }
 
 # poor Symbol.pm - substitute of real Symbol.pm
 BEGIN {
@@ -65,16 +65,6 @@ sub LOCK_SH() {1}
 sub LOCK_EX() {2}
 sub LOCK_UN() {8}
 sub LOCK_NB() {4}
-
-# P.707 29.2.33. exec
-# in Chapter 29: Functions
-# of ISBN 0-596-00027-8 Programming Perl Third Edition.
-
-# P.855 exec
-# in Chapter 27: Functions
-# of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
-
-$| = 1;
 
 sub import() {}
 sub unimport() {}
@@ -255,7 +245,7 @@ if (not -e("$filename.e")) {
     if (eval q{ use Fcntl qw(O_WRONLY O_APPEND O_CREAT); 1 } and CORE::sysopen($fh,"$filename.e",&O_WRONLY|&O_APPEND|&O_CREAT)) {
     }
     else {
-        open($fh, ">>$filename.e") or die __FILE__, ": Can't write open file: $filename.e";
+        Char::Elatin2::_open_a($fh, "$filename.e") or die __FILE__, ": Can't write open file: $filename.e";
     }
 
     if (0) {
@@ -303,19 +293,8 @@ if (not -e("$filename.e")) {
     close($fh) or die __FILE__, ": Can't close file: $filename.e";
 }
 
-# P.565 23.1.2. Cleaning Up Your Environment
-# in Chapter 23: Security
-# of ISBN 0-596-00027-8 Programming Perl Third Edition.
-
-# P.656 Cleaning Up Your Environment
-# in Chapter 20: Security
-# of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
-
-# local $ENV{'PATH'} = '.';
-local @ENV{qw(IFS CDPATH ENV BASH_ENV)}; # Make %ENV safer
-
 my $fh = gensym();
-open($fh, "$filename.e") or die __FILE__, ": Can't read open file: $filename.e";
+Char::Elatin2::_open_r($fh, "$filename.e") or die __FILE__, ": Can't read open file: $filename.e";
 
 if (0) {
 }
@@ -336,6 +315,30 @@ if ($^W) {
     push @switch, '-w';
 }
 
+# P.707 29.2.33. exec
+# in Chapter 29: Functions
+# of ISBN 0-596-00027-8 Programming Perl Third Edition.
+#
+# If there is more than one argument in LIST, or if LIST is an array with more
+# than one value, the system shell will never be used. This also bypasses any
+# shell processing of the command. The presence or absence of metacharacters in
+# the arguments doesn't affect this list-triggered behavior, which makes it the
+# preferred from in security-conscious programs that do not with to expose
+# themselves to potential shell escapes.
+# Environment variable PERL5SHELL(Microsoft ports only) will never be used, too.
+
+# P.855 exec
+# in Chapter 27: Functions
+# of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+#
+# If there is more than one argument in LIST, or if LIST is an array with more
+# than one value, the system shell will never be used. This also bypasses any
+# shell processing of the command. The presence or absence of metacharacters in
+# the arguments doesn't affect this list-triggered behavior, which makes it the
+# preferred from in security-conscious programs that do not wish to expose
+# themselves to injection attacks via shell escapes.
+# Environment variable PERL5SHELL(Microsoft ports only) will never be used, too.
+
 # P.489 #! and Quoting on Non-Unix Systems
 # in Chapter 19: The Command-Line Interface
 # of ISBN 0-596-00027-8 Programming Perl Third Edition.
@@ -346,11 +349,11 @@ if ($^W) {
 
 # DOS-like system
 if ($^O =~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
-    exit system
+    exit Char::Elatin2::_systemx
         _escapeshellcmd_MSWin32($^X),
 
-# -I switch can not treat space included path
-#       (map { '-I' . _escapeshellcmd_MSWin32($_) } @INC),
+    # -I switch can not treat space included path
+    #   (map { '-I' . _escapeshellcmd_MSWin32($_) } @INC),
         (map { '-I' .                         $_  } @INC),
 
         @switch,
@@ -360,7 +363,7 @@ if ($^O =~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
 
 # UNIX-like system
 else {
-    exit system
+    exit Char::Elatin2::_systemx
         _escapeshellcmd($^X),
         (map { '-I' . _escapeshellcmd($_) } @INC),
         @switch,
@@ -371,7 +374,9 @@ else {
 # escape shell command line on DOS-like system
 sub _escapeshellcmd_MSWin32 {
     my($word) = @_;
-    if ($word =~ / $anchor [ ] /oxms) {
+    if ($word =~ / [ ] /oxms) {
+
+        # both DOS-like and UNIX-like shell quote
         return qq{"$word"};
     }
     else {
@@ -382,7 +387,6 @@ sub _escapeshellcmd_MSWin32 {
 # escape shell command line on UNIX-like system
 sub _escapeshellcmd {
     my($word) = @_;
-    $word =~ s/([\t\n\r\x20!"#\$%&'()*+;<=>?\[\\\]^`{|}~\x7F\xFF])/\\$1/g;
     return $word;
 }
 
@@ -401,7 +405,7 @@ sub Char::Latin2::escape_script {
 
     # read Latin-2 script
     my $fh = gensym();
-    open($fh, $script) or die __FILE__, ": Can't open file: $script";
+    Char::Elatin2::_open_r($fh, $script) or die __FILE__, ": Can't open file: $script";
     local $/ = undef; # slurp mode
     $_ = <$fh>;
     close($fh) or die __FILE__, ": Can't close file: $script";
@@ -4929,6 +4933,18 @@ __END__
 
 Char::Latin2 - Source code filter to escape Latin-2 script
 
+=head1 Install and Usage
+
+There are two steps there:
+
+=over 2
+
+=item * You'll have to download Char/Latin2.pm and Char/Elatin2.pm and put it in your perl lib directory.
+
+=item * You'll need to write "use Char::Latin2;" at head of the script.
+
+=back
+
 =head1 SYNOPSIS
 
   use Char::Latin2;
@@ -4971,24 +4987,25 @@ Char::Latin2 - Source code filter to escape Latin-2 script
 
 =head1 ABSTRACT
 
-Let's start with a bit of history: jperl 4.019+1.3 introduced Latin-2 support.
-You could apply chop() and regexps even to complex CJK characters.
+Char::Latin2 software is "middleware" between perl interpreter and your Perl script
+written by Latin-2.
 
-JPerl in CPAN Perl Ports (Binary Distributions)
+Perl is optimized for problems which are about 90% working with text and about
+10% everything else. But this "text" means US-ASCII text, and popular Latin-2
+is contained in "everything else."
 
-said before,
+Please be not disappointed.
 
-  As of Perl 5.8.0 it is suggested that instead of JPerl (which is
-  based on a quite old release of Perl) you should just use Perl 5.8.0,
-  since it can do all that JPerl did, and more.
+The string of Perl3 or later can treat binary data. That is, the string of
+Perl3 or later can treat Latin-2.
 
-But was it really so?
+Perl is designed to make the easy jobs easy, without making the hard jobs
+impossible. Char::Latin2 software is Perl program designed to make the "easy jobs easy".
 
-In this country, Latin-2 is widely used on mainframe I/O, the personal computer,
-and the cellular phone. This software treats Latin-2 directly, but doesn't treat
-Latin-1. Therefore, this software doesn't use UTF8 flag.
-
-Shall we escape from the encode problem?
+By "use Char::Latin2;", it automatically interpret your script as Latin-2. The various
+functions of perl including a regular expression can treat Latin-2 now.
+The function length treats length per byte. This software does not use UTF8
+flag.
 
 =head1 Yet Another Future Of
 
@@ -5046,7 +5063,7 @@ I learned the following things from the successful software.
 
 =back
 
-Let's make yet another future by JPerl's future.
+I am excited about this software and its future --- I hope you are too.
 
 =head1 JRE: JPerl Runtime Environment
 
@@ -5065,7 +5082,7 @@ computer intermediate language commonly referred to as Perl byteorientedcode.
 This language conceptually represents the instruction set of a byte-oriented,
 capability architecture.
 
-=head1 Basic Idea Of Source Code Filter
+=head1 Basic Idea of Source Code Filter
 
 I discovered this mail again recently.
 
@@ -5092,6 +5109,51 @@ save as: SJIS.pm
   1;
 
 I am glad that I could confirm my idea is not so wrong.
+
+=head1 Command-line Wildcard Expansion on DOS-like Systems
+
+The default command shells on DOS-like systems (COMMAND.COM or cmd.exe) do not
+expand wildcard arguments supplied to programs. Instead, import() of Char/Elatin2.pm
+works well.
+
+   in Char/Elatin2.pm
+   #
+   # @ARGV wildcard globbing
+   #
+   sub import() {
+
+       if ($^O =~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
+           my @argv = ();
+           for (@ARGV) {
+
+               # has space
+               if (/\A (?:$q_char)*? [ ] /oxms) {
+                   if (my @glob = Char::Elatin2::glob(qq{"$_"})) {
+                       push @argv, @glob;
+                   }
+                   else {
+                       push @argv, $_;
+                   }
+               }
+
+               # has wildcard metachar
+               elsif (/\A (?:$q_char)*? [*?] /oxms) {
+                   if (my @glob = Char::Elatin2::glob($_)) {
+                       push @argv, @glob;
+                   }
+                   else {
+                       push @argv, $_;
+                   }
+               }
+
+               # no wildcard globbing
+               else {
+                   push @argv, $_;
+               }
+           }
+           @ARGV = @argv;
+       }
+   }
 
 =head1 Software Composition
 
@@ -5130,7 +5192,7 @@ I am glad that I could confirm my idea is not so wrong.
    warnings/register.pm_ --- poor warnings/register.pm
    feature.pm_           --- dummy feature.pm
 
-=head1 Upper Compatibility By Escaping
+=head1 Upper Compatibility by Escaping
 
 This software adds the function by 'Escaping' it always, and nothing of the
 past is broken. Therefore, 'Possible job' never becomes 'Impossible job'.
@@ -5266,7 +5328,7 @@ Definitions in Char/Elatin2.pm.
   ${Char::Elatin2::eB}             qr{(?:(?<=[0-9A-Z_a-z])(?=[0-9A-Z_a-z])|(?<=[\x00-\x2F\x40\x5B-\x5E\x60\x7B-\xFF])(?=[\x00-\x2F\x40\x5B-\x5E\x60\x7B-\xFF]))}
   ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-=head1 Un-Escaping \ Of \N, \p, \P and \X (Char/Latin2.pm provides)
+=head1 Un-Escaping \ of \N, \p, \P and \X (Char/Latin2.pm provides)
 
 Char/Latin2.pm removes '\' at head of alphanumeric regexp metasymbols \N, \p, \P
 and \X. By this method, you can avoid the trap of the abstraction.
@@ -5346,7 +5408,7 @@ You need copy built-in standard module to /Perl/site/lib/Char::Latin2 and change
 
 Back to and see 'Escaping Your Script'. Enjoy hacking!!
 
-=head1 Ignore Pragmas And Modules
+=head1 Ignore Pragmas and Modules
 
   -----------------------------------------------------------
   Before                    After
@@ -5465,20 +5527,20 @@ Back to and see 'Escaping Your Script'. Enjoy hacking!!
  
  (The value '1' doesn't have the meaning)
 
-=head1 Perl5.6 Emulation On perl5.005
+=head1 Perl5.6 Emulation on perl5.005
 
   Using warnings pragma on perl5.00503 by rename files.
 
   warnings.pm_ --> warnings.pm
   warnings/register.pm_ --> warnings/register.pm
 
-=head1 Perl5.16 Emulation On perl5.005
+=head1 Perl5.16 Emulation
 
-  Using feature pragma on perl5.00503 by rename files.
+  Using feature pragma by rename files.
 
   feature.pm_ --> feature.pm
 
-=head1 BUGS AND LIMITATIONS
+=head1 BUGS, LIMITATIONS, and COMPATIBILITY
 
 I have tested and verified this software using the best of my ability.
 However, a software containing much regular expression is bound to contain
@@ -5489,7 +5551,13 @@ make this a more useful tool, please let everyone share it.
 
 =over 2
 
-=item * Modifier /a /d /l And /u Of Regular Expression
+=item * cloister of regular expression
+
+The cloister (?s) and (?i) of a regular expression will not be implemented for
+the time being. Cloister (?s) can be substituted with the .(dot) and \N on /s
+modifier. Cloister (?i) can be substituted with \F...\E.
+
+=item * Modifier /a /d /l and /u of Regular Expression
 
 The concept of this software is not to use two or more encoding methods at the
 same time. Therefore, modifier /a /d /l and /u are not supported.
@@ -5657,7 +5725,7 @@ Back when Programming Perl, 3rd ed. was written, UTF8 flag was not born
 and Perl is designed to make the easy jobs easy. This software provide
 programming environment like at that time.
 
-=head1 Words Of Learning Perl
+=head1 Words of Learning Perl
 
    Some computer scientists (the reductionists, in particular) would
   like to deny it, but people have funny-shaped minds. Mental geography
@@ -5854,6 +5922,7 @@ I am thankful to all persons.
 
  SADAHIRO Tomoyuki, The right way of using Shift_JIS
  http://homepage1.nifty.com/nomenclator/perl/shiftjis.htm
+ http://search.cpan.org/~sadahiro/
 
  Yukihiro "Matz" Matsumoto, YAPC::Asia2006 Ruby on Perl(s)
  http://www.rubyist.net/~matz/slides/yapc2006/

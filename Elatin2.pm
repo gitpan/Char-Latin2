@@ -27,7 +27,7 @@ BEGIN {
 # (and so on)
 
 BEGIN { eval q{ use vars qw($VERSION) } }
-$VERSION = sprintf '%d.%02d', q$Revision: 0.83 $ =~ /(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.84 $ =~ /(\d+)/xmsg;
 
 BEGIN {
     my $PERL5LIB = __FILE__;
@@ -318,9 +318,46 @@ else {
 }
 
 #
+# @ARGV wildcard globbing
+#
+sub import() {
+
+    if ($^O =~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
+        my @argv = ();
+        for (@ARGV) {
+
+            # has space
+            if (/\A (?:$q_char)*? [ ] /oxms) {
+                if (my @glob = Elatin2::glob(qq{"$_"})) {
+                    push @argv, @glob;
+                }
+                else {
+                    push @argv, $_;
+                }
+            }
+
+            # has wildcard metachar
+            elsif (/\A (?:$q_char)*? [*?] /oxms) {
+                if (my @glob = Elatin2::glob($_)) {
+                    push @argv, @glob;
+                }
+                else {
+                    push @argv, $_;
+                }
+            }
+
+            # no wildcard globbing
+            else {
+                push @argv, $_;
+            }
+        }
+        @ARGV = @argv;
+    }
+}
+
+#
 # Prototypes of subroutines
 #
-sub import() {}
 sub unimport() {}
 sub Elatin2::split(;$$$);
 sub Elatin2::tr($$$$;$);
@@ -422,27 +459,6 @@ ${Elatin2::not_word}    = qr{(?:[^\x30-\x39\x41-\x5A\x5F\x61-\x7A])};
 ${Elatin2::not_xdigit}  = qr{(?:[^\x30-\x39\x41-\x46\x61-\x66])};
 ${Elatin2::eb}          = qr{(?:\A(?=[0-9A-Z_a-z])|(?<=[\x00-\x2F\x40\x5B-\x5E\x60\x7B-\xFF])(?=[0-9A-Z_a-z])|(?<=[0-9A-Z_a-z])(?=[\x00-\x2F\x40\x5B-\x5E\x60\x7B-\xFF]|\z))};
 ${Elatin2::eB}          = qr{(?:(?<=[0-9A-Z_a-z])(?=[0-9A-Z_a-z])|(?<=[\x00-\x2F\x40\x5B-\x5E\x60\x7B-\xFF])(?=[\x00-\x2F\x40\x5B-\x5E\x60\x7B-\xFF]))};
-
-#
-# @ARGV wildcard globbing
-#
-if ($^O =~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
-    if ($ENV{'ComSpec'} =~ / (?: COMMAND\.COM | CMD\.EXE ) \z /oxmsi) {
-        my @argv = ();
-        for (@ARGV) {
-            if (/\A ' ((?:$q_char)*) ' \z/oxms) {
-                push @argv, $1;
-            }
-            elsif (/\A (?:$q_char)*? [*?] /oxms and (my @glob = Elatin2::glob($_))) {
-                push @argv, @glob;
-            }
-            else {
-                push @argv, $_;
-            }
-        }
-        @ARGV = @argv;
-    }
-}
 
 #
 # Latin-2 split
@@ -1089,6 +1105,13 @@ sub classic_character_class($) {
         '\S' => '${Elatin2::eS}',
         '\W' => '${Elatin2::eW}',
         '\d' => '[0-9]',
+
+        # Before Perl 5.6, \s only matched the five whitespace characters
+        # tab, newline, form-feed, carriage return, and the space character
+        # itself, which, taken together, is the character class [\t\n\f\r ].
+        # We can still use the ASCII whitespace semantics using this
+        # software.
+
                  # \t  \n  \f  \r space
         '\s' => '[\x09\x0A\x0C\x0D\x20]',
 
@@ -2021,6 +2044,118 @@ sub charlist_not_qr {
 }
 
 #
+# open file in read mode
+#
+sub _open_r {
+    my(undef,$file) = @_;
+    $file =~ s#\A ([\x09\x0A\x0C\x0D\x20]) #./$1#oxms;
+    return eval(q{open($_[0],'<',$_[1])}) ||
+                  open($_[0],"< $file\0");
+}
+
+#
+# open file in write mode
+#
+sub _open_w {
+    my(undef,$file) = @_;
+    $file =~ s#\A ([\x09\x0A\x0C\x0D\x20]) #./$1#oxms;
+    return eval(q{open($_[0],'>',$_[1])}) ||
+                  open($_[0],"> $file\0");
+}
+
+#
+# open file in append mode
+#
+sub _open_a {
+    my(undef,$file) = @_;
+    $file =~ s#\A ([\x09\x0A\x0C\x0D\x20]) #./$1#oxms;
+    return eval(q{open($_[0],'>>',$_[1])}) ||
+                  open($_[0],">> $file\0");
+}
+
+#
+# safe system
+#
+sub _systemx {
+
+    # P.707 29.2.33. exec
+    # in Chapter 29: Functions
+    # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+    #
+    # Be aware that in older releases of Perl, exec (and system) did not flush
+    # your output buffer, so you needed to enable command buffering by setting $|
+    # on one or more filehandles to avoid lost output in the case of exec, or
+    # misordererd output in the case of system. This situation was largely remedied
+    # in the 5.6 release of Perl. (So, 5.005 release not yet.)
+
+    # P.855 exec
+    # in Chapter 27: Functions
+    # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+    #
+    # In very old release of Perl (before v5.6), exec (and system) did not flush
+    # your output buffer, so you needed to enable command buffering by setting $|
+    # on one or more filehandles to avoid lost output with exec or misordered
+    # output with system.
+
+    $| = 1;
+
+    # P.565 23.1.2. Cleaning Up Your Environment
+    # in Chapter 23: Security
+    # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
+    # P.656 Cleaning Up Your Environment
+    # in Chapter 20: Security
+    # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+
+    # local $ENV{'PATH'} = '.';
+    local @ENV{qw(IFS CDPATH ENV BASH_ENV)}; # Make %ENV safer
+
+    # P.707 29.2.33. exec
+    # in Chapter 29: Functions
+    # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+    #
+    # As we mentioned earlier, exec treats a discrete list of arguments as an
+    # indication that it should bypass shell processing. However, there is one
+    # place where you might still get tripped up. The exec call (and system, too)
+    # will not distinguish between a single scalar argument and an array containing
+    # only one element.
+    #
+    #     @args = ("echo surprise");  # just one element in list
+    #     exec @args                  # still subject to shell escapes
+    #         or die "exec: $!";      #   because @args == 1
+    #
+    # To avoid this, you can use the PATHNAME syntax, explicitly duplicating the
+    # first argument as the pathname, which forces the rest of the arguments to be
+    # interpreted as a list, even if there is only one of them:
+    #
+    #     exec { $args[0] } @args  # safe even with one-argument list
+    #         or die "can't exec @args: $!";
+
+    # P.855 exec
+    # in Chapter 27: Functions
+    # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+    #
+    # As we mentioned earlier, exec treats a discrete list of arguments as a
+    # directive to bypass shell processing. However, there is one place where
+    # you might still get tripped up. The exec call (and system, too) cannot
+    # distinguish between a single scalar argument and an array containing
+    # only one element.
+    #
+    #     @args = ("echo surprise");  # just one element in list
+    #     exec @args                  # still subject to shell escapes
+    #         || die "exec: $!";      #   because @args == 1
+    #
+    # To avoid this, use the PATHNAME syntax, explicitly duplicating the first
+    # argument as the pathname, which forces the rest of the arguments to be
+    # interpreted as a list, even if there is only one of them:
+    #
+    #     exec { $args[0] } @args  # safe even with one-argument list
+    #         || die "can't exec @args: $!";
+
+    return CORE::system { $_[0] } @_; # safe even with one-argument list
+}
+
+#
 # Latin-2 order to character (with parameter)
 #
 sub Elatin2::chr(;$) {
@@ -2066,14 +2201,14 @@ sub Elatin2::chr_() {
 sub Elatin2::glob($) {
 
     if (wantarray) {
-        my @glob = _dosglob(@_);
+        my @glob = _DOS_like_glob(@_);
         for my $glob (@glob) {
             $glob =~ s{ \A (?:\./)+ }{}oxms;
         }
         return @glob;
     }
     else {
-        my $glob = _dosglob(@_);
+        my $glob = _DOS_like_glob(@_);
         $glob =~ s{ \A (?:\./)+ }{}oxms;
         return $glob;
     }
@@ -2085,14 +2220,14 @@ sub Elatin2::glob($) {
 sub Elatin2::glob_() {
 
     if (wantarray) {
-        my @glob = _dosglob();
+        my @glob = _DOS_like_glob();
         for my $glob (@glob) {
             $glob =~ s{ \A (?:\./)+ }{}oxms;
         }
         return @glob;
     }
     else {
-        my $glob = _dosglob();
+        my $glob = _DOS_like_glob();
         $glob =~ s{ \A (?:\./)+ }{}oxms;
         return $glob;
     }
@@ -2101,9 +2236,12 @@ sub Elatin2::glob_() {
 #
 # Latin-2 path globbing from File::DosGlob module
 #
+# Often I confuse "_dosglob" and "_doglob".
+# So, I renamed "_dosglob" to "_DOS_like_glob".
+#
 my %iter;
 my %entries;
-sub _dosglob {
+sub _DOS_like_glob {
 
     # context (keyed by second cxix argument provided by core)
     my($expr,$cxix) = @_;
@@ -2832,7 +2970,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   $chop = Elatin2::chop();
   $chop = Elatin2::chop;
 
-  This fubction chops off the last character of a string variable and returns the
+  This function chops off the last character of a string variable and returns the
   character chopped. The Elatin2::chop function is used primary to remove the newline
   from the end of an input recoed, and it is more efficient than using a
   substitution. If that's all you're doing, then it would be safer to use chomp,
@@ -3051,20 +3189,16 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   @glob = Elatin2::glob_;
 
   This function returns the value of $string with filename expansions the way a
-  shell would expand them, returning the next successive name on each call.
-  If $string is omitted, $_ is globbed instead. This is the internal function
-  implementing the <*> operator.
+  DOS-like shell would expand them, returning the next successive name on each
+  call. If $string is omitted, $_ is globbed instead. This is the internal
+  function implementing the <*> and glob operator.
   This function function when the pathname ends with chr(0x5C) on MSWin32.
 
-  For economic reasons, the algorithm matches the command.com or cmd.exe's style
-  of expansion, not the UNIX-like shell's. An asterisk ("*") matches any sequence
-  of any character (including none). A question mark ("?") matches any one
-  character or none. A tilde ("~") expands to a home directory, as in "~/.*rc"
-  for all the current user's "rc" files, or "~jane/Mail/*" for all of Jane's mail
-  files.
-
-  For example, C<<..\\l*b\\file/*glob.p?>> on MSWin32 or UNIX will work as
-  expected (in that it will find something like '..\lib\File/DosGlob.pm' alright).
+  For ease of use, the algorithm matches the DOS-like shell's style of expansion,
+  not the UNIX-like shell's. An asterisk ("*") matches any sequence of any
+  character (including none). A question mark ("?") matches any one character or
+  none. A tilde ("~") expands to a home directory, as in "~/.*rc" for all the
+  current user's "rc" files, or "~jane/Mail/*" for all of Jane's mail files.
 
   Note that all path components are case-insensitive, and that backslashes and
   forward slashes are both accepted, and preserved. You may have to double the
@@ -3086,10 +3220,13 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   @spacies = Elatin2::glob("'*${var}e f*'");
   @spacies = Elatin2::glob(qq("*${var}e f*"));
 
-  Hint: Programmer Efficiency
+  Another way on MSWin32
 
-  "When I'm on Windows, I use split(/\n/,`dir /s /b *.* 2>NUL`) instead of glob('*.*')"
-  -- ina
+  # relative path
+  @relpath_file = split(/\n/,`dir /b wildcard\\here*.txt 2>NUL`);
+
+  # absolute path
+  @abspath_file = split(/\n/,`dir /s /b wildcard\\here*.txt 2>NUL`);
 
 =cut
 

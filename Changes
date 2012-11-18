@@ -1,5 +1,14 @@
 Revision history for this software.
 
+0.84  2012/11/19 00:00:00
+	- support Strawberry Perl 5.16.2.
+	- support Perl 5.16.2.
+	- delete escape-characters of run-time command.
+	- have to use both two-argument and three-argument open().
+	- support Microsoft Windows 8 Pro (x64).
+	- support PowerShell 3.0
+	; created by INABA Hitoshi
+
 0.83  2012/09/29 00:00:00
 	- support Strawberry Perl 5.16.1.
 	- support ActivePerl 5.16.1.
