@@ -101,7 +101,6 @@ t/141_jperlre.t
 t/142_jperlre.t
 t/147_jperlre.t
 t/148_jperlre.t
-t/149_jperlre.t
 t/150_jperlre.t
 t/151_jperlre.t
 t/152_jperlre.t
@@ -199,3 +198,7 @@ t/329_charclass_pi.t
 t/330_charclass_ni.t
 t/335_negated_s.t
 t/338_regexp_z.t
+t/339_getc.t
+t/340_getc.t
+t/341_getc.t
+t/342_getc.t

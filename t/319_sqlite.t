@@ -33,6 +33,7 @@ if (defined $dbh) {
     $sth1->execute('1', '111');
     $sth1->execute('2', '222');
     $sth1->execute('3', '333');
+    $sth1->finish;
 
     $dbh->do("update table1 set key = ? where value = ?", undef, '1', '100');
     $dbh->do("delete from table1 where key = ?", undef, '2');

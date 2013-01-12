@@ -21,12 +21,12 @@ END
     }
 }
 
-sub carp(@) {
+sub carp {
     my($package,$filename,$line) = caller(1);
     print STDERR "@_ at $filename line $line.\n";
 }
 
-sub croak(@) {
+sub croak {
     my($package,$filename,$line) = caller(1);
     print STDERR "@_ at $filename line $line.\n";
     die "\n";

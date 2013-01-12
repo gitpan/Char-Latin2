@@ -1,5 +1,12 @@
 Revision history for this software.
 
+0.85  2013/01/13 00:00:00
+	- support Microsoft Windows 95.
+	- support Microsoft Windows NT 4.0.
+	- support KPS 9566.
+	- support Sjis::getc().
+	; created by INABA Hitoshi
+
 0.84  2012/11/19 00:00:00
 	- support Strawberry Perl 5.16.2.
 	- support Perl 5.16.2.
