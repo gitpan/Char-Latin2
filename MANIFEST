@@ -202,3 +202,5 @@ t/339_getc.t
 t/340_getc.t
 t/341_getc.t
 t/342_getc.t
+t/343_getc.t
+t/344_getc.t

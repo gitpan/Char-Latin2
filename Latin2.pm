@@ -27,7 +27,7 @@ BEGIN {
 # (and so on)
 
 BEGIN { eval q{ use vars qw($VERSION) } }
-$VERSION = sprintf '%d.%02d', q$Revision: 0.85 $ =~ /(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.86 $ =~ /(\d+)/oxmsg;
 
 BEGIN { require Elatin2; }
 
@@ -380,7 +380,7 @@ sub import {
 
     # DOS-like system
     if ($^O =~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
-        exit Elatin2::_systemx
+        exit Elatin2::_systemx(
             _escapeshellcmd_MSWin32($^X),
 
         # -I switch can not treat space included path
@@ -389,17 +389,19 @@ sub import {
 
             @switch,
             '--',
-            map { _escapeshellcmd_MSWin32($_) } "$filename.e", @ARGV;
+            map { _escapeshellcmd_MSWin32($_) } "$filename.e", @ARGV
+        );
     }
 
     # UNIX-like system
     else {
-        exit Elatin2::_systemx
+        exit Elatin2::_systemx(
             _escapeshellcmd($^X),
             (map { '-I' . _escapeshellcmd($_) } @INC),
             @switch,
             '--',
-            map { _escapeshellcmd($_) } "$filename.e", @ARGV;
+            map { _escapeshellcmd($_) } "$filename.e", @ARGV
+        );
     }
 }
 
@@ -6001,6 +6003,9 @@ I am thankful to all persons.
  http://gihyo.jp/dev/serial/01/modern-perl/0031
  http://gihyo.jp/dev/serial/01/modern-perl/0032
  http://gihyo.jp/dev/serial/01/modern-perl/0033
+
+ Fuji, Goro (gfx), Perl Hackers Hub No.16
+ http://gihyo.jp/dev/serial/01/perl-hackers-hub/001602
 
  Dan Kogai, Encode module
  http://search.cpan.org/dist/Encode/

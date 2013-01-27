@@ -1,5 +1,9 @@
 Revision history for this software.
 
+0.86  2013/01/27 00:00:00
+	- fix Sjis::getc(BAREWORD).
+	; created by INABA Hitoshi
+
 0.85  2013/01/13 00:00:00
 	- support Microsoft Windows 95.
 	- support Microsoft Windows NT 4.0.
