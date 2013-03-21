@@ -5,7 +5,7 @@ rem
 rem  perl64 - execute perlscript on ActivePerl 64 or Strawbery Perl 64 without %PATH% settings
 rem           (poor App::perlbrew)
 rem 
-rem  Copyright (c) 2008, 2009, 2011, 2012 INABA Hitoshi (ina@cpan.org)
+rem  Copyright (c) 2008, 2009, 2011, 2012, 2013 INABA Hitoshi (ina@cpan.org)
 rem 
 rem ======================================================================
 
@@ -94,6 +94,7 @@ goto END
   echo Press [Enter] to Yes continue, or [Ctrl]+[C] to No, quit.
   echo ***********************************************************
   pause
+  rem homemade setx command for portability
   type PERL64BIN.$$$ >> C:\AUTOEXEC.BAT
   del PERL64BIN.$$$
   echo -----------------------------------------------------------
@@ -176,6 +177,7 @@ goto END
   echo Press [Enter] to Yes continue, or [Ctrl]+[C] to No, quit.
   echo ***********************************************************
   pause
+  rem homemade setx command for portability
   ver | find "Windows NT" > nul
   if     %ERRORLEVEL% == 0 echo REGEDIT4>PERL64BIN.REG
   if not %ERRORLEVEL% == 0 echo Windows Registry Editor Version 5.00>PERL64BIN.REG

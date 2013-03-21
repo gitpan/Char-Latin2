@@ -5,7 +5,7 @@ rem
 rem  sperl64516 - execute perlscript on Strawbery Perl x64 5.16 without %PATH% settings
 rem           (poor App::perlbrew)
 rem 
-rem  Copyright (c) 2008, 2009, 2011, 2012 INABA Hitoshi (ina@cpan.org)
+rem  Copyright (c) 2008, 2009, 2011, 2012, 2013 INABA Hitoshi (ina@cpan.org)
 rem 
 rem ======================================================================
 
@@ -69,6 +69,7 @@ goto END
   echo Press [Enter] to Yes continue, or [Ctrl]+[C] to No, quit.
   echo ***********************************************************
   pause
+  rem homemade setx command for portability
   type SPERL64516BIN.$$$ >> C:\AUTOEXEC.BAT
   del SPERL64516BIN.$$$
   echo -----------------------------------------------------------
@@ -126,6 +127,7 @@ goto END
   echo Press [Enter] to Yes continue, or [Ctrl]+[C] to No, quit.
   echo ***********************************************************
   pause
+  rem homemade setx command for portability
   ver | find "Windows NT" > nul
   if     %ERRORLEVEL% == 0 echo REGEDIT4>SPERL64516BIN.REG
   if not %ERRORLEVEL% == 0 echo Windows Registry Editor Version 5.00>SPERL64516BIN.REG

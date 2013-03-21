@@ -3,8 +3,9 @@ package Char::Elatin2;
 #
 # Char::Elatin2 - Run-time routines for Char/Latin2.pm
 #
-# Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 INABA Hitoshi <ina@cpan.org>
+# http://search.cpan.org/dist/Char-Char::Latin2/
 #
+# Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
 use 5.00503;
@@ -27,7 +28,7 @@ BEGIN {
 # (and so on)
 
 BEGIN { eval q{ use vars qw($VERSION) } }
-$VERSION = sprintf '%d.%02d', q$Revision: 0.86 $ =~ /(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.87 $ =~ /(\d+)/xmsg;
 
 BEGIN {
     my $PERL5LIB = __FILE__;
