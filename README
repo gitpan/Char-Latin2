@@ -52,45 +52,6 @@ To install this software without make, type the following:
    pmake.bat dist       --- make distribution package
    pmake.bat ptar.bat   --- make perl script "ptar.bat"
 
-PROGRAM COMPOSITION
-
-   Char/Latin2.pm        --- source code filter for Latin-2 script
-   Char/Elatin2.pm       --- run-time routines for Char/Latin2.pm
-   Latin2.pm             --- alias of Char/Latin2.pm
-   Elatin2.pm            --- alias of Char/Elatin2.pm
-   perl5.bat             --- find and run perl5    without %PATH% settings
-   perl55.bat            --- find and run perl5.5  without %PATH% settings
-   perl56.bat            --- find and run perl5.6  without %PATH% settings
-   perl58.bat            --- find and run perl5.8  without %PATH% settings
-   perl510.bat           --- find and run perl5.10 without %PATH% settings
-   perl512.bat           --- find and run perl5.12 without %PATH% settings
-   perl514.bat           --- find and run perl5.14 without %PATH% settings
-   perl516.bat           --- find and run perl5.16 without %PATH% settings
-   perl64.bat            --- find and run perl64   without %PATH% settings
-   perl64512.bat         --- find and run perl5.12 (x64) without %PATH% settings
-   perl64514.bat         --- find and run perl5.14 (x64) without %PATH% settings
-   perl64516.bat         --- find and run perl5.16 (x64) without %PATH% settings
-   aperl58.bat           --- find and run ActivePerl 5.8  without %PATH% settings
-   aperl510.bat          --- find and run ActivePerl 5.10 without %PATH% settings
-   aperl512.bat          --- find and run ActivePerl 5.12 without %PATH% settings
-   aperl514.bat          --- find and run ActivePerl 5.14 without %PATH% settings
-   aperl516.bat          --- find and run ActivePerl 5.16 without %PATH% settings
-   aperl64512.bat        --- find and run ActivePerl 5.12 (x64) without %PATH% settings
-   aperl64514.bat        --- find and run ActivePerl 5.14 (x64) without %PATH% settings
-   aperl64516.bat        --- find and run ActivePerl 5.16 (x64) without %PATH% settings
-   sperl58.bat           --- find and run Strawberry Perl 5.8  without %PATH% settings
-   sperl510.bat          --- find and run Strawberry Perl 5.10 without %PATH% settings
-   sperl512.bat          --- find and run Strawberry Perl 5.12 without %PATH% settings
-   sperl514.bat          --- find and run Strawberry Perl 5.14 without %PATH% settings
-   sperl516.bat          --- find and run Strawberry Perl 5.16 without %PATH% settings
-   sperl64512.bat        --- find and run Strawberry Perl 5.12 (x64) without %PATH% settings
-   sperl64514.bat        --- find and run Strawberry Perl 5.14 (x64) without %PATH% settings
-   sperl64516.bat        --- find and run Strawberry Perl 5.16 (x64) without %PATH% settings
-   strict.pm_            --- dummy strict.pm
-   warnings.pm_          --- poor warnings.pm
-   warnings/register.pm_ --- poor warnings/register.pm
-   feature.pm_           --- dummy feature.pm
-
 DEPENDENCIES
 
 This software requires perl5.00503 or later.

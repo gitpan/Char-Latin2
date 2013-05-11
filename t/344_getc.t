@@ -13,7 +13,7 @@ close(FILE);
 open(GETC,"<$__FILE__.txt") || die;
 my @getc = ();
 while (my $c = getc(GETC)) {
-    last if $c eq "\n";
+    last if $c =~ /\A[\r\n]\z/;
     push @getc, $c;
 }
 close(GETC);
@@ -32,7 +32,7 @@ else {
     open(GETC2,"<$__FILE__.txt") || die;
     my @getc = ();
     while (my $c = getc(GETC2)) {
-        last if $c eq "\n";
+        last if $c =~ /\A[\r\n]\z/;
         push @getc, $c;
     }
     close(GETC2);

@@ -1,5 +1,12 @@
 Revision history for this software.
 
+0.89  2013/05/12 00:00:00
+	- cancel improving multi-byte anchoring for over 32766 octet string on perl 5.10.0.
+	- add perl518.bat, perl64518.bat, aperl518.bat, aperl64518.bat, sperl518.bat, and sperl64518.bat.
+	- support Cygwin's Perl.
+	- add cperl.bat.
+	; created by INABA Hitoshi
+
 0.88  2013/05/01 00:00:00
 	- improve multi-byte anchoring for over 32766 octet string.
 	- remove multi-byte anchoring of UTF2 and OldUTF8.

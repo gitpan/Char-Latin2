@@ -8,7 +8,7 @@ my $__FILE__ = __FILE__;
 
 my @getc = ();
 while (my $c = getc(DATA)) {
-    last if $c eq "\n";
+    last if $c =~ /\A[\r\n]\z/;
     push @getc, $c;
 }
 my $result = join('', map {"($_)"} @getc);
