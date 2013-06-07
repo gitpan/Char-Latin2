@@ -41,6 +41,7 @@ sperl64514.bat
 sperl64516.bat
 sperl64518.bat
 cperl.bat
+dperl.bat
 Changes
 Makefile.PL
 pMakefile.PL
@@ -211,3 +212,11 @@ t/341_getc.t
 t/342_getc.t
 t/343_getc.t
 t/344_getc.t
+t/348_lsubstr_assign.t
+t/349_lsubstr_tr.t
+t/350_lsubstr_sub.t
+t/351_substr_perldoc.t
+t/352_substr_perldoc.t
+t/353_substr_perldoc.t
+t/354_substr_perldoc.t
+t/355_substr_perldoc.t

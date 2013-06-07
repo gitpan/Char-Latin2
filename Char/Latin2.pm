@@ -8,7 +8,8 @@ package Char::Latin2;
 # Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
-use 5.00503;
+use 5.00503;    # Galapagos Consensus 1998 for primetools
+# use 5.008001; # Lancaster Consensus 2013 for toolchains
 
 BEGIN {
     if ($^X =~ / jperl /oxmsi) {
@@ -28,9 +29,9 @@ BEGIN {
 # (and so on)
 
 BEGIN { eval q{ use vars qw($VERSION) } }
-$VERSION = sprintf '%d.%02d', q$Revision: 0.89 $ =~ /(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.90 $ =~ /(\d+)/oxmsg;
 
-BEGIN { require Char::Elatin2; }
+BEGIN { CORE::require Char::Elatin2; }
 
 # poor Symbol.pm - substitute of real Symbol.pm
 BEGIN {
@@ -146,6 +147,8 @@ my $qq_variable = qr{(?: \{ (?:$qq_brace)*? \}                    |
                                           (?: (?: -> )? (?: \[ (?: \$\[ | \$\] | $qq_char )*? \] | \{ (?:$qq_brace)*? \} ) )*
                     ))
                   }xms;
+my $qq_substr  = qr{(?: Char::Latin2::substr | CORE::substr | substr ) \( $qq_paren \)
+                 }xms;
 
 # regexp of nested parens in qXX
 my $q_paren    = qr{(?{local $nest=0}) (?>(?:
@@ -677,7 +680,9 @@ sub escape {
 
 # scalar variable $scalar =~ tr///;
 # scalar variable $scalar =~ s///;
-    elsif (/\G ( \$ $qq_scalar ) /oxgc) {
+# substr() =~ tr///;
+# substr() =~ s///;
+    elsif (/\G ( \$ $qq_scalar | $qq_substr ) /oxgc) {
         my $scalar = e_string($1);
 
         if (/\G ( \s* (?: =~ | !~ ) \s* ) (?= (?: tr|y) \b ) /oxgc) {
@@ -4325,14 +4330,6 @@ sub e_sub {
         }
     }
 
-    my $local = '';
-    if ($variable_basename =~ /::/) {
-        $local = 'local';
-    }
-    else{
-        $local = 'my';
-    }
-
     my $sub = '';
 
     # with /r
@@ -4343,26 +4340,16 @@ sub e_sub {
         # s///gr without multibyte anchoring
         elsif ($modifier =~ /g/oxms) {
             $sub = sprintf(
-                #      1  2    3         4       5   6               7  8    9   1011      12           13              14              15
-                q<eval{%s %s_t=%s; while(%s_t =~ %s){%s local $^W=0; %s %s_r=%s; %s%s_t="$`%s_r$'"; pos(%s_t)=length "$`%s_r"; } return %s_t}>,
+                #                        1                        2   3                                 4   5
+                q<eval{local $Char::Latin2::re_t=%s; while($Char::Latin2::re_t =~ %s){%s local $^W=0; local $Char::Latin2::re_r=%s; %s$Char::Latin2::re_t="$`$Char::Latin2::re_r$'"; pos($Char::Latin2::re_t)=length "$`$Char::Latin2::re_r"; } return $Char::Latin2::re_t}>,
 
-                $local,                                                                       #  1
-                    $variable_basename,                                                       #  2
-                $variable,                                                                    #  3
-                    $variable_basename,                                                       #  4
-                ($delimiter1 eq "'") ?                                                        #  5
-                e_s1_q('m', $delimiter1, $end_delimiter1, $pattern, $modifier) :              #  :
-                e_s1  ('m', $delimiter1, $end_delimiter1, $pattern, $modifier),               #  :
-                $s_matched,                                                                   #  6
-                $local,                                                                       #  7
-                    $variable_basename,                                                       #  8
-                $e_replacement,                                                               #  9
-                sprintf('%s_r=eval %s_r; ', $variable_basename, $variable_basename) x $e_modifier, # 10
-                    $variable_basename,                                                       # 11
-                    $variable_basename,                                                       # 12
-                    $variable_basename,                                                       # 13
-                    $variable_basename,                                                       # 14
-                    $variable_basename,                                                       # 15
+                $variable,                                                       #  1
+                ($delimiter1 eq "'") ?                                           #  2
+                e_s1_q('m', $delimiter1, $end_delimiter1, $pattern, $modifier) : #  :
+                e_s1  ('m', $delimiter1, $end_delimiter1, $pattern, $modifier),  #  :
+                $s_matched,                                                      #  3
+                $e_replacement,                                                  #  4
+                '$Char::Latin2::re_r=eval $Char::Latin2::re_r; ' x $e_modifier,                  #  5
             );
         }
 
@@ -4372,21 +4359,18 @@ sub e_sub {
             my $prematch = q{$`};
 
             $sub = sprintf(
-                #  1     2          3               4  5    6   7  8 9           10
-                q<(%s =~ %s) ? eval{%s local $^W=0; %s %s_r=%s; %s"%s%s_r$'" } : %s>,
+                #  1     2          3                                 4   5  6                    7
+                q<(%s =~ %s) ? eval{%s local $^W=0; local $Char::Latin2::re_r=%s; %s"%s$Char::Latin2::re_r$'" } : %s>,
 
-                $variable,                                                                    #  1
-                ($delimiter1 eq "'") ?                                                        #  2
-                e_s1_q('m', $delimiter1, $end_delimiter1, $pattern, $modifier) :              #  :
-                e_s1  ('m', $delimiter1, $end_delimiter1, $pattern, $modifier),               #  :
-                $s_matched,                                                                   #  3
-                $local,                                                                       #  4
-                    $variable_basename,                                                       #  5
-                $e_replacement,                                                               #  6
-                sprintf('%s_r=eval %s_r; ', $variable_basename, $variable_basename) x $e_modifier, #  7
-                $prematch,                                                                    #  8
-                    $variable_basename,                                                       #  9
-                $variable,                                                                    # 10
+                $variable,                                                       #  1
+                ($delimiter1 eq "'") ?                                           #  2
+                e_s1_q('m', $delimiter1, $end_delimiter1, $pattern, $modifier) : #  :
+                e_s1  ('m', $delimiter1, $end_delimiter1, $pattern, $modifier),  #  :
+                $s_matched,                                                      #  3
+                $e_replacement,                                                  #  4
+                '$Char::Latin2::re_r=eval $Char::Latin2::re_r; ' x $e_modifier,                  #  5
+                $prematch,                                                       #  6
+                $variable,                                                       #  7
             );
         }
 
@@ -4404,27 +4388,19 @@ sub e_sub {
         # s///g without multibyte anchoring
         elsif ($modifier =~ /g/oxms) {
             $sub = sprintf(
-                #      1  2             3     4   5               6  7    8   9 10    11           12            13     14             1516
-                q<eval{%s %s_n=0; while(%s =~ %s){%s local $^W=0; %s %s_r=%s; %s%s="$`%s_r$'"; pos(%s)=length "$`%s_r"; %s_n++} return %s%s_n}>,
+                #                                 1     2   3                                 4   5 6                         7                                                 8
+                q<eval{local $Char::Latin2::re_n=0; while(%s =~ %s){%s local $^W=0; local $Char::Latin2::re_r=%s; %s%s="$`$Char::Latin2::re_r$'"; pos(%s)=length "$`$Char::Latin2::re_r"; $Char::Latin2::re_n++} return %s$Char::Latin2::re_n}>,
 
-                $local,                                                                       #  1
-                    $variable_basename,                                                       #  2
-                $variable,                                                                    #  3
-                ($delimiter1 eq "'") ?                                                        #  4
-                e_s1_q('m', $delimiter1, $end_delimiter1, $pattern, $modifier) :              #  :
-                e_s1  ('m', $delimiter1, $end_delimiter1, $pattern, $modifier),               #  :
-                $s_matched,                                                                   #  5
-                $local,                                                                       #  6
-                    $variable_basename,                                                       #  7
-                $e_replacement,                                                               #  8
-                sprintf('%s_r=eval %s_r; ', $variable_basename, $variable_basename) x $e_modifier, #  9
-                $variable,                                                                    # 10
-                    $variable_basename,                                                       # 11
-                $variable,                                                                    # 12
-                    $variable_basename,                                                       # 13
-                    $variable_basename,                                                       # 14
-                ($bind_operator =~ / !~ /oxms) ? '!' : '',                                    # 15
-                    $variable_basename,                                                       # 16
+                $variable,                                                       #  1
+                ($delimiter1 eq "'") ?                                           #  2
+                e_s1_q('m', $delimiter1, $end_delimiter1, $pattern, $modifier) : #  :
+                e_s1  ('m', $delimiter1, $end_delimiter1, $pattern, $modifier),  #  :
+                $s_matched,                                                      #  3
+                $e_replacement,                                                  #  4
+                '$Char::Latin2::re_r=eval $Char::Latin2::re_r; ' x $e_modifier,                  #  5
+                $variable,                                                       #  6
+                $variable,                                                       #  7
+                ($bind_operator =~ / !~ /oxms) ? '!' : '',                       #  8
             );
         }
 
@@ -4437,25 +4413,22 @@ sub e_sub {
 
                 ($bind_operator =~ / =~ /oxms) ?
 
-                #  1 2 3          4               5  6    7   8 9   1011
-                q<(%s%s%s) ? eval{%s local $^W=0; %s %s_r=%s; %s%s="%s%s_r$'"; 1 } : undef> :
+                #  1 2 3          4                                 5   6 7   8
+                q<(%s%s%s) ? eval{%s local $^W=0; local $Char::Latin2::re_r=%s; %s%s="%s$Char::Latin2::re_r$'"; 1 } : undef> :
 
-                #  1 2 3              4               5  6    7   8 9   1011
-                q<(%s%s%s) ? 1 : eval{%s local $^W=0; %s %s_r=%s; %s%s="%s%s_r$'"; undef }>,
+                #  1 2 3              4                                 5   6 7   8
+                q<(%s%s%s) ? 1 : eval{%s local $^W=0; local $Char::Latin2::re_r=%s; %s%s="%s$Char::Latin2::re_r$'"; undef }>,
 
-                $variable,                                                                    #  1
-                $bind_operator,                                                               #  2
-                ($delimiter1 eq "'") ?                                                        #  3
-                e_s1_q('m', $delimiter1, $end_delimiter1, $pattern, $modifier) :              #  :
-                e_s1  ('m', $delimiter1, $end_delimiter1, $pattern, $modifier),               #  :
-                $s_matched,                                                                   #  4
-                $local,                                                                       #  5
-                    $variable_basename,                                                       #  6
-                $e_replacement,                                                               #  7
-                sprintf('%s_r=eval %s_r; ', $variable_basename, $variable_basename) x $e_modifier, #  8
-                $variable,                                                                    #  9
-                $prematch,                                                                    # 10
-                    $variable_basename,                                                       # 11
+                $variable,                                                       #  1
+                $bind_operator,                                                  #  2
+                ($delimiter1 eq "'") ?                                           #  3
+                e_s1_q('m', $delimiter1, $end_delimiter1, $pattern, $modifier) : #  :
+                e_s1  ('m', $delimiter1, $end_delimiter1, $pattern, $modifier),  #  :
+                $s_matched,                                                      #  4
+                $e_replacement,                                                  #  5
+                '$Char::Latin2::re_r=eval $Char::Latin2::re_r; ' x $e_modifier,                  #  6
+                $variable,                                                       #  7
+                $prematch,                                                       #  8
             );
         }
     }
@@ -5274,7 +5247,7 @@ The character classes are redefined as follows to backward compatibility.
    .            ${Char::Elatin2::dot}
                 ${Char::Elatin2::dot_s}    (/s modifier)
   \d            [0-9]
-  \s            [\x09\x0A\x0C\x0D\x20]
+  \s            \s
   \w            [0-9A-Z_a-z]
   \D            ${Char::Elatin2::eD}
   \S            ${Char::Elatin2::eS}
@@ -5305,7 +5278,7 @@ Also POSIX-style character classes.
                 [\x41-\x5A\x61-\x7A]     (/i modifier)
   [:print:]     [\x20-\x7F]
   [:punct:]     [\x21-\x2F\x3A-\x3F\x40\x5B-\x5F\x60\x7B-\x7E]
-  [:space:]     [\x09\x0A\x0B\x0C\x0D\x20]
+  [:space:]     [\s\x0B]
   [:upper:]     [\x41-\x5A]
                 [\x41-\x5A\x61-\x7A]     (/i modifier)
   [:word:]      [\x30-\x39\x41-\x5A\x5F\x61-\x7A]
@@ -5345,7 +5318,7 @@ Definitions in Char/Elatin2.pm.
   ${Char::Elatin2::dot}            qr{(?:[^\x0A])}
   ${Char::Elatin2::dot_s}          qr{(?:[\x00-\xFF])}
   ${Char::Elatin2::eD}             qr{(?:[^0-9])}
-  ${Char::Elatin2::eS}             qr{(?:[^\x09\x0A\x0C\x0D\x20])}
+  ${Char::Elatin2::eS}             qr{(?:[^\s])}
   ${Char::Elatin2::eW}             qr{(?:[^0-9A-Z_a-z])}
   ${Char::Elatin2::eH}             qr{(?:[^\x09\x20])}
   ${Char::Elatin2::eV}             qr{(?:[^\x0A\x0B\x0C\x0D])}
@@ -5362,7 +5335,7 @@ Definitions in Char/Elatin2.pm.
   ${Char::Elatin2::not_lower_i}    qr{(?:[\x00-\xFF])}
   ${Char::Elatin2::not_print}      qr{(?:[^\x20-\x7F])}
   ${Char::Elatin2::not_punct}      qr{(?:[^\x21-\x2F\x3A-\x3F\x40\x5B-\x5F\x60\x7B-\x7E])}
-  ${Char::Elatin2::not_space}      qr{(?:[^\x09\x0A\x0B\x0C\x0D\x20])}
+  ${Char::Elatin2::not_space}      qr{(?:[^\s\x0B])}
   ${Char::Elatin2::not_upper}      qr{(?:[^\x41-\x5A])}
   ${Char::Elatin2::not_upper_i}    qr{(?:[\x00-\xFF])}
   ${Char::Elatin2::not_word}       qr{(?:[^\x30-\x39\x41-\x5A\x5F\x61-\x7A])}
@@ -5606,6 +5579,11 @@ The concept of this software is not to use two or more encoding methods at the
 same time. Therefore, modifier /a /d /l and /u are not supported.
 \d means [0-9] always.
 
+=item * eval "string"
+
+The function which escapes "string" of eval has not been implemented yet. It will
+be supported in future versions.
+
 =back
 
 =head1 AUTHOR
@@ -5738,6 +5716,8 @@ as in the old byte-oriented mode.
 It is impossible. Because the following time is necessary.
 
 (1) Time of escape script for old byte-oriented perl.
+
+Someday, I want to ask Larry Wall about this goal in the elevator.
 
 =item * Goal #4:
 
