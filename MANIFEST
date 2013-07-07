@@ -2,6 +2,8 @@ Char/Latin2.pm
 Char/Elatin2.pm
 Latin2.pm
 Elatin2.pm
+Latin2.pm
+Elatin2.pm
 strict.pm_
 warnings.pm_
 warnings/register.pm_
@@ -48,6 +50,7 @@ pMakefile.PL
 MANIFEST
 test.pl
 README
+README2ND
 META.yml
 t/023_charclass.t
 t/024_charclass.t
@@ -220,3 +223,5 @@ t/352_substr_perldoc.t
 t/353_substr_perldoc.t
 t/354_substr_perldoc.t
 t/355_substr_perldoc.t
+t/356_split_longstr.t
+t/361_split_perl518.t

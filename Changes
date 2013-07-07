@@ -1,5 +1,12 @@
 Revision history for this software.
 
+0.91  2013/07/07 00:00:00
+	- improve split() for over 32766 octet string.
+	- add short README.
+	- use Esjis ver.sion; --> use Esjis ver.sion.0;
+	- undo BEGIN { unshift @INC, '/Perl/site/lib/Sjis'; } in Esjis.pm.
+	; created by INABA Hitoshi
+
 0.90  2013/06/08 00:00:00
 	- support Perl 5.18.0.
 	- support StrawberryPerl 5.18.0.
