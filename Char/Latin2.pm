@@ -11,6 +11,14 @@ package Char::Latin2;
 use 5.00503;    # Galapagos Consensus 1998 for primetools
 # use 5.008001; # Lancaster Consensus 2013 for toolchains
 
+# 12.3. Delaying use Until Runtime
+# in Chapter 12. Packages, Libraries, and Modules
+# of ISBN 0-596-00313-7 Perl Cookbook, 2nd Edition.
+# (and so on)
+
+BEGIN { eval q{ use vars qw($VERSION) } }
+$VERSION = sprintf '%d.%02d', q$Revision: 0.92 $ =~ /(\d+)/oxmsg;
+
 BEGIN {
     if ($^X =~ / jperl /oxmsi) {
         die __FILE__, ": needs perl(not jperl) 5.00503 or later. (\$^X==$^X)";
@@ -22,14 +30,6 @@ BEGIN {
         die __FILE__, ": is not US-ASCII script (must be US-ASCII script).";
     }
 }
-
-# 12.3. Delaying use Until Runtime
-# in Chapter 12. Packages, Libraries, and Modules
-# of ISBN 0-596-00313-7 Perl Cookbook, 2nd Edition.
-# (and so on)
-
-BEGIN { eval q{ use vars qw($VERSION) } }
-$VERSION = sprintf '%d.%02d', q$Revision: 0.91 $ =~ /(\d+)/oxmsg;
 
 BEGIN { CORE::require Char::Elatin2; }
 
@@ -818,7 +818,7 @@ sub escape {
 # doit if, doit unless, doit while, doit until, doit for, doit when
     elsif (/\G \b ( if | unless | while | until | for | when ) \b /oxgc) { $slash = 'm//'; return $1; }
 
-# functions of package Char::Elatin2
+# subroutines of package Char::Elatin2
     elsif (/\G \b (CORE:: | ->[ ]* (?: atan2 | [a-z]{2,})) \b  /oxgc) { $slash = 'm//'; return $1;                    }
     elsif (/\G \b bytes::substr \b (?! \s* => )                /oxgc) { $slash = 'm//'; return 'substr';              }
     elsif (/\G \b chop \b          (?! \s* => )                /oxgc) { $slash = 'm//'; return 'Char::Elatin2::chop';         }
@@ -1965,7 +1965,7 @@ E_STRING_LOOP:
             $slash = 'div';
         }
 
-# functions of package Char::Elatin2
+# subroutines of package Char::Elatin2
         elsif ($string =~ /\G \b (CORE:: | ->[ ]* (?: atan2 | [a-z]{2,})) \b  /oxgc) { $e_string .= $1;               $slash = 'm//'; }
         elsif ($string =~ /\G \b bytes::substr \b                             /oxgc) { $e_string .= 'substr';         $slash = 'm//'; }
         elsif ($string =~ /\G \b chop \b                                      /oxgc) { $e_string .= 'Char::Elatin2::chop';    $slash = 'm//'; }
@@ -5371,7 +5371,7 @@ http://perl5.git.perl.org/perl.git/commit/2a53d3314d380af5ab5283758219417c6dfa36
 =head1 Escaping Built-in Functions (Char/Latin2.pm and Char/Elatin2.pm provide)
 
 Insert 'Char::Elatin2::' at head of function name. Char/Elatin2.pm provides your script Char::Elatin2::*
-functions.
+subroutines.
 
   -------------------------------------------
   Before      After            Works as
@@ -5396,9 +5396,9 @@ functions.
   no Perl::Module ();      BEGIN { require 'Perl/Module.pm'; }
   ------------------------------------------------------------------------------------------------------------------------
 
-=head1 Un-Escaping bytes::* Functions (Char/Latin2.pm provides)
+=head1 Un-Escaping bytes::* Subroutines (Char/Latin2.pm provides)
 
-Char/Latin2.pm removes 'bytes::' at head of function name.
+Char/Latin2.pm removes 'bytes::' at head of subroutine name.
 
   ---------------------------------------
   Before           After     Works as
@@ -5500,27 +5500,27 @@ Back to and see 'Escaping Your Script'. Enjoy hacking!!
 
 =item * Dummy bytes::chr
 
-  This function is same as chr.
+  This subroutine is same as chr.
 
 =item * Dummy bytes::index
 
-  This function is same as index.
+  This subroutine is same as index.
 
 =item * Dummy bytes::length
 
-  This function is same as length.
+  This subroutine is same as length.
 
 =item * Dummy bytes::ord
 
-  This function is same as ord.
+  This subroutine is same as ord.
 
 =item * Dummy bytes::rindex
 
-  This function is same as rindex.
+  This subroutine is same as rindex.
 
 =item * Dummy bytes::substr
 
-  This function is same as substr.
+  This subroutine is same as substr.
 
 =back
 
@@ -5658,7 +5658,7 @@ nothing.
 Old byte-oriented programs should magically start working on the new
 character-oriented data when appropriate.
 
-Still now, 1 octet is counted with 1 by embedded functions length,
+Still now, 1 octet is counted with 1 by built-in functions length,
 substr, index, rindex and pos that handle length and position of string.
 In this part, there is no change. The length of 1 character of 2 octet
 code is 2.

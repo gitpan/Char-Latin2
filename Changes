@@ -1,5 +1,12 @@
 Revision history for this software.
 
+0.92  2013/07/18 00:00:00
+	- support JIS8.
+	- support Arabic.
+	- support Hebrew.
+	- support TIS-620.
+	; created by INABA Hitoshi
+
 0.91  2013/07/07 00:00:00
 	- improve split() for over 32766 octet string.
 	- add short README.

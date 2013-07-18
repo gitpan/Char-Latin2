@@ -12,15 +12,25 @@ DESCRIPTION
   environment in Latin-2 by easy installation and easy usage.
 
   - Character oriented regular expression
-  - Byte oriented built-in functions
-      and
+  - Character oriented run-time routines
   - Character oriented subroutines
+      and
+  - Byte oriented CORE::* functions
   - Byte oriented regular expression on /b modifier
+
+  Information processing model beginning with perl3 or this software.
+
+    +--------------------------------------------+
+    |       Text strings as Binary strings       |
+    |       Binary strings as Text strings       |
+    +--------------------------------------------+
+    |              Not UTF8 Flagged              |
+    +--------------------------------------------+
 
 INSTALLATION
 
   Just copy Latin2.pm and Elatin2.pm to your @INC directory.
-  for example, to C:\Perl\site\lib
+  For example, to C:\Perl\site\lib
 
 SUBROUTINES
 
