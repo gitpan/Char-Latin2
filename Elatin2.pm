@@ -17,7 +17,7 @@ use 5.00503;    # Galapagos Consensus 1998 for primetools
 # (and so on)
 
 BEGIN { eval q{ use vars qw($VERSION) } }
-$VERSION = sprintf '%d.%02d', q$Revision: 0.92 $ =~ /(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.93 $ =~ /(\d+)/xmsg;
 
 BEGIN {
     if ($^X =~ / jperl /oxmsi) {
@@ -53,7 +53,7 @@ BEGIN {
     }
 }
 
-# poor Symbol.pm - substitute of real Symbol.pm
+# instead of Symbol.pm
 BEGIN {
     my $genpkg = "Symbol::";
     my $genseq = 0;
@@ -2326,7 +2326,7 @@ sub _DOS_like_glob {
     # UNIX-like system
     else {
         $expr =~ s{ \A ~ ( (?:[^/])* ) }
-                  { $1 ? (getpwnam($1))[7] : my_home() }oxmse;
+                  { $1 ? (eval(q{(getpwnam($1))[7]})||my_home()) : my_home() }oxmse;
     }
 
     # assume global context if not provided one
@@ -2597,7 +2597,7 @@ sub my_home {
 
     # Light desperation on any (Unixish) platform
     else {
-        $home = (getpwuid($<))[7];
+        $home = eval q{ (getpwuid($<))[7] };
     }
 
     # On Unix in general, a non-existant home means "no home"

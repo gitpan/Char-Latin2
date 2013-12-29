@@ -1,5 +1,18 @@
 Revision history for this software.
 
+0.93  2013/12/29 00:00:00
+	- fix quoting after filetest operators.
+	- Esjis::unlink() deletes read only file too.
+	- remove PERL5.BATes.
+	- remove strict.pm_, warnings.pm_, warnings/register.pm_, and feature.pm_.
+	- truncate(), getpwnam(), and getpwuid() into eval q{}.
+	- consider Win95Cmd.exe by PERL5SHELL.
+	- remove $ENV{'COMSPEC'}.
+	- changed condition for escaping script.
+	- support ActivePerl 5.18.1.1800 Windows (x86).
+	- support ActivePerl 5.18.1.1800 Windows (64-bit, x64).
+	; created by INABA Hitoshi
+
 0.92  2013/07/18 00:00:00
 	- support JIS8.
 	- support Arabic.

@@ -33,9 +33,6 @@ To install this software by make, type the following:
    make test
    make install
 
-   Rename and install strict.pm_ of this distribution to strict.pm if your system
-   doesn't have strict.pm.
-
 INSTALLATION WITHOUT MAKE (for DOS like system)
 
 To install this software without make, type the following:
@@ -45,9 +42,6 @@ To install this software without make, type the following:
    pmake.bat test
 
    pmake.bat install    --- install to current using Perl
-
-   Rename and install strict.pm_ of this distribution to strict.pm if your system
-   doesn't have strict.pm.
 
    pmake.bat dist       --- make distribution package
    pmake.bat ptar.bat   --- make perl script "ptar.bat"
