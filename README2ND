@@ -1,14 +1,12 @@
 NAME
 
-       Char::Latin2 - Source code filter for Latin-2 script (Imitation JPerl)
+       Latin2 - Source code filter for Latin-2 script (Imitation JPerl)
 
 SYNOPSIS
 
     In your script:
 
-      use Char::Latin2; # CPAN formal style
-         or
-      use Latin2; # casual style
+      use Latin2;
 
     At command prompt:
 

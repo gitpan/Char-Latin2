@@ -1,5 +1,10 @@
 Revision history for this software.
 
+0.94  2014/01/13 00:00:00
+	- support CaseFolding-6.3.0.txt.
+	- support Perl 5.18.2.
+	; created by INABA Hitoshi
+
 0.93  2013/12/29 00:00:00
 	- fix quoting after filetest operators.
 	- Esjis::unlink() deletes read only file too.
