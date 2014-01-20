@@ -185,3 +185,5 @@ t/354_substr_perldoc.t
 t/355_substr_perldoc.t
 t/356_split_longstr.t
 t/361_split_perl518.t
+t/364_useversion.t
+t/365_useversion.t

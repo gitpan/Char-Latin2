@@ -17,7 +17,7 @@ use 5.00503;    # Galapagos Consensus 1998 for primetools
 # (and so on)
 
 BEGIN { eval q{ use vars qw($VERSION) } }
-$VERSION = sprintf '%d.%02d', q$Revision: 0.94 $ =~ /(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.95 $ =~ /(\d+)/oxmsg;
 
 BEGIN {
     if ($^X =~ / jperl /oxmsi) {
@@ -1554,19 +1554,19 @@ sub escape {
 
 # use 5.12.0; --> use 5.12.0; no strict qw(refs);
     elsif (/\G \b use \s+ (([1-9][0-9_]*)(?:\.([0-9_]+))*)  \s* ;                     /oxmsgc) {
-        if (($2 >= 6) or (($2 == 5) and ($3 >= 12))) {
-            return "use$1 no strict qw(refs);";
+        if (($2 >= 6) or (($2 == 5) and ($3 ge '012'))) {
+            return "use $1; no strict qw(refs);";
         }
         else {
-            return "use$1";
+            return "use $1;";
         }
     }
     elsif (/\G \b use \s+ (v([0-9][0-9_]*)(?:\.([0-9_]+))*) \s* ;                    /oxmsgc)  {
         if (($2 >= 6) or (($2 == 5) and ($3 >= 12))) {
-            return "use$1 no strict qw(refs);";
+            return "use $1; no strict qw(refs);";
         }
         else {
-            return "use$1";
+            return "use $1;";
         }
     }
 
