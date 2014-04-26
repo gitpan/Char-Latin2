@@ -126,7 +126,7 @@ for my $target (@ARGV) {
             }
         }
 
-        # install *.pl, *.bat, *.exe and *.com files to /Perl/bin
+        # install *.pl, *.bat, *.exe, and *.com files to /Perl/bin
         my($perl_bin) = $^X =~ /^(.*)\\[^\\]*$/;
         for (grep m/ \. (?: pl | bat | exe | com ) \z /xmsi, @file) {
             next if m/(?: Makefile | pMakefile | test ) \.pl  $/xmsi;

@@ -18,7 +18,7 @@ DESCRIPTION
   - Byte oriented CORE::* functions
   - Byte oriented regular expression on /b modifier
 
-  Information processing model beginning with perl3 or this software.
+  Information processing model beginning with Perl3 or this software.
 
     +--------------------------------------------+
     |       Text strings as Binary strings       |
@@ -36,7 +36,7 @@ SUBROUTINES
 
   Latin2::length(charstring)
   Latin2::substr(charstring, charpos, charlen)
-  etc
+  and more...
 
 SEE ALSO
 

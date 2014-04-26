@@ -17,7 +17,7 @@ use 5.00503;    # Galapagos Consensus 1998 for primetools
 # (and so on)
 
 BEGIN { eval q{ use vars qw($VERSION) } }
-$VERSION = sprintf '%d.%02d', q$Revision: 0.95 $ =~ /(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.96 $ =~ /(\d+)/oxmsg;
 
 BEGIN {
     if ($^X =~ / jperl /oxmsi) {
@@ -83,6 +83,11 @@ sub LOCK_NB() {4}
 
 sub unimport {}
 sub Latin2::escape_script;
+
+# 6.18. Matching Multiple-Byte Characters
+# in Chapter 6. Pattern Matching
+# of ISBN 978-1-56592-243-3 Perl Perl Cookbook.
+# (and so on)
 
 # regexp of character
 my $your_char = q{[\x00-\xFF]};
@@ -574,6 +579,11 @@ END
 
     # while all script
 
+    # 6.14. Matching from Where the Last Pattern Left Off
+    # in Chapter 6. Pattern Matching
+    # of ISBN 0-596-00313-7 Perl Cookbook, 2nd Edition.
+    # (and so on)
+
     # one member of Tag-team
     #
     # P.128 Start of match (or end of previous match): \G
@@ -626,7 +636,7 @@ sub escape {
 # ignore space, comment
     elsif (/\G (\s+|\#.*) /oxgc) { return $1; }
 
-# if (, elsif (, unless (, while (, until (, given ( and when (
+# if (, elsif (, unless (, while (, until (, given (, and when (
 
     # given, when
 
@@ -3453,7 +3463,7 @@ sub qq_stuff {
 }
 
 #
-# escape regexp (m'', qr'' and m''b, qr''b)
+# escape regexp (m'', qr'', and m''b, qr''b)
 #
 sub e_qr_q {
     my($ope,$delimiter,$end_delimiter,$string,$modifier) = @_;
@@ -5242,9 +5252,9 @@ The character classes are redefined as follows to backward compatibility.
   ---------------------------------------------------------------
    .            ${Elatin2::dot}
                 ${Elatin2::dot_s}    (/s modifier)
-  \d            [0-9]
+  \d            [0-9]              (universally)
   \s            \s
-  \w            [0-9A-Z_a-z]
+  \w            [0-9A-Z_a-z]       (universally)
   \D            ${Elatin2::eD}
   \S            ${Elatin2::eS}
   \W            ${Elatin2::eW}
@@ -5253,7 +5263,7 @@ The character classes are redefined as follows to backward compatibility.
   \H            ${Elatin2::eH}
   \V            ${Elatin2::eV}
   \C            [\x00-\xFF]
-  \X            X (so, just 'X')
+  \X            X                  (so, just 'X')
   \R            ${Elatin2::eR}
   \N            ${Elatin2::eN}
   ---------------------------------------------------------------
@@ -5340,7 +5350,7 @@ Definitions in Elatin2.pm.
   ${Elatin2::eB}             qr{(?:(?<=[0-9A-Z_a-z])(?=[0-9A-Z_a-z])|(?<=[\x00-\x2F\x40\x5B-\x5E\x60\x7B-\xFF])(?=[\x00-\x2F\x40\x5B-\x5E\x60\x7B-\xFF]))}
   ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-=head1 Un-Escaping \ of \N, \p, \P and \X (Latin2.pm provides)
+=head1 Un-Escaping \ of \N, \p, \P, and \X (Latin2.pm provides)
 
 Latin2.pm removes '\' at head of alphanumeric regexp metasymbols \N, \p, \P
 and \X. By this method, you can avoid the trap of the abstraction.
@@ -5553,8 +5563,8 @@ modifier. Cloister (?i) can be substituted with \F...\E.
 =item * Modifier /a /d /l and /u of Regular Expression
 
 The concept of this software is not to use two or more encoding methods at the
-same time. Therefore, modifier /a /d /l and /u are not supported.
-\d means [0-9] always.
+same time. Therefore, modifier /a, /d, /l, and /u are not supported.
+\d means [0-9] universally.
 
 =item * Named Character
 
@@ -5653,7 +5663,7 @@ Old byte-oriented programs should magically start working on the new
 character-oriented data when appropriate.
 
 Still now, 1 octet is counted with 1 by built-in functions length,
-substr, index, rindex and pos that handle length and position of string.
+substr, index, rindex, and pos that handle length and position of string.
 In this part, there is no change. The length of 1 character of 2 octet
 code is 2.
 
@@ -5674,7 +5684,7 @@ figure of Goal #1 and Goal #2.
       Old --- Old byte-oriented
       New --- New character-oriented
 
-There is a combination from (a) to (e) in data, script and interpreter
+There is a combination from (a) to (e) in data, script, and interpreter
 of old and new. Let's add the Encode module and this software did not
 exist at time of be written this document and JPerl did exist.
 
@@ -5736,7 +5746,7 @@ Back when Programming Perl, 3rd ed. was written, UTF8 flag was not born
 and Perl is designed to make the easy jobs easy. This software provide
 programming environment like at that time.
 
-=head1 Words of Learning Perl
+=head1 Perl's motto
 
    Some computer scientists (the reductionists, in particular) would
   like to deny it, but people have funny-shaped minds. Mental geography
@@ -5758,6 +5768,18 @@ programming environment like at that time.
   not make so many mistakes next time.
  
   --- Learning Perl 6th Edition
+
+   The most important thing for most people to know about handling
+  Unicode data in Perl, however, is that if you don't ever use any Uni-
+  code data -- if none of your files are marked as UTF-8 and you don't
+  use UTF-8 locales -- then you can happily pretend that you're back in
+  Perl 5.005_03 land; the Unicode features will in no way interfere with
+  your code unless you're explicitly using them. Sometimes the twin
+  goals of embracing Unicode but not disturbing old-style byte-oriented
+  scripts has led to compromise and confusion, but it's the Perl way to
+  silently do the right thing, which is what Perl ends up doing.
+
+  --- Advanced Perl Programming, 2nd Edition
 
 =head1 SEE ALSO
 
@@ -5805,6 +5827,13 @@ programming environment like at that time.
  Ebook ISBN: 978-1-4493-9890-3 | ISBN 10: 1-4493-9890-1
  http://shop.oreilly.com/product/9780596004927.do
 
+ Perl Cookbook
+ By Tom Christiansen, Nathan Torkington
+ August 1998
+ Pages: 800
+ ISBN 10: 1-56592-243-3 | ISBN 13: 978-1-56592-243-3
+ http://shop.oreilly.com/product/9781565922433.do
+
  Perl Cookbook, Second Edition
  By Tom Christiansen, Nathan Torkington
  Second Edition  August 2003
@@ -5841,6 +5870,13 @@ programming environment like at that time.
  Pages: 390
  ISBN-10: 1449303587 | ISBN-13: 978-1449303587
  http://shop.oreilly.com/product/0636920018452.do
+
+ Advanced Perl Programming, 2nd Edition
+ By Simon Cozens
+ June 2005
+ Pages: 300
+ ISBN-10: 0-596-00456-7 | ISBN-13: 978-0-596-00456-9
+ http://shop.oreilly.com/product/9780596004569.do
 
  Perl RESOURCE KIT UNIX EDITION
  Futato, Irving, Jepson, Patwardhan, Siever
@@ -5930,13 +5966,14 @@ programming environment like at that time.
  ISBN 10: 0-7356-2262-0 | ISBN 13: 978-0-7356-2262-3
  http://shop.oreilly.com/product/9780735622623.do
 
- Other Tools
- http://search.cpan.org/dist/Char/
- http://search.cpan.org/dist/jacode/
- http://search.cpan.org/dist/japerl/
+ CPAN Directory INABA Hitoshi
+ http://search.cpan.org/~ina/
 
  BackPAN
  http://backpan.perl.org/authors/id/I/IN/INA/
+
+ Recent Perl packages by "INABA Hitoshi"
+ http://code.activestate.com/ppm/author:INABA-Hitoshi/
 
 =head1 ACKNOWLEDGEMENTS
 
