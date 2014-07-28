@@ -4,7 +4,7 @@ NAME
 
 SYNOPSIS
 
-  use Latin2;
+  use Latin2; # usage for application programmers
 
 DESCRIPTION
 
@@ -24,8 +24,19 @@ DESCRIPTION
     |       Text strings as Binary strings       |
     |       Binary strings as Text strings       |
     +--------------------------------------------+
-    |              Not UTF8 Flagged              |
+    |        Not UTF8 Flagged, UNIX/C-ism        |
     +--------------------------------------------+
+
+  Script could be written in native encoding of operating systems.
+  - Like contents of a file
+  - Like a file name on the file systems
+  - Like command lines
+  - Like environment variables
+  - Like parameters of API
+
+  In UNIX Everything is a File
+  - In UNIX everything is a stream of bytes
+  - In UNIX the filesystem is used as a universal name space
 
 INSTALLATION
 

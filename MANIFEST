@@ -187,3 +187,10 @@ t/356_split_longstr.t
 t/361_split_perl518.t
 t/364_useversion.t
 t/365_useversion.t
+t/368_prototypeattr.t
+t/369_postderef.t
+t/370_postderef_gref.t
+t/371_postderef_slice.t
+t/372_postderef_hashslice.t
+t/373_postderef_interpolates.t
+t/374_hashslice.t

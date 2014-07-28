@@ -1,5 +1,12 @@
 Revision history for this software.
 
+0.97  2014-07-28 00:00:00
+  - fix name: in META.yml
+  - support Perl 5.20.0
+  - support StrawberryPerl 5.20.0
+  - support perl on Raspberry Pi
+  - created by INABA Hitoshi
+
 0.96  2014-04-26 00:00:00
   - fix m/[ABC]/i
   - created by INABA Hitoshi
