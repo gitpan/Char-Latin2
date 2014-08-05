@@ -1,5 +1,14 @@
 Revision history for this software.
 
+0.99  2014-08-03 00:00:00
+  - fix fix name: in META.yml Char::Sjis to Char-Sjis
+  - fix sub e_capture() on SBCS
+  - created by INABA Hitoshi
+
+0.98  2014-08-02 00:00:00
+  - experimental release
+  - created by INABA Hitoshi
+
 0.97  2014-07-28 00:00:00
   - fix name: in META.yml
   - support Perl 5.20.0
