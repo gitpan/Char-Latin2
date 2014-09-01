@@ -7,9 +7,9 @@ BEGIN {
     print "1..6\n";
     if ($] >= 5.020) {
         require feature;
-        feature->import('postderef');
+        feature::->import('postderef');
         require warnings;
-        warnings->unimport('experimental::postderef');
+        warnings::->unimport('experimental::postderef');
     }
     else{
         for my $tno (1..6) {

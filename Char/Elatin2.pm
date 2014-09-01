@@ -1,3 +1,6 @@
+#
+# This file is *** FOR CPAN USE ONLY ***.
+#
 package Char::Elatin2;
 ######################################################################
 #
@@ -17,7 +20,7 @@ use 5.00503;    # Galapagos Consensus 1998 for primetools
 # (and so on)
 
 BEGIN { eval q{ use vars qw($VERSION) } }
-$VERSION = sprintf '%d.%02d', q$Revision: 0.99 $ =~ /(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 1.00 $ =~ /(\d+)/xmsg;
 
 BEGIN {
     if ($^X =~ / jperl /oxmsi) {
