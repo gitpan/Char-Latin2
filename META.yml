@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name: Char-Latin2
 abstract: Source code filter for Latin-2 script (Imitation JPerl)
-version: 1.00
+version: 1.01
 author:
   - INABA Hitoshi <ina@cpan.org>
 license: perl
