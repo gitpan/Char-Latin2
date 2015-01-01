@@ -17,15 +17,15 @@ else {
 }
 
 local $@;
-sub foo { ... }
+sub foo1 { ... }
 eval {
-    foo();
+    foo1();
 };
 if (substr($@,0,length('Unimplemented')) eq 'Unimplemented') {
-    print qq{ok - 2 sub foo { ... } $^X @{[__FILE__]}\n};
+    print qq{ok - 2 sub foo1 { ... } $^X @{[__FILE__]}\n};
 }
 else {
-    print qq{not ok - 2 sub foo { ... } $^X @{[__FILE__]}\n};
+    print qq{not ok - 2 sub foo1 { ... } $^X @{[__FILE__]}\n};
 }
 
 local $@;
@@ -51,15 +51,15 @@ else {
 }
 
 local $@;
-sub foo { my($self)=shift; ...; }
+sub foo2 { my($self)=shift; ...; }
 eval {
-    foo();
+    foo2();
 };
 if (substr($@,0,length('Unimplemented')) eq 'Unimplemented') {
-    print qq{ok - 5 sub foo {my(\$self)=shift;...;} $^X @{[__FILE__]}\n};
+    print qq{ok - 5 sub foo2 {my(\$self)=shift;...;} $^X @{[__FILE__]}\n};
 }
 else {
-    print qq{not ok - 5 sub foo {my(\$self)=shift;...;} $^X @{[__FILE__]}\n};
+    print qq{not ok - 5 sub foo2 {my(\$self)=shift;...;} $^X @{[__FILE__]}\n};
 }
 
 local $@;

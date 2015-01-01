@@ -2,7 +2,7 @@
 #
 # pMakefile.PL - Makefile.PL of Perl Poor Tools
 #
-# Copyright (c) 2008, 2009, 2010, 2011 INABA Hitoshi <ina@cpan.org>
+# Copyright (c) 2008, 2009, 2010, 2011, 2014, 2015 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
 use strict;
@@ -207,6 +207,8 @@ for my $target (@ARGV) {
 # Sunday December 21, 2008 07:38 PM 
 # Fixing world writable files in tarball before upload to CPAN [ #38127 ]
 # http://use.perl.org/~bart/journal/38127 (dead link)
+# Fix CPAN uploads for world writable files
+# http://perlmonks.org/index.pl?node_id=731935
 #-----------------------------------------------------------------------------
 #                   $tar->add_files("$tardir/$file");
 #-----------------------------------------------------------------------------

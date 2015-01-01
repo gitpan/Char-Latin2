@@ -5,7 +5,7 @@ package Elatin2;
 #
 # http://search.cpan.org/dist/Char-Latin2/
 #
-# Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 INABA Hitoshi <ina@cpan.org>
+# Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
 use 5.00503;    # Galapagos Consensus 1998 for primetools
@@ -16,8 +16,8 @@ use 5.00503;    # Galapagos Consensus 1998 for primetools
 # of ISBN 0-596-00313-7 Perl Cookbook, 2nd Edition.
 # (and so on)
 
-BEGIN { eval q{ use vars qw($VERSION) } }
-$VERSION = sprintf '%d.%02d', q$Revision: 1.01 $ =~ /(\d+)/xmsg;
+BEGIN { CORE::eval q{ use vars qw($VERSION) } }
+$VERSION = sprintf '%d.%02d', q$Revision: 1.02 $ =~ /(\d+)/xmsg;
 
 BEGIN {
     if ($^X =~ / jperl /oxmsi) {
@@ -34,7 +34,7 @@ BEGIN {
 BEGIN {
 
     # instead of utf8.pm
-    eval q{
+    CORE::eval q{
         no warnings qw(redefine);
         *utf8::upgrade   = sub { CORE::length $_[0] };
         *utf8::downgrade = sub { 1 };
@@ -103,7 +103,7 @@ BEGIN {
 
 # use strict; if strict.pm exists
 BEGIN {
-    if (eval { local $@; CORE::require strict }) {
+    if (CORE::eval { local $@; CORE::require strict }) {
         strict::->import;
     }
 }
@@ -127,11 +127,15 @@ sub croak;
 sub cluck;
 sub confess;
 
-my $your_char = q{[\x00-\xFF]};
+# 6.18. Matching Multiple-Byte Characters
+# in Chapter 6. Pattern Matching
+# of ISBN 978-1-56592-243-3 Perl Perl Cookbook.
+# (and so on)
 
 # regexp of character
-BEGIN { eval q{ use vars qw($q_char) } }
-$q_char = qr/$your_char/oxms;
+BEGIN { CORE::eval q{ use vars qw($your_char) } } $your_char = q{[\x00-\xFF]};
+BEGIN { CORE::eval q{ use vars qw($qq_char  ) } } $qq_char   = qr/\\c[\x40-\x5F]|\\?(?:$your_char)/oxms;
+BEGIN { CORE::eval q{ use vars qw($q_char   ) } } $q_char    = qr/$your_char/oxms;
 
 #
 # Latin-2 character range per length
@@ -141,7 +145,7 @@ my %range_tr = ();
 #
 # alias of encoding name
 #
-BEGIN { eval q{ use vars qw($encoding_alias) } }
+BEGIN { CORE::eval q{ use vars qw($encoding_alias) } }
 
 #
 # Latin-2 case conversion
@@ -392,11 +396,12 @@ sub Latin2::length(;$);
 sub Latin2::substr($$;$$);
 sub Latin2::index($$;$);
 sub Latin2::rindex($$;$);
+sub Latin2::escape(;$);
 
 #
 # Regexp work
 #
-BEGIN { eval q{ use vars qw(
+BEGIN { CORE::eval q{ use vars qw(
     $Latin2::re_a
     $Latin2::re_t
     $Latin2::re_n
@@ -406,7 +411,7 @@ BEGIN { eval q{ use vars qw(
 #
 # Character class
 #
-BEGIN { eval q{ use vars qw(
+BEGIN { CORE::eval q{ use vars qw(
     $dot
     $dot_s
     $eD
@@ -598,7 +603,7 @@ sub Elatin2::split(;$$$) {
 
                 local $@;
                 for (my $digit=1; $digit <= ($last_subexpression_offsets + 1); $digit++) {
-                    push @split, eval('$' . $digit);
+                    push @split, CORE::eval('$' . $digit);
                 }
             }
         }
@@ -610,7 +615,7 @@ sub Elatin2::split(;$$$) {
             while ($string =~ s/\A((?:$q_char)*?)$pattern//m) {
                 local $@;
                 for (my $digit=1; $digit <= ($last_subexpression_offsets + 1); $digit++) {
-                    push @split, eval('$' . $digit);
+                    push @split, CORE::eval('$' . $digit);
                 }
             }
         }
@@ -625,7 +630,7 @@ sub Elatin2::split(;$$$) {
                 if ($string =~ s/\A((?:$q_char)+?)$pattern//m) {
                     local $@;
                     for (my $digit=1; $digit <= ($last_subexpression_offsets + 1); $digit++) {
-                        push @split, eval('$' . $digit);
+                        push @split, CORE::eval('$' . $digit);
                     }
                 }
             }
@@ -638,7 +643,7 @@ sub Elatin2::split(;$$$) {
                 if ($string =~ s/\A((?:$q_char)*?)$pattern//m) {
                     local $@;
                     for (my $digit=1; $digit <= ($last_subexpression_offsets + 1); $digit++) {
-                        push @split, eval('$' . $digit);
+                        push @split, CORE::eval('$' . $digit);
                     }
                 }
             }
@@ -2115,8 +2120,8 @@ sub charlist_not_qr {
 sub _open_r {
     my(undef,$file) = @_;
     $file =~ s#\A (\s) #./$1#oxms;
-    return eval(q{open($_[0],'<',$_[1])}) ||
-                  open($_[0],"< $file\0");
+    return CORE::eval(q{open($_[0],'<',$_[1])}) ||
+                        open($_[0],"< $file\0");
 }
 
 #
@@ -2125,8 +2130,8 @@ sub _open_r {
 sub _open_w {
     my(undef,$file) = @_;
     $file =~ s#\A (\s) #./$1#oxms;
-    return eval(q{open($_[0],'>',$_[1])}) ||
-                  open($_[0],"> $file\0");
+    return CORE::eval(q{open($_[0],'>',$_[1])}) ||
+                        open($_[0],"> $file\0");
 }
 
 #
@@ -2135,8 +2140,8 @@ sub _open_w {
 sub _open_a {
     my(undef,$file) = @_;
     $file =~ s#\A (\s) #./$1#oxms;
-    return eval(q{open($_[0],'>>',$_[1])}) ||
-                  open($_[0],">> $file\0");
+    return CORE::eval(q{open($_[0],'>>',$_[1])}) ||
+                        open($_[0],">> $file\0");
 }
 
 #
@@ -2332,7 +2337,7 @@ sub _DOS_like_glob {
     # UNIX-like system
     else {
         $expr =~ s{ \A ~ ( (?:[^/])* ) }
-                  { $1 ? (eval(q{(getpwnam($1))[7]})||my_home()) : my_home() }oxmse;
+                  { $1 ? (CORE::eval(q{(getpwnam($1))[7]})||my_home()) : my_home() }oxmse;
     }
 
     # assume global context if not provided one
@@ -2609,7 +2614,7 @@ sub my_home {
 
     # Light desperation on any (Unixish) platform
     else {
-        $home = eval q{ (getpwuid($<))[7] };
+        $home = CORE::eval q{ (getpwuid($<))[7] };
     }
 
     # On Unix in general, a non-existant home means "no home"
@@ -2748,7 +2753,7 @@ BEGIN {
     # in Chapter 8: perlsub: Perl subroutines
     # of ISBN-13: 978-1-906966-02-7 The Perl Language Reference Manual (for Perl version 5.12.1)
 
-    eval sprintf(<<'END', ($] >= 5.014000) ? ':lvalue' : '');
+    CORE::eval sprintf(<<'END', ($] >= 5.014000) ? ':lvalue' : '');
     #                       vv----------------*******
     sub Latin2::substr($$;$$) %s {
 
@@ -2864,6 +2869,4572 @@ sub Latin2::rindex($$;$) {
     }
 }
 
+# when 'm//', '/' means regexp match 'm//' and '?' means regexp match '??'
+# when 'div', '/' means division operator and '?' means conditional operator (condition ? then : else)
+BEGIN { CORE::eval q{ use vars qw($slash) } } $slash = 'm//';
+
+# ord() to ord() or Latin2::ord()
+BEGIN { CORE::eval q{ use vars qw($function_ord) } }     $function_ord     = 'ord';
+
+# ord to ord or Latin2::ord_
+BEGIN { CORE::eval q{ use vars qw($function_ord_) } }    $function_ord_    = 'ord';
+
+# reverse to reverse or Latin2::reverse
+BEGIN { CORE::eval q{ use vars qw($function_reverse) } } $function_reverse = 'reverse';
+
+# getc to getc or Latin2::getc
+BEGIN { CORE::eval q{ use vars qw($function_getc) } }    $function_getc    = 'getc';
+
+# P.1023 Appendix W.9 Multibyte Anchoring
+# of ISBN 1-56592-224-7 CJKV Information Processing
+
+my $anchor = '';
+
+BEGIN { CORE::eval q{ use vars qw($nest) } }
+
+# regexp of nested parens in qqXX
+
+# P.340 Matching Nested Constructs with Embedded Code
+# in Chapter 7: Perl
+# of ISBN 0-596-00289-0 Mastering Regular Expressions, Second edition
+
+my $qq_paren   = qr{(?{local $nest=0}) (?>(?:
+                    \\c[\x40-\x5F] |
+                    \\ [\x00-\xFF] |
+                    [^()] |
+                             \(  (?{$nest++}) |
+                             \)  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                 }xms;
+my $qq_brace   = qr{(?{local $nest=0}) (?>(?:
+                    \\c[\x40-\x5F] |
+                    \\ [\x00-\xFF] |
+                    [^{}] |
+                             \{  (?{$nest++}) |
+                             \}  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                 }xms;
+my $qq_bracket = qr{(?{local $nest=0}) (?>(?:
+                    \\c[\x40-\x5F] |
+                    \\ [\x00-\xFF] |
+                    [^[\]] |
+                             \[  (?{$nest++}) |
+                             \]  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                 }xms;
+my $qq_angle   = qr{(?{local $nest=0}) (?>(?:
+                    \\c[\x40-\x5F] |
+                    \\ [\x00-\xFF] |
+                    [^<>] |
+                             \<  (?{$nest++}) |
+                             \>  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                 }xms;
+my $qq_scalar  = qr{(?: \{ (?:$qq_brace)*? \} |
+                       (?: ::)? (?:
+                             [a-zA-Z_][a-zA-Z_0-9]*
+                       (?: ::[a-zA-Z_][a-zA-Z_0-9]* )* (?:                                   \[ (?: \$\[ | \$\] | $qq_char )*? \] |           \{ (?:$qq_brace)*? \} )*
+                                         (?: (?: -> )? (?: [\$\@\%\&\*]\* | \$\#\* | [\@\%]? \[ (?: \$\[ | \$\] | $qq_char )*? \] | [\@\%\*]? \{ (?:$qq_brace)*? \} ) )*
+                   ))
+                 }xms;
+my $qq_variable = qr{(?: \{ (?:$qq_brace)*? \}                    |
+                        (?: ::)? (?:
+                              [0-9]+                              |
+                              [^a-zA-Z_0-9\[\]] |
+                              ^[A-Z]                              |
+                              [a-zA-Z_][a-zA-Z_0-9]*
+                        (?: ::[a-zA-Z_][a-zA-Z_0-9]* )* (?:                                   \[ (?: \$\[ | \$\] | $qq_char )*? \] |           \{ (?:$qq_brace)*? \} )*
+                                          (?: (?: -> )? (?: [\$\@\%\&\*]\* | \$\#\* | [\@\%]? \[ (?: \$\[ | \$\] | $qq_char )*? \] | [\@\%\*]? \{ (?:$qq_brace)*? \} ) )*
+                    ))
+                  }xms;
+my $qq_substr  = qr{(?: Latin2::substr | CORE::substr | substr ) \( $qq_paren \)
+                 }xms;
+
+# regexp of nested parens in qXX
+my $q_paren    = qr{(?{local $nest=0}) (?>(?:
+                    [^()] |
+                             \(  (?{$nest++}) |
+                             \)  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                 }xms;
+my $q_brace    = qr{(?{local $nest=0}) (?>(?:
+                    [^{}] |
+                             \{  (?{$nest++}) |
+                             \}  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                 }xms;
+my $q_bracket  = qr{(?{local $nest=0}) (?>(?:
+                    [^[\]] |
+                             \[  (?{$nest++}) |
+                             \]  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                 }xms;
+my $q_angle    = qr{(?{local $nest=0}) (?>(?:
+                    [^<>] |
+                             \<  (?{$nest++}) |
+                             \>  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                 }xms;
+
+my $matched     = '';
+my $s_matched   = '';
+
+my $tr_variable   = '';   # variable of tr///
+my $sub_variable  = '';   # variable of s///
+my $bind_operator = '';   # =~ or !~
+
+my @heredoc = ();         # here document
+my @heredoc_delimiter = ();
+my $here_script = '';     # here script
+
+#
+# escape Latin-2 script
+#
+sub Latin2::escape(;$) {
+    local($_) = $_[0] if @_;
+
+    # P.359 The Study Function
+    # in Chapter 7: Perl
+    # of ISBN 0-596-00289-0 Mastering Regular Expressions, Second edition
+
+    study $_; # Yes, I studied study yesterday.
+
+    # while all script
+
+    # 6.14. Matching from Where the Last Pattern Left Off
+    # in Chapter 6. Pattern Matching
+    # of ISBN 0-596-00313-7 Perl Cookbook, 2nd Edition.
+    # (and so on)
+
+    # one member of Tag-team
+    #
+    # P.128 Start of match (or end of previous match): \G
+    # P.130 Advanced Use of \G with Perl
+    # in Chapter 3: Overview of Regular Expression Features and Flavors
+    # P.255 Use leading anchors
+    # P.256 Expose ^ and \G at the front expressions
+    # in Chapter 6: Crafting an Efficient Expression
+    # P.315 "Tag-team" matching with /gc
+    # in Chapter 7: Perl
+    # of ISBN 0-596-00289-0 Mastering Regular Expressions, Second edition
+
+    my $e_script = '';
+    while (not /\G \z/oxgc) { # member
+        $e_script .= Latin2::escape_token();
+    }
+
+    return $e_script;
+}
+
+#
+# escape Latin-2 token of script
+#
+sub Latin2::escape_token {
+
+# \n output here document
+
+    my $ignore_modules = join('|', qw(
+        utf8
+        bytes
+        charnames
+        I18N::Japanese
+        I18N::Collate
+        I18N::JExt
+        File::DosGlob
+        Wild
+        Wildcard
+        Japanese
+    ));
+
+    # another member of Tag-team
+    #
+    # P.315 "Tag-team" matching with /gc
+    # in Chapter 7: Perl
+    # of ISBN 0-596-00289-0 Mastering Regular Expressions, Second edition
+
+    if (/\G ( \n ) /oxgc) { # another member (and so on)
+        my $heredoc = '';
+        if (scalar(@heredoc_delimiter) >= 1) {
+            $slash = 'm//';
+
+            $heredoc = join '', @heredoc;
+            @heredoc = ();
+
+            # skip here document
+            for my $heredoc_delimiter (@heredoc_delimiter) {
+                /\G .*? \n $heredoc_delimiter \n/xmsgc;
+            }
+            @heredoc_delimiter = ();
+
+            $here_script = '';
+        }
+        return "\n" . $heredoc;
+    }
+
+# ignore space, comment
+    elsif (/\G (\s+|\#.*) /oxgc) { return $1; }
+
+# if (, elsif (, unless (, while (, until (, given (, and when (
+
+    # given, when
+
+    # P.225 The given Statement
+    # in Chapter 15: Smart Matching and given-when
+    # of ISBN 978-0-596-52010-6 Learning Perl, Fifth Edition
+
+    # P.133 The given Statement
+    # in Chapter 4: Statements and Declarations
+    # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+
+    elsif (/\G ( (?: if | elsif | unless | while | until | given | when ) \s* \( ) /oxgc) {
+        $slash = 'm//';
+        return $1;
+    }
+
+# scalar variable ($scalar = ...) =~ tr///;
+# scalar variable ($scalar = ...) =~ s///;
+
+    # state
+
+    # P.68 Persistent, Private Variables
+    # in Chapter 4: Subroutines
+    # of ISBN 978-0-596-52010-6 Learning Perl, Fifth Edition
+
+    # P.160 Persistent Lexically Scoped Variables: state
+    # in Chapter 4: Statements and Declarations
+    # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+
+    # (and so on)
+
+    elsif (/\G ( \( \s* (?: local \b | my \b | our \b | state \b )? \s* \$ $qq_scalar ) /oxgc) {
+        my $e_string = e_string($1);
+
+        if (/\G ( \s* = $qq_paren \) ) ( \s* (?: =~ | !~ ) \s* ) (?= (?: tr | y ) \b ) /oxgc) {
+            $tr_variable = $e_string . e_string($1);
+            $bind_operator = $2;
+            $slash = 'm//';
+            return '';
+        }
+        elsif (/\G ( \s* = $qq_paren \) ) ( \s* (?: =~ | !~ ) \s* ) (?= s \b ) /oxgc) {
+            $sub_variable = $e_string . e_string($1);
+            $bind_operator = $2;
+            $slash = 'm//';
+            return '';
+        }
+        else {
+            $slash = 'div';
+            return $e_string;
+        }
+    }
+
+# $`, ${`}, $PREMATCH, ${PREMATCH}, ${^PREMATCH} --> Elatin2::PREMATCH()
+    elsif (/\G ( \$` | \$\{`\} | \$ \s* PREMATCH  \b | \$ \s* \{ \s* PREMATCH  \s* \} | \$ \s* \{\^PREMATCH\}  ) /oxmsgc) {
+        $slash = 'div';
+        return q{Elatin2::PREMATCH()};
+    }
+
+# $&, ${&}, $MATCH, ${MATCH}, ${^MATCH} --> Elatin2::MATCH()
+    elsif (/\G ( \$& | \$\{&\} | \$ \s* MATCH     \b | \$ \s* \{ \s* MATCH     \s* \} | \$ \s* \{\^MATCH\}     ) /oxmsgc) {
+        $slash = 'div';
+        return q{Elatin2::MATCH()};
+    }
+
+# $', ${'} --> $', ${'}
+    elsif (/\G ( \$' | \$\{'\}                                                                                 ) /oxmsgc) {
+        $slash = 'div';
+        return $1;
+    }
+
+# $POSTMATCH, ${POSTMATCH}, ${^POSTMATCH} --> Elatin2::POSTMATCH()
+    elsif (/\G (                 \$ \s* POSTMATCH \b | \$ \s* \{ \s* POSTMATCH \s* \} | \$ \s* \{\^POSTMATCH\} ) /oxmsgc) {
+        $slash = 'div';
+        return q{Elatin2::POSTMATCH()};
+    }
+
+# scalar variable $scalar =~ tr///;
+# scalar variable $scalar =~ s///;
+# substr() =~ tr///;
+# substr() =~ s///;
+    elsif (/\G ( \$ $qq_scalar | $qq_substr ) /oxgc) {
+        my $scalar = e_string($1);
+
+        if (/\G ( \s* (?: =~ | !~ ) \s* ) (?= (?: tr | y ) \b ) /oxgc) {
+            $tr_variable = $scalar;
+            $bind_operator = $1;
+            $slash = 'm//';
+            return '';
+        }
+        elsif (/\G ( \s* (?: =~ | !~ ) \s* ) (?= s \b ) /oxgc) {
+            $sub_variable = $scalar;
+            $bind_operator = $1;
+            $slash = 'm//';
+            return '';
+        }
+        else {
+            $slash = 'div';
+            return $scalar;
+        }
+    }
+
+    # end of statement
+    elsif (/\G ( [,;] ) /oxgc) {
+        $slash = 'm//';
+
+        # clear tr/// variable
+        $tr_variable  = '';
+
+        # clear s/// variable
+        $sub_variable  = '';
+
+        $bind_operator = '';
+
+        return $1;
+    }
+
+# bareword
+    elsif (/\G ( \{ \s* (?: tr | index | rindex | reverse ) \s* \} ) /oxmsgc) {
+        return $1;
+    }
+
+# $0 --> $0
+    elsif (/\G ( \$ 0 ) /oxmsgc) {
+        $slash = 'div';
+        return $1;
+    }
+    elsif (/\G ( \$ \{ \s* 0 \s* \} ) /oxmsgc) {
+        $slash = 'div';
+        return $1;
+    }
+
+# $$ --> $$
+    elsif (/\G ( \$ \$ ) (?![\w\{]) /oxmsgc) {
+        $slash = 'div';
+        return $1;
+    }
+
+# $1, $2, $3 --> $2, $3, $4 after s/// with multibyte anchoring
+# $1, $2, $3 --> $1, $2, $3 otherwise
+    elsif (/\G \$ ([1-9][0-9]*) /oxmsgc) {
+        $slash = 'div';
+        return e_capture($1);
+    }
+    elsif (/\G \$ \{ \s* ([1-9][0-9]*) \s* \} /oxmsgc) {
+        $slash = 'div';
+        return e_capture($1);
+    }
+
+# $$foo[ ... ] --> $ $foo->[ ... ]
+    elsif (/\G \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \[ .+? \] ) /oxmsgc) {
+        $slash = 'div';
+        return e_capture($1.'->'.$2);
+    }
+
+# $$foo{ ... } --> $ $foo->{ ... }
+    elsif (/\G \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \{ .+? \} ) /oxmsgc) {
+        $slash = 'div';
+        return e_capture($1.'->'.$2);
+    }
+
+# $$foo
+    elsif (/\G \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) /oxmsgc) {
+        $slash = 'div';
+        return e_capture($1);
+    }
+
+# ${ foo }
+    elsif (/\G \$ \s* \{ ( \s* [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* \s* ) \} /oxmsgc) {
+        $slash = 'div';
+        return '${' . $1 . '}';
+    }
+
+# ${ ... }
+    elsif (/\G \$ \s* \{ \s* ( $qq_brace ) \s* \} /oxmsgc) {
+        $slash = 'div';
+        return e_capture($1);
+    }
+
+# variable or function
+    #                  $ @ % & *     $ #
+    elsif (/\G ( (?: [\$\@\%\&\*] | \$\# | -> | \b sub \b) \s* (?: split | chop | index | rindex | lc | uc | fc | chr | ord | reverse | getc | tr | y | q | qq | qx | qw | m | s | qr | glob | lstat | opendir | stat | unlink | chdir ) ) \b /oxmsgc) {
+        $slash = 'div';
+        return $1;
+    }
+    #                $ $ $ $ $ $ $ $ $ $ $ $ $ $
+    #                $ @ # \ ' " / ? ( ) [ ] < >
+    elsif (/\G ( \$[\$\@\#\\\'\"\/\?\(\)\[\]\<\>] ) /oxmsgc) {
+        $slash = 'div';
+        return $1;
+    }
+
+# while (<FILEHANDLE>)
+    elsif (/\G \b (while \s* \( \s* <[\$]?[A-Za-z_][A-Za-z_0-9]*> \s* \)) \b /oxgc) {
+        return $1;
+    }
+
+# while (<WILDCARD>) --- glob
+
+    # avoid "Error: Runtime exception" of perl version 5.005_03
+
+    elsif (/\G \b while \s* \( \s* < ((?:[^>\0\a\e\f\n\r\t])+?) > \s* \) \b /oxgc) {
+        return 'while ($_ = Elatin2::glob("' . $1 . '"))';
+    }
+
+# while (glob)
+    elsif (/\G \b while \s* \( \s* glob \s* \) /oxgc) {
+        return 'while ($_ = Elatin2::glob_)';
+    }
+
+# while (glob(WILDCARD))
+    elsif (/\G \b while \s* \( \s* glob \b /oxgc) {
+        return 'while ($_ = Elatin2::glob';
+    }
+
+# doit if, doit unless, doit while, doit until, doit for, doit when
+    elsif (/\G \b ( if | unless | while | until | for | when ) \b /oxgc) { $slash = 'm//'; return $1; }
+
+# subroutines of package Elatin2
+    elsif (/\G \b (CORE:: | ->[ ]* (?: atan2 | [a-z]{2,})) \b  /oxgc) { $slash = 'm//'; return $1;                  }
+    elsif (/\G \b Latin2::eval       (?= \s* \{ )                /oxgc) { $slash = 'm//'; return 'eval';              }
+    elsif (/\G \b Latin2::eval    \b (?! \s* => )                /oxgc) { $slash = 'm//'; return 'eval Latin2::escape'; }
+    elsif (/\G \b bytes::substr \b (?! \s* => )                /oxgc) { $slash = 'm//'; return 'substr';            }
+    elsif (/\G \b chop \b          (?! \s* => )                /oxgc) { $slash = 'm//'; return 'Elatin2::chop';       }
+    elsif (/\G \b bytes::index \b  (?! \s* => )                /oxgc) { $slash = 'm//'; return 'index';             }
+    elsif (/\G \b Latin2::index \b   (?! \s* => )                /oxgc) { $slash = 'm//'; return 'Latin2::index';       }
+    elsif (/\G \b index \b         (?! \s* => )                /oxgc) { $slash = 'm//'; return 'Elatin2::index';      }
+    elsif (/\G \b bytes::rindex \b (?! \s* => )                /oxgc) { $slash = 'm//'; return 'rindex';            }
+    elsif (/\G \b Latin2::rindex \b  (?! \s* => )                /oxgc) { $slash = 'm//'; return 'Latin2::rindex';      }
+    elsif (/\G \b rindex \b        (?! \s* => )                /oxgc) { $slash = 'm//'; return 'Elatin2::rindex';     }
+    elsif (/\G \b lc      (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $slash = 'm//'; return 'Elatin2::lc';         }
+    elsif (/\G \b lcfirst (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $slash = 'm//'; return 'Elatin2::lcfirst';    }
+    elsif (/\G \b uc      (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $slash = 'm//'; return 'Elatin2::uc';         }
+    elsif (/\G \b ucfirst (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $slash = 'm//'; return 'Elatin2::ucfirst';    }
+    elsif (/\G \b fc      (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $slash = 'm//'; return 'Elatin2::fc';         }
+
+    # "-s '' ..." means file test "-s 'filename' ..." (not means "- s/// ...")
+    elsif (/\G -s                               \s+    \s* (\") ((?:$qq_char)+?)               (\") /oxgc) { $slash = 'm//'; return '-s ' . e_qq('',  $1,$3,$2); }
+    elsif (/\G -s                               \s+ qq \s* (\#) ((?:$qq_char)+?)               (\#) /oxgc) { $slash = 'm//'; return '-s ' . e_qq('qq',$1,$3,$2); }
+    elsif (/\G -s                               \s+ qq \s* (\() ((?:$qq_paren)+?)              (\)) /oxgc) { $slash = 'm//'; return '-s ' . e_qq('qq',$1,$3,$2); }
+    elsif (/\G -s                               \s+ qq \s* (\{) ((?:$qq_brace)+?)              (\}) /oxgc) { $slash = 'm//'; return '-s ' . e_qq('qq',$1,$3,$2); }
+    elsif (/\G -s                               \s+ qq \s* (\[) ((?:$qq_bracket)+?)            (\]) /oxgc) { $slash = 'm//'; return '-s ' . e_qq('qq',$1,$3,$2); }
+    elsif (/\G -s                               \s+ qq \s* (\<) ((?:$qq_angle)+?)              (\>) /oxgc) { $slash = 'm//'; return '-s ' . e_qq('qq',$1,$3,$2); }
+    elsif (/\G -s                               \s+ qq \s* (\S) ((?:$qq_char)+?)               (\1) /oxgc) { $slash = 'm//'; return '-s ' . e_qq('qq',$1,$3,$2); }
+
+    elsif (/\G -s                               \s+    \s* (\') ((?:\\\'|\\\\|$q_char)+?)      (\') /oxgc) { $slash = 'm//'; return '-s ' . e_q ('',  $1,$3,$2); }
+    elsif (/\G -s                               \s+ q  \s* (\#) ((?:\\\#|\\\\|$q_char)+?)      (\#) /oxgc) { $slash = 'm//'; return '-s ' . e_q ('q', $1,$3,$2); }
+    elsif (/\G -s                               \s+ q  \s* (\() ((?:\\\)|\\\\|$q_paren)+?)     (\)) /oxgc) { $slash = 'm//'; return '-s ' . e_q ('q', $1,$3,$2); }
+    elsif (/\G -s                               \s+ q  \s* (\{) ((?:\\\}|\\\\|$q_brace)+?)     (\}) /oxgc) { $slash = 'm//'; return '-s ' . e_q ('q', $1,$3,$2); }
+    elsif (/\G -s                               \s+ q  \s* (\[) ((?:\\\]|\\\\|$q_bracket)+?)   (\]) /oxgc) { $slash = 'm//'; return '-s ' . e_q ('q', $1,$3,$2); }
+    elsif (/\G -s                               \s+ q  \s* (\<) ((?:\\\>|\\\\|$q_angle)+?)     (\>) /oxgc) { $slash = 'm//'; return '-s ' . e_q ('q', $1,$3,$2); }
+    elsif (/\G -s                               \s+ q  \s* (\S) ((?:\\\1|\\\\|$q_char)+?)      (\1) /oxgc) { $slash = 'm//'; return '-s ' . e_q ('q', $1,$3,$2); }
+
+    elsif (/\G -s                               \s* (\$ \w+(?: ::\w+)* (?: (?: ->)? (?: [\$\@\%\&\*]\* | \$\#\* | \( (?:$qq_paren)*? \) | [\@\%\*]? \{ (?:$qq_brace)+? \} | [\@\%]? \[ (?:$qq_bracket)+? \] ) )*) /oxgc)
+                                                                                                           { $slash = 'm//'; return "-s $1";   }
+    elsif (/\G -s                               \s* \( ((?:$qq_paren)*?) \)                         /oxgc) { $slash = 'm//'; return "-s ($1)"; }
+    elsif (/\G -s                               (?= \s+ [a-z]+)                                     /oxgc) { $slash = 'm//'; return '-s';      }
+    elsif (/\G -s                               \s+ (\w+)                                           /oxgc) { $slash = 'm//'; return "-s $1";   }
+
+    elsif (/\G \b bytes::length (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $slash = 'm//'; return 'length';                   }
+    elsif (/\G \b bytes::chr    (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $slash = 'm//'; return 'chr';                      }
+    elsif (/\G \b chr           (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $slash = 'm//'; return 'Elatin2::chr';               }
+    elsif (/\G \b bytes::ord    (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $slash = 'div'; return 'ord';                      }
+    elsif (/\G \b ord           (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $slash = 'div'; return $function_ord;              }
+    elsif (/\G \b glob          (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $slash = 'm//'; return 'Elatin2::glob';              }
+    elsif (/\G \b lc \b            (?! \s* => )                      /oxgc) { $slash = 'm//'; return 'Elatin2::lc_';               }
+    elsif (/\G \b lcfirst \b       (?! \s* => )                      /oxgc) { $slash = 'm//'; return 'Elatin2::lcfirst_';          }
+    elsif (/\G \b uc \b            (?! \s* => )                      /oxgc) { $slash = 'm//'; return 'Elatin2::uc_';               }
+    elsif (/\G \b ucfirst \b       (?! \s* => )                      /oxgc) { $slash = 'm//'; return 'Elatin2::ucfirst_';          }
+    elsif (/\G \b fc \b            (?! \s* => )                      /oxgc) { $slash = 'm//'; return 'Elatin2::fc_';               }
+    elsif (/\G    -s \b            (?! \s* => )                      /oxgc) { $slash = 'm//'; return '-s ';                      }
+
+    elsif (/\G \b bytes::length \b (?! \s* => )                      /oxgc) { $slash = 'm//'; return 'length';                   }
+    elsif (/\G \b bytes::chr \b    (?! \s* => )                      /oxgc) { $slash = 'm//'; return 'chr';                      }
+    elsif (/\G \b chr \b           (?! \s* => )                      /oxgc) { $slash = 'm//'; return 'Elatin2::chr_';              }
+    elsif (/\G \b bytes::ord \b    (?! \s* => )                      /oxgc) { $slash = 'div'; return 'ord';                      }
+    elsif (/\G \b ord \b           (?! \s* => )                      /oxgc) { $slash = 'div'; return $function_ord_;             }
+    elsif (/\G \b glob \b          (?! \s* => )                      /oxgc) { $slash = 'm//'; return 'Elatin2::glob_';             }
+    elsif (/\G \b reverse \b       (?! \s* => )                      /oxgc) { $slash = 'm//'; return $function_reverse;          }
+    elsif (/\G \b getc \b          (?! \s* => )                      /oxgc) { $slash = 'm//'; return $function_getc;             }
+# split
+    elsif (/\G \b (split) \b (?! \s* => ) /oxgc) {
+        $slash = 'm//';
+
+        my $e = '';
+        while (/\G ( \s+ | \( | \#.* ) /oxgc) {
+            $e .= $1;
+        }
+
+# end of split
+        if    (/\G (?= [,;\)\}\]] )          /oxgc) { return 'Elatin2::split' . $e;                 }
+
+# split scalar value
+        elsif (/\G ( [\$\@\&\*] $qq_scalar ) /oxgc) { return 'Elatin2::split' . $e . e_string($1);  }
+
+# split literal space
+        elsif (/\G \b qq       (\#) [ ] (\#) /oxgc) { return 'Elatin2::split' . $e . qq  {qq$1 $2}; }
+        elsif (/\G \b qq (\s*) (\() [ ] (\)) /oxgc) { return 'Elatin2::split' . $e . qq{$1qq$2 $3}; }
+        elsif (/\G \b qq (\s*) (\{) [ ] (\}) /oxgc) { return 'Elatin2::split' . $e . qq{$1qq$2 $3}; }
+        elsif (/\G \b qq (\s*) (\[) [ ] (\]) /oxgc) { return 'Elatin2::split' . $e . qq{$1qq$2 $3}; }
+        elsif (/\G \b qq (\s*) (\<) [ ] (\>) /oxgc) { return 'Elatin2::split' . $e . qq{$1qq$2 $3}; }
+        elsif (/\G \b qq (\s*) (\S) [ ] (\2) /oxgc) { return 'Elatin2::split' . $e . qq{$1qq$2 $3}; }
+        elsif (/\G \b q        (\#) [ ] (\#) /oxgc) { return 'Elatin2::split' . $e . qq   {q$1 $2}; }
+        elsif (/\G \b q  (\s*) (\() [ ] (\)) /oxgc) { return 'Elatin2::split' . $e . qq {$1q$2 $3}; }
+        elsif (/\G \b q  (\s*) (\{) [ ] (\}) /oxgc) { return 'Elatin2::split' . $e . qq {$1q$2 $3}; }
+        elsif (/\G \b q  (\s*) (\[) [ ] (\]) /oxgc) { return 'Elatin2::split' . $e . qq {$1q$2 $3}; }
+        elsif (/\G \b q  (\s*) (\<) [ ] (\>) /oxgc) { return 'Elatin2::split' . $e . qq {$1q$2 $3}; }
+        elsif (/\G \b q  (\s*) (\S) [ ] (\2) /oxgc) { return 'Elatin2::split' . $e . qq {$1q$2 $3}; }
+        elsif (/\G                ' [ ] '    /oxgc) { return 'Elatin2::split' . $e . qq     {' '};  }
+        elsif (/\G                " [ ] "    /oxgc) { return 'Elatin2::split' . $e . qq     {" "};  }
+
+# split qq//
+        elsif (/\G \b (qq) \b /oxgc) {
+            if (/\G (\#) ((?:$qq_char)*?) (\#) /oxgc)                        { return e_split($e.'qr',$1,$3,$2,'');   } # qq# #  --> qr # #
+            else {
+                while (not /\G \z/oxgc) {
+                    if    (/\G (\s+|\#.*)                             /oxgc) { $e .= $1; }
+                    elsif (/\G (\()          ((?:$qq_paren)*?)   (\)) /oxgc) { return e_split($e.'qr',$1,$3,$2,'');   } # qq ( ) --> qr ( )
+                    elsif (/\G (\{)          ((?:$qq_brace)*?)   (\}) /oxgc) { return e_split($e.'qr',$1,$3,$2,'');   } # qq { } --> qr { }
+                    elsif (/\G (\[)          ((?:$qq_bracket)*?) (\]) /oxgc) { return e_split($e.'qr',$1,$3,$2,'');   } # qq [ ] --> qr [ ]
+                    elsif (/\G (\<)          ((?:$qq_angle)*?)   (\>) /oxgc) { return e_split($e.'qr',$1,$3,$2,'');   } # qq < > --> qr < >
+                    elsif (/\G ([*\-:?\\^|]) ((?:$qq_char)*?)    (\1) /oxgc) { return e_split($e.'qr','{','}',$2,''); } # qq | | --> qr { }
+                    elsif (/\G (\S)          ((?:$qq_char)*?)    (\1) /oxgc) { return e_split($e.'qr',$1,$3,$2,'');   } # qq * * --> qr * *
+                }
+                die __FILE__, ": Can't find string terminator anywhere before EOF";
+            }
+        }
+
+# split qr//
+        elsif (/\G \b (qr) \b /oxgc) {
+            if (/\G (\#) ((?:$qq_char)*?) (\#) ([imosxpadlubB]*) /oxgc)                        { return e_split  ($e.'qr',$1,$3,$2,$4);   } # qr# #
+            else {
+                while (not /\G \z/oxgc) {
+                    if    (/\G (\s+|\#.*)                                               /oxgc) { $e .= $1; }
+                    elsif (/\G (\()          ((?:$qq_paren)*?)   (\)) ([imosxpadlubB]*) /oxgc) { return e_split  ($e.'qr',$1, $3, $2,$4); } # qr ( )
+                    elsif (/\G (\{)          ((?:$qq_brace)*?)   (\}) ([imosxpadlubB]*) /oxgc) { return e_split  ($e.'qr',$1, $3, $2,$4); } # qr { }
+                    elsif (/\G (\[)          ((?:$qq_bracket)*?) (\]) ([imosxpadlubB]*) /oxgc) { return e_split  ($e.'qr',$1, $3, $2,$4); } # qr [ ]
+                    elsif (/\G (\<)          ((?:$qq_angle)*?)   (\>) ([imosxpadlubB]*) /oxgc) { return e_split  ($e.'qr',$1, $3, $2,$4); } # qr < >
+                    elsif (/\G (\')          ((?:$qq_char)*?)    (\') ([imosxpadlubB]*) /oxgc) { return e_split_q($e.'qr',$1, $3, $2,$4); } # qr ' '
+                    elsif (/\G ([*\-:?\\^|]) ((?:$qq_char)*?)    (\1) ([imosxpadlubB]*) /oxgc) { return e_split  ($e.'qr','{','}',$2,$4); } # qr | | --> qr { }
+                    elsif (/\G (\S)          ((?:$qq_char)*?)    (\1) ([imosxpadlubB]*) /oxgc) { return e_split  ($e.'qr',$1, $3, $2,$4); } # qr * *
+                }
+                die __FILE__, ": Can't find string terminator anywhere before EOF";
+            }
+        }
+
+# split q//
+        elsif (/\G \b (q) \b /oxgc) {
+            if (/\G (\#) ((?:\\\#|\\\\|$q_char)*?) (\#) /oxgc)                    { return e_split_q($e.'qr',$1,$3,$2,'');   } # q# #  --> qr # #
+            else {
+                while (not /\G \z/oxgc) {
+                    if    (/\G (\s+|\#.*)                                  /oxgc) { $e .= $1; }
+                    elsif (/\G (\() ((?:\\\\|\\\)|\\\(|$q_paren)*?)   (\)) /oxgc) { return e_split_q($e.'qr',$1,$3,$2,'');   } # q ( ) --> qr ( )
+                    elsif (/\G (\{) ((?:\\\\|\\\}|\\\{|$q_brace)*?)   (\}) /oxgc) { return e_split_q($e.'qr',$1,$3,$2,'');   } # q { } --> qr { }
+                    elsif (/\G (\[) ((?:\\\\|\\\]|\\\[|$q_bracket)*?) (\]) /oxgc) { return e_split_q($e.'qr',$1,$3,$2,'');   } # q [ ] --> qr [ ]
+                    elsif (/\G (\<) ((?:\\\\|\\\>|\\\<|$q_angle)*?)   (\>) /oxgc) { return e_split_q($e.'qr',$1,$3,$2,'');   } # q < > --> qr < >
+                    elsif (/\G ([*\-:?\\^|])       ((?:$q_char)*?)    (\1) /oxgc) { return e_split_q($e.'qr','{','}',$2,''); } # q | | --> qr { }
+                    elsif (/\G (\S) ((?:\\\\|\\\1|     $q_char)*?)    (\1) /oxgc) { return e_split_q($e.'qr',$1,$3,$2,'');   } # q * * --> qr * *
+                }
+                die __FILE__, ": Can't find string terminator anywhere before EOF";
+            }
+        }
+
+# split m//
+        elsif (/\G \b (m) \b /oxgc) {
+            if (/\G (\#) ((?:$qq_char)*?) (\#) ([cgimosxpadlubB]*) /oxgc)                        { return e_split  ($e.'qr',$1,$3,$2,$4);   } # m# #  --> qr # #
+            else {
+                while (not /\G \z/oxgc) {
+                    if    (/\G (\s+|\#.*)                                                 /oxgc) { $e .= $1; }
+                    elsif (/\G (\()          ((?:$qq_paren)*?)   (\)) ([cgimosxpadlubB]*) /oxgc) { return e_split  ($e.'qr',$1, $3, $2,$4); } # m ( ) --> qr ( )
+                    elsif (/\G (\{)          ((?:$qq_brace)*?)   (\}) ([cgimosxpadlubB]*) /oxgc) { return e_split  ($e.'qr',$1, $3, $2,$4); } # m { } --> qr { }
+                    elsif (/\G (\[)          ((?:$qq_bracket)*?) (\]) ([cgimosxpadlubB]*) /oxgc) { return e_split  ($e.'qr',$1, $3, $2,$4); } # m [ ] --> qr [ ]
+                    elsif (/\G (\<)          ((?:$qq_angle)*?)   (\>) ([cgimosxpadlubB]*) /oxgc) { return e_split  ($e.'qr',$1, $3, $2,$4); } # m < > --> qr < >
+                    elsif (/\G (\')          ((?:$qq_char)*?)    (\') ([cgimosxpadlubB]*) /oxgc) { return e_split_q($e.'qr',$1, $3, $2,$4); } # m ' ' --> qr ' '
+                    elsif (/\G ([*\-:?\\^|]) ((?:$qq_char)*?)    (\1) ([cgimosxpadlubB]*) /oxgc) { return e_split  ($e.'qr','{','}',$2,$4); } # m | | --> qr { }
+                    elsif (/\G (\S)          ((?:$qq_char)*?)    (\1) ([cgimosxpadlubB]*) /oxgc) { return e_split  ($e.'qr',$1, $3, $2,$4); } # m * * --> qr * *
+                }
+                die __FILE__, ": Search pattern not terminated";
+            }
+        }
+
+# split ''
+        elsif (/\G (\') /oxgc) {
+            my $q_string = '';
+            while (not /\G \z/oxgc) {
+                if    (/\G (\\\\)    /oxgc) { $q_string .= $1; }
+                elsif (/\G (\\\')    /oxgc) { $q_string .= $1; }                               # splitqr'' --> split qr''
+                elsif (/\G \'        /oxgc)                                                    { return e_split_q($e.q{ qr},"'","'",$q_string,''); } # ' ' --> qr ' '
+                elsif (/\G ($q_char) /oxgc) { $q_string .= $1; }
+            }
+            die __FILE__, ": Can't find string terminator anywhere before EOF";
+        }
+
+# split ""
+        elsif (/\G (\") /oxgc) {
+            my $qq_string = '';
+            while (not /\G \z/oxgc) {
+                if    (/\G (\\\\)    /oxgc) { $qq_string .= $1; }
+                elsif (/\G (\\\")    /oxgc) { $qq_string .= $1; }                              # splitqr"" --> split qr""
+                elsif (/\G \"        /oxgc)                                                    { return e_split($e.q{ qr},'"','"',$qq_string,''); } # " " --> qr " "
+                elsif (/\G ($q_char) /oxgc) { $qq_string .= $1; }
+            }
+            die __FILE__, ": Can't find string terminator anywhere before EOF";
+        }
+
+# split //
+        elsif (/\G (\/) /oxgc) {
+            my $regexp = '';
+            while (not /\G \z/oxgc) {
+                if    (/\G (\\\\)                 /oxgc) { $regexp .= $1; }
+                elsif (/\G (\\\/)                 /oxgc) { $regexp .= $1; }                    # splitqr// --> split qr//
+                elsif (/\G \/ ([cgimosxpadlubB]*) /oxgc)                                       { return e_split($e.q{ qr}, '/','/',$regexp,$1); } # / / --> qr / /
+                elsif (/\G ($q_char)              /oxgc) { $regexp .= $1; }
+            }
+            die __FILE__, ": Search pattern not terminated";
+        }
+    }
+
+# tr/// or y///
+
+    # about [cdsrbB]* (/B modifier)
+    #
+    # P.559 appendix C
+    # of ISBN 4-89052-384-7 Programming perl
+    # (Japanese title is: Perl puroguramingu)
+
+    elsif (/\G \b ( tr | y ) \b /oxgc) {
+        my $ope = $1;
+
+        #        $1   $2               $3   $4               $5   $6
+        if (/\G (\#) ((?:$qq_char)*?) (\#) ((?:$qq_char)*?) (\#) ([cdsrbB]*) /oxgc) { # tr# # #
+            my @tr = ($tr_variable,$2);
+            return e_tr(@tr,'',$4,$6);
+        }
+        else {
+            my $e = '';
+            while (not /\G \z/oxgc) {
+                if    (/\G (\s+|\#.*)                  /oxgc) { $e .= $1; }
+                elsif (/\G (\() ((?:$qq_paren)*?) (\)) /oxgc) {
+                    my @tr = ($tr_variable,$2);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\s+|\#.*)                                /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr ( ) ( )
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr ( ) { }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr ( ) [ ]
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr ( ) < >
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr ( ) * *
+                    }
+                    die __FILE__, ": Transliteration replacement not terminated";
+                }
+                elsif (/\G (\{) ((?:$qq_brace)*?) (\}) /oxgc) {
+                    my @tr = ($tr_variable,$2);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\s+|\#.*)                                /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr { } ( )
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr { } { }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr { } [ ]
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr { } < >
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr { } * *
+                    }
+                    die __FILE__, ": Transliteration replacement not terminated";
+                }
+                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) {
+                    my @tr = ($tr_variable,$2);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\s+|\#.*)                                /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr [ ] ( )
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr [ ] { }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr [ ] [ ]
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr [ ] < >
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr [ ] * *
+                    }
+                    die __FILE__, ": Transliteration replacement not terminated";
+                }
+                elsif (/\G (\<) ((?:$qq_angle)*?) (\>) /oxgc) {
+                    my @tr = ($tr_variable,$2);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\s+|\#.*)                                /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr < > ( )
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr < > { }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr < > [ ]
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr < > < >
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cdsrbB]*) /oxgc) { return e_tr(@tr,$e,$2,$4); } # tr < > * *
+                    }
+                    die __FILE__, ": Transliteration replacement not terminated";
+                }
+                #           $1   $2               $3   $4               $5   $6
+                elsif (/\G (\S) ((?:$qq_char)*?) (\1) ((?:$qq_char)*?) (\1) ([cdsrbB]*) /oxgc) { # tr * * *
+                    my @tr = ($tr_variable,$2);
+                    return e_tr(@tr,'',$4,$6);
+                }
+            }
+            die __FILE__, ": Transliteration pattern not terminated";
+        }
+    }
+
+# qq//
+    elsif (/\G \b (qq) \b /oxgc) {
+        my $ope = $1;
+
+#       if (/\G (\#) ((?:$qq_char)*?) (\#) /oxgc) { return e_qq($ope,$1,$3,$2); } # qq# #
+        if (/\G (\#) /oxgc) {                                                     # qq# #
+            my $qq_string = '';
+            while (not /\G \z/oxgc) {
+                if    (/\G (\\\\)     /oxgc) { $qq_string .= $1;                     }
+                elsif (/\G (\\\#)     /oxgc) { $qq_string .= $1;                     }
+                elsif (/\G (\#)       /oxgc) { return e_qq($ope,'#','#',$qq_string); }
+                elsif (/\G ($qq_char) /oxgc) { $qq_string .= $1;                     }
+            }
+            die __FILE__, ": Can't find string terminator anywhere before EOF";
+        }
+
+        else {
+            my $e = '';
+            while (not /\G \z/oxgc) {
+                if    (/\G (\s+|\#.*)                  /oxgc) { $e .= $1; }
+
+#               elsif (/\G (\() ((?:$qq_paren)*?) (\)) /oxgc) { return $e . e_qq($ope,$1,$3,$2); } # qq ( )
+                elsif (/\G (\() /oxgc) {                                                           # qq ( )
+                    my $qq_string = '';
+                    local $nest = 1;
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\\\\)     /oxgc) { $qq_string .= $1;                          }
+                        elsif (/\G (\\\))     /oxgc) { $qq_string .= $1;                          }
+                        elsif (/\G (\()       /oxgc) { $qq_string .= $1; $nest++;                 }
+                        elsif (/\G (\))       /oxgc) {
+                            if (--$nest == 0)        { return $e . e_qq($ope,'(',')',$qq_string); }
+                            else                     { $qq_string .= $1;                          }
+                        }
+                        elsif (/\G ($qq_char) /oxgc) { $qq_string .= $1;                          }
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+
+#               elsif (/\G (\{) ((?:$qq_brace)*?) (\}) /oxgc) { return $e . e_qq($ope,$1,$3,$2); } # qq { }
+                elsif (/\G (\{) /oxgc) {                                                           # qq { }
+                    my $qq_string = '';
+                    local $nest = 1;
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\\\\)     /oxgc) { $qq_string .= $1;                          }
+                        elsif (/\G (\\\})     /oxgc) { $qq_string .= $1;                          }
+                        elsif (/\G (\{)       /oxgc) { $qq_string .= $1; $nest++;                 }
+                        elsif (/\G (\})       /oxgc) {
+                            if (--$nest == 0)        { return $e . e_qq($ope,'{','}',$qq_string); }
+                            else                     { $qq_string .= $1;                          }
+                        }
+                        elsif (/\G ($qq_char) /oxgc) { $qq_string .= $1;                          }
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+
+#               elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) { return $e . e_qq($ope,$1,$3,$2); } # qq [ ]
+                elsif (/\G (\[) /oxgc) {                                                             # qq [ ]
+                    my $qq_string = '';
+                    local $nest = 1;
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\\\\)     /oxgc) { $qq_string .= $1;                          }
+                        elsif (/\G (\\\])     /oxgc) { $qq_string .= $1;                          }
+                        elsif (/\G (\[)       /oxgc) { $qq_string .= $1; $nest++;                 }
+                        elsif (/\G (\])       /oxgc) {
+                            if (--$nest == 0)        { return $e . e_qq($ope,'[',']',$qq_string); }
+                            else                     { $qq_string .= $1;                          }
+                        }
+                        elsif (/\G ($qq_char) /oxgc) { $qq_string .= $1;                          }
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+
+#               elsif (/\G (\<) ((?:$qq_angle)*?) (\>) /oxgc) { return $e . e_qq($ope,$1,$3,$2); } # qq < >
+                elsif (/\G (\<) /oxgc) {                                                           # qq < >
+                    my $qq_string = '';
+                    local $nest = 1;
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\\\\)     /oxgc) { $qq_string .= $1;                          }
+                        elsif (/\G (\\\>)     /oxgc) { $qq_string .= $1;                          }
+                        elsif (/\G (\<)       /oxgc) { $qq_string .= $1; $nest++;                 }
+                        elsif (/\G (\>)       /oxgc) {
+                            if (--$nest == 0)        { return $e . e_qq($ope,'<','>',$qq_string); }
+                            else                     { $qq_string .= $1;                          }
+                        }
+                        elsif (/\G ($qq_char) /oxgc) { $qq_string .= $1;                          }
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+
+#               elsif (/\G (\S) ((?:$qq_char)*?) (\1) /oxgc) { return $e . e_qq($ope,$1,$3,$2); } # qq * *
+                elsif (/\G (\S) /oxgc) {                                                          # qq * *
+                    my $delimiter = $1;
+                    my $qq_string = '';
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\\\\)             /oxgc) { $qq_string .= $1;                                        }
+                        elsif (/\G (\\\Q$delimiter\E) /oxgc) { $qq_string .= $1;                                        }
+                        elsif (/\G (\Q$delimiter\E)   /oxgc) { return $e . e_qq($ope,$delimiter,$delimiter,$qq_string); }
+                        elsif (/\G ($qq_char)         /oxgc) { $qq_string .= $1;                                        }
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+            }
+            die __FILE__, ": Can't find string terminator anywhere before EOF";
+        }
+    }
+
+# qr//
+    elsif (/\G \b (qr) \b /oxgc) {
+        my $ope = $1;
+        if (/\G (\#) ((?:$qq_char)*?) (\#) ([imosxpadlubB]*) /oxgc) { # qr# # #
+            return e_qr($ope,$1,$3,$2,$4);
+        }
+        else {
+            my $e = '';
+            while (not /\G \z/oxgc) {
+                if    (/\G (\s+|\#.*)                                               /oxgc) { $e .= $1; }
+                elsif (/\G (\()          ((?:$qq_paren)*?)   (\)) ([imosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr ( )
+                elsif (/\G (\{)          ((?:$qq_brace)*?)   (\}) ([imosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr { }
+                elsif (/\G (\[)          ((?:$qq_bracket)*?) (\]) ([imosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr [ ]
+                elsif (/\G (\<)          ((?:$qq_angle)*?)   (\>) ([imosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr < >
+                elsif (/\G (\')          ((?:$qq_char)*?)    (\') ([imosxpadlubB]*) /oxgc) { return $e . e_qr_q($ope,$1, $3, $2,$4); } # qr ' '
+                elsif (/\G ([*\-:?\\^|]) ((?:$qq_char)*?)    (\1) ([imosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,'{','}',$2,$4); } # qr | | --> qr { }
+                elsif (/\G (\S)          ((?:$qq_char)*?)    (\1) ([imosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr * *
+            }
+            die __FILE__, ": Can't find string terminator anywhere before EOF";
+        }
+    }
+
+# qw//
+    elsif (/\G \b (qw) \b /oxgc) {
+        my $ope = $1;
+        if (/\G (\#) (.*?) (\#) /oxmsgc) { # qw# #
+            return e_qw($ope,$1,$3,$2);
+        }
+        else {
+            my $e = '';
+            while (not /\G \z/oxgc) {
+                if    (/\G (\s+|\#.*)                            /oxgc)   { $e .= $1; }
+
+                elsif (/\G (\()          ([^(]*?)           (\)) /oxmsgc) { return $e . e_qw($ope,$1,$3,$2); } # qw ( )
+                elsif (/\G (\()          ((?:$q_paren)*?)   (\)) /oxmsgc) { return $e . e_qw($ope,$1,$3,$2); } # qw ( )
+
+                elsif (/\G (\{)          ([^{]*?)           (\}) /oxmsgc) { return $e . e_qw($ope,$1,$3,$2); } # qw { }
+                elsif (/\G (\{)          ((?:$q_brace)*?)   (\}) /oxmsgc) { return $e . e_qw($ope,$1,$3,$2); } # qw { }
+
+                elsif (/\G (\[)          ([^[]*?)           (\]) /oxmsgc) { return $e . e_qw($ope,$1,$3,$2); } # qw [ ]
+                elsif (/\G (\[)          ((?:$q_bracket)*?) (\]) /oxmsgc) { return $e . e_qw($ope,$1,$3,$2); } # qw [ ]
+
+                elsif (/\G (\<)          ([^<]*?)           (\>) /oxmsgc) { return $e . e_qw($ope,$1,$3,$2); } # qw < >
+                elsif (/\G (\<)          ((?:$q_angle)*?)   (\>) /oxmsgc) { return $e . e_qw($ope,$1,$3,$2); } # qw < >
+
+                elsif (/\G ([\x21-\x3F]) (.*?)              (\1) /oxmsgc) { return $e . e_qw($ope,$1,$3,$2); } # qw * *
+                elsif (/\G (\S)          ((?:$q_char)*?)    (\1) /oxmsgc) { return $e . e_qw($ope,$1,$3,$2); } # qw * *
+            }
+            die __FILE__, ": Can't find string terminator anywhere before EOF";
+        }
+    }
+
+# qx//
+    elsif (/\G \b (qx) \b /oxgc) {
+        my $ope = $1;
+        if (/\G (\#) ((?:$qq_char)*?) (\#) /oxgc) { # qx# #
+            return e_qq($ope,$1,$3,$2);
+        }
+        else {
+            my $e = '';
+            while (not /\G \z/oxgc) {
+                if    (/\G (\s+|\#.*)                    /oxgc) { $e .= $1; }
+                elsif (/\G (\() ((?:$qq_paren)*?)   (\)) /oxgc) { return $e . e_qq($ope,$1,$3,$2); } # qx ( )
+                elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) /oxgc) { return $e . e_qq($ope,$1,$3,$2); } # qx { }
+                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) { return $e . e_qq($ope,$1,$3,$2); } # qx [ ]
+                elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) /oxgc) { return $e . e_qq($ope,$1,$3,$2); } # qx < >
+                elsif (/\G (\') ((?:$qq_char)*?)    (\') /oxgc) { return $e . e_q ($ope,$1,$3,$2); } # qx ' '
+                elsif (/\G (\S) ((?:$qq_char)*?)    (\1) /oxgc) { return $e . e_qq($ope,$1,$3,$2); } # qx * *
+            }
+            die __FILE__, ": Can't find string terminator anywhere before EOF";
+        }
+    }
+
+# q//
+    elsif (/\G \b (q) \b /oxgc) {
+        my $ope = $1;
+
+#       if (/\G (\#) ((?:\\\#|\\\\|$q_char)*?) (\#) /oxgc) { return e_q($ope,$1,$3,$2); } # q# #
+
+        # avoid "Error: Runtime exception" of perl version 5.005_03
+        # (and so on)
+
+        if (/\G (\#) /oxgc) {                                                             # q# #
+            my $q_string = '';
+            while (not /\G \z/oxgc) {
+                if    (/\G (\\\\)    /oxgc) { $q_string .= $1;                    }
+                elsif (/\G (\\\#)    /oxgc) { $q_string .= $1;                    }
+                elsif (/\G (\#)      /oxgc) { return e_q($ope,'#','#',$q_string); }
+                elsif (/\G ($q_char) /oxgc) { $q_string .= $1;                    }
+            }
+            die __FILE__, ": Can't find string terminator anywhere before EOF";
+        }
+
+        else {
+            my $e = '';
+            while (not /\G \z/oxgc) {
+                if    (/\G (\s+|\#.*)                           /oxgc) { $e .= $1; }
+
+#               elsif (/\G (\() ((?:\\\)|\\\\|$q_paren)*?) (\)) /oxgc) { return $e . e_q($ope,$1,$3,$2); } # q ( )
+                elsif (/\G (\() /oxgc) {                                                                   # q ( )
+                    my $q_string = '';
+                    local $nest = 1;
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\\\\)    /oxgc) { $q_string .= $1;                         }
+                        elsif (/\G (\\\))    /oxgc) { $q_string .= $1;                         }
+                        elsif (/\G (\\\()    /oxgc) { $q_string .= $1;                         }
+                        elsif (/\G (\()      /oxgc) { $q_string .= $1; $nest++;                }
+                        elsif (/\G (\))      /oxgc) {
+                            if (--$nest == 0)       { return $e . e_q($ope,'(',')',$q_string); }
+                            else                    { $q_string .= $1;                         }
+                        }
+                        elsif (/\G ($q_char) /oxgc) { $q_string .= $1;                         }
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+
+#               elsif (/\G (\{) ((?:\\\}|\\\\|$q_brace)*?) (\}) /oxgc) { return $e . e_q($ope,$1,$3,$2); } # q { }
+                elsif (/\G (\{) /oxgc) {                                                                   # q { }
+                    my $q_string = '';
+                    local $nest = 1;
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\\\\)    /oxgc) { $q_string .= $1;                         }
+                        elsif (/\G (\\\})    /oxgc) { $q_string .= $1;                         }
+                        elsif (/\G (\\\{)    /oxgc) { $q_string .= $1;                         }
+                        elsif (/\G (\{)      /oxgc) { $q_string .= $1; $nest++;                }
+                        elsif (/\G (\})      /oxgc) {
+                            if (--$nest == 0)       { return $e . e_q($ope,'{','}',$q_string); }
+                            else                    { $q_string .= $1;                         }
+                        }
+                        elsif (/\G ($q_char) /oxgc) { $q_string .= $1;                         }
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+
+#               elsif (/\G (\[) ((?:\\\]|\\\\|$q_bracket)*?) (\]) /oxgc) { return $e . e_q($ope,$1,$3,$2); } # q [ ]
+                elsif (/\G (\[) /oxgc) {                                                                     # q [ ]
+                    my $q_string = '';
+                    local $nest = 1;
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\\\\)    /oxgc) { $q_string .= $1;                         }
+                        elsif (/\G (\\\])    /oxgc) { $q_string .= $1;                         }
+                        elsif (/\G (\\\[)    /oxgc) { $q_string .= $1;                         }
+                        elsif (/\G (\[)      /oxgc) { $q_string .= $1; $nest++;                }
+                        elsif (/\G (\])      /oxgc) {
+                            if (--$nest == 0)       { return $e . e_q($ope,'[',']',$q_string); }
+                            else                    { $q_string .= $1;                         }
+                        }
+                        elsif (/\G ($q_char) /oxgc) { $q_string .= $1;                         }
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+
+#               elsif (/\G (\<) ((?:\\\>|\\\\|$q_angle)*?) (\>) /oxgc) { return $e . e_q($ope,$1,$3,$2); } # q < >
+                elsif (/\G (\<) /oxgc) {                                                                   # q < >
+                    my $q_string = '';
+                    local $nest = 1;
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\\\\)    /oxgc) { $q_string .= $1;                         }
+                        elsif (/\G (\\\>)    /oxgc) { $q_string .= $1;                         }
+                        elsif (/\G (\\\<)    /oxgc) { $q_string .= $1;                         }
+                        elsif (/\G (\<)      /oxgc) { $q_string .= $1; $nest++;                }
+                        elsif (/\G (\>)      /oxgc) {
+                            if (--$nest == 0)       { return $e . e_q($ope,'<','>',$q_string); }
+                            else                    { $q_string .= $1;                         }
+                        }
+                        elsif (/\G ($q_char) /oxgc) { $q_string .= $1;                         }
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+
+#               elsif (/\G (\S) ((?:\\\1|\\\\|$q_char)*?) (\1) /oxgc) { return $e . e_q($ope,$1,$3,$2); } # q * *
+                elsif (/\G (\S) /oxgc) {                                                                  # q * *
+                    my $delimiter = $1;
+                    my $q_string = '';
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\\\\)             /oxgc) { $q_string .= $1;                                       }
+                        elsif (/\G (\\\Q$delimiter\E) /oxgc) { $q_string .= $1;                                       }
+                        elsif (/\G (\Q$delimiter\E)   /oxgc) { return $e . e_q($ope,$delimiter,$delimiter,$q_string); }
+                        elsif (/\G ($q_char)          /oxgc) { $q_string .= $1;                                       }
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+            }
+            die __FILE__, ": Can't find string terminator anywhere before EOF";
+        }
+    }
+
+# m//
+    elsif (/\G \b (m) \b /oxgc) {
+        my $ope = $1;
+        if (/\G (\#) ((?:$qq_char)*?) (\#) ([cgimosxpadlubB]*) /oxgc) { # m# #
+            return e_qr($ope,$1,$3,$2,$4);
+        }
+        else {
+            my $e = '';
+            while (not /\G \z/oxgc) {
+                if    (/\G (\s+|\#.*)                                                /oxgc) { $e .= $1; }
+                elsif (/\G (\()         ((?:$qq_paren)*?)   (\)) ([cgimosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # m ( )
+                elsif (/\G (\{)         ((?:$qq_brace)*?)   (\}) ([cgimosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # m { }
+                elsif (/\G (\[)         ((?:$qq_bracket)*?) (\]) ([cgimosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # m [ ]
+                elsif (/\G (\<)         ((?:$qq_angle)*?)   (\>) ([cgimosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # m < >
+                elsif (/\G (\?)         ((?:$qq_char)*?)    (\?) ([cgimosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # m ? ?
+                elsif (/\G (\')         ((?:$qq_char)*?)    (\') ([cgimosxpadlubB]*) /oxgc) { return $e . e_qr_q($ope,$1, $3, $2,$4); } # m ' '
+                elsif (/\G ([*\-:\\^|]) ((?:$qq_char)*?)    (\1) ([cgimosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,'{','}',$2,$4); } # m | | --> m { }
+                elsif (/\G (\S)         ((?:$qq_char)*?)    (\1) ([cgimosxpadlubB]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # m * *
+            }
+            die __FILE__, ": Search pattern not terminated";
+        }
+    }
+
+# s///
+
+    # about [cegimosxpradlubB]* (/cg modifier)
+    #
+    # P.67 Pattern-Matching Operators
+    # of ISBN 0-596-00241-6 Perl in a Nutshell, Second Edition.
+
+    elsif (/\G \b (s) \b /oxgc) {
+        my $ope = $1;
+
+        #        $1   $2               $3   $4               $5   $6
+        if (/\G (\#) ((?:$qq_char)*?) (\#) ((?:$qq_char)*?) (\#) ([cegimosxpradlubB]*) /oxgc) { # s# # #
+            return e_sub($sub_variable,$1,$2,$3,$3,$4,$5,$6);
+        }
+        else {
+            my $e = '';
+            while (not /\G \z/oxgc) {
+                if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                elsif (/\G (\() ((?:$qq_paren)*?) (\)) /oxgc) {
+                    my @s = ($1,$2,$3);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\s+|\#.*)                                          /oxgc) { $e .= $1; }
+                        #           $1   $2                  $3   $4
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\$) ((?:$qq_char)*?)    (\$) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\:) ((?:$qq_char)*?)    (\:) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\@) ((?:$qq_char)*?)    (\@) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                    }
+                    die __FILE__, ": Substitution replacement not terminated";
+                }
+                elsif (/\G (\{) ((?:$qq_brace)*?) (\}) /oxgc) {
+                    my @s = ($1,$2,$3);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\s+|\#.*)                                          /oxgc) { $e .= $1; }
+                        #           $1   $2                  $3   $4
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\$) ((?:$qq_char)*?)    (\$) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\:) ((?:$qq_char)*?)    (\:) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\@) ((?:$qq_char)*?)    (\@) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                    }
+                    die __FILE__, ": Substitution replacement not terminated";
+                }
+                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) {
+                    my @s = ($1,$2,$3);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\s+|\#.*)                                          /oxgc) { $e .= $1; }
+                        #           $1   $2                  $3   $4
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\$) ((?:$qq_char)*?)    (\$) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                    }
+                    die __FILE__, ": Substitution replacement not terminated";
+                }
+                elsif (/\G (\<) ((?:$qq_angle)*?) (\>) /oxgc) {
+                    my @s = ($1,$2,$3);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G (\s+|\#.*)                                          /oxgc) { $e .= $1; }
+                        #           $1   $2                  $3   $4
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\$) ((?:$qq_char)*?)    (\$) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\:) ((?:$qq_char)*?)    (\:) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\@) ((?:$qq_char)*?)    (\@) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cegimosxpradlubB]*) /oxgc) { return e_sub($sub_variable,@s,$1,$2,$3,$4); }
+                    }
+                    die __FILE__, ": Substitution replacement not terminated";
+                }
+                #           $1   $2               $3   $4               $5   $6
+                elsif (/\G (\') ((?:$qq_char)*?) (\') ((?:$qq_char)*?) (\') ([cegimosxpradlubB]*) /oxgc) {
+                    return e_sub($sub_variable,$1,$2,$3,$3,$4,$5,$6);
+                }
+                #           $1            $2               $3   $4               $5   $6
+                elsif (/\G ([*\-:?\\^|]) ((?:$qq_char)*?) (\1) ((?:$qq_char)*?) (\1) ([cegimosxpradlubB]*) /oxgc) {
+                    return e_sub($sub_variable,'{',$2,'}','{',$4,'}',$6); # s | | | --> s { } { }
+                }
+                #           $1   $2               $3   $4               $5   $6
+                elsif (/\G (\$) ((?:$qq_char)*?) (\1) ((?:$qq_char)*?) (\1) ([cegimosxpradlubB]*) /oxgc) {
+                    return e_sub($sub_variable,$1,$2,$3,$3,$4,$5,$6);
+                }
+                #           $1   $2               $3   $4               $5   $6
+                elsif (/\G (\S) ((?:$qq_char)*?) (\1) ((?:$qq_char)*?) (\1) ([cegimosxpradlubB]*) /oxgc) {
+                    return e_sub($sub_variable,$1,$2,$3,$3,$4,$5,$6);
+                }
+            }
+            die __FILE__, ": Substitution pattern not terminated";
+        }
+    }
+
+# require ignore module
+    elsif (/\G \b require (\s+ (?:$ignore_modules) .*? ;) ([ \t]* [#\n])                  /oxmsgc) { return "# require$1$2";   }
+    elsif (/\G \b require (\s+ (?:$ignore_modules) .*? ;) ([ \t]* [^#]) /oxmsgc) { return "# require$1\n$2"; }
+    elsif (/\G \b require (\s+ (?:$ignore_modules)) \b                                    /oxmsgc) { return "# require$1";     }
+
+# use strict; --> use strict; no strict qw(refs);
+    elsif (/\G \b use (\s+ strict .*? ;) ([ \t]* [#\n])                               /oxmsgc) { return "use$1 no strict qw(refs);$2";   }
+    elsif (/\G \b use (\s+ strict .*? ;) ([ \t]* [^#])              /oxmsgc) { return "use$1 no strict qw(refs);\n$2"; }
+    elsif (/\G \b use (\s+ strict) \b                                                 /oxmsgc) { return "use$1; no strict qw(refs)";     }
+
+# use 5.12.0; --> use 5.12.0; no strict qw(refs);
+    elsif (/\G \b use \s+ (([1-9][0-9_]*)(?:\.([0-9_]+))*)  \s* ;                     /oxmsgc) {
+        if (($2 >= 6) or (($2 == 5) and ($3 ge '012'))) {
+            return "use $1; no strict qw(refs);";
+        }
+        else {
+            return "use $1;";
+        }
+    }
+    elsif (/\G \b use \s+ (v([0-9][0-9_]*)(?:\.([0-9_]+))*) \s* ;                    /oxmsgc)  {
+        if (($2 >= 6) or (($2 == 5) and ($3 >= 12))) {
+            return "use $1; no strict qw(refs);";
+        }
+        else {
+            return "use $1;";
+        }
+    }
+
+# ignore use module
+    elsif (/\G \b use (\s+ (?:$ignore_modules) .*? ;) ([ \t]* [#\n])                  /oxmsgc) { return "# use$1$2";         }
+    elsif (/\G \b use (\s+ (?:$ignore_modules) .*? ;) ([ \t]* [^#]) /oxmsgc) { return "# use$1\n$2";       }
+    elsif (/\G \b use (\s+ (?:$ignore_modules)) \b                                    /oxmsgc) { return "# use$1";           }
+
+# ignore no module
+    elsif (/\G \b no  (\s+ (?:$ignore_modules) .*? ;) ([ \t]* [#\n])                  /oxmsgc) { return "# no$1$2";          }
+    elsif (/\G \b no  (\s+ (?:$ignore_modules) .*? ;) ([ \t]* [^#]) /oxmsgc) { return "# no$1\n$2";        }
+    elsif (/\G \b no  (\s+ (?:$ignore_modules)) \b                                    /oxmsgc) { return "# no$1";            }
+
+# use else
+    elsif (/\G \b use \b                                                              /oxmsgc) { return "use";               }
+
+# use else
+    elsif (/\G \b no  \b                                                              /oxmsgc) { return "no";                }
+
+# ''
+    elsif (/\G (?<![\w\$\@\%\&\*]) (\') /oxgc) {
+        my $q_string = '';
+        while (not /\G \z/oxgc) {
+            if    (/\G (\\\\)                 /oxgc) { $q_string .= $1;                   }
+            elsif (/\G (\\\')                 /oxgc) { $q_string .= $1;                   }
+            elsif (/\G \'                     /oxgc) { return e_q('', "'","'",$q_string); }
+            elsif (/\G ($q_char)              /oxgc) { $q_string .= $1;                   }
+        }
+        die __FILE__, ": Can't find string terminator anywhere before EOF";
+    }
+
+# ""
+    elsif (/\G (\") /oxgc) {
+        my $qq_string = '';
+        while (not /\G \z/oxgc) {
+            if    (/\G (\\\\)                 /oxgc) { $qq_string .= $1;                    }
+            elsif (/\G (\\\")                 /oxgc) { $qq_string .= $1;                    }
+            elsif (/\G \"                     /oxgc) { return e_qq('', '"','"',$qq_string); }
+            elsif (/\G ($q_char)              /oxgc) { $qq_string .= $1;                    }
+        }
+        die __FILE__, ": Can't find string terminator anywhere before EOF";
+    }
+
+# ``
+    elsif (/\G (\`) /oxgc) {
+        my $qx_string = '';
+        while (not /\G \z/oxgc) {
+            if    (/\G (\\\\)                 /oxgc) { $qx_string .= $1;                    }
+            elsif (/\G (\\\`)                 /oxgc) { $qx_string .= $1;                    }
+            elsif (/\G \`                     /oxgc) { return e_qq('', '`','`',$qx_string); }
+            elsif (/\G ($q_char)              /oxgc) { $qx_string .= $1;                    }
+        }
+        die __FILE__, ": Can't find string terminator anywhere before EOF";
+    }
+
+# //   --- not divide operator (num / num), not defined-or
+    elsif (($slash eq 'm//') and /\G (\/) /oxgc) {
+        my $regexp = '';
+        while (not /\G \z/oxgc) {
+            if    (/\G (\\\\)                 /oxgc) { $regexp .= $1;                       }
+            elsif (/\G (\\\/)                 /oxgc) { $regexp .= $1;                       }
+            elsif (/\G \/ ([cgimosxpadlubB]*) /oxgc) { return e_qr('', '/','/',$regexp,$1); }
+            elsif (/\G ($q_char)              /oxgc) { $regexp .= $1;                       }
+        }
+        die __FILE__, ": Search pattern not terminated";
+    }
+
+# ??   --- not conditional operator (condition ? then : else)
+    elsif (($slash eq 'm//') and /\G (\?) /oxgc) {
+        my $regexp = '';
+        while (not /\G \z/oxgc) {
+            if    (/\G (\\\\)                 /oxgc) { $regexp .= $1;                       }
+            elsif (/\G (\\\?)                 /oxgc) { $regexp .= $1;                       }
+            elsif (/\G \? ([cgimosxpadlubB]*) /oxgc) { return e_qr('m','?','?',$regexp,$1); }
+            elsif (/\G ($q_char)              /oxgc) { $regexp .= $1;                       }
+        }
+        die __FILE__, ": Search pattern not terminated";
+    }
+
+# << (bit shift)   --- not here document
+    elsif (/\G ( << \s* ) (?= [0-9\$\@\&] ) /oxgc)   { $slash = 'm//'; return $1;           }
+
+# <<'HEREDOC'
+    elsif (/\G ( << '([a-zA-Z_0-9]*)' ) /oxgc) {
+        $slash = 'm//';
+        my $here_quote = $1;
+        my $delimiter  = $2;
+
+        # get here document
+        if ($here_script eq '') {
+            $here_script = CORE::substr $_, pos $_;
+            $here_script =~ s/.*?\n//oxm;
+        }
+        if ($here_script =~ s/\A (.*?) \n $delimiter \n //xms) {
+            push @heredoc, $1 . qq{\n$delimiter\n};
+            push @heredoc_delimiter, $delimiter;
+        }
+        else {
+            die __FILE__, ": Can't find string terminator $delimiter anywhere before EOF";
+        }
+        return $here_quote;
+    }
+
+# <<\HEREDOC
+
+    # P.66 2.6.6. "Here" Documents
+    # in Chapter 2: Bits and Pieces
+    # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
+    # P.73 "Here" Documents
+    # in Chapter 2: Bits and Pieces
+    # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+
+    elsif (/\G ( << \\([a-zA-Z_0-9]+) ) /oxgc) {
+        $slash = 'm//';
+        my $here_quote = $1;
+        my $delimiter  = $2;
+
+        # get here document
+        if ($here_script eq '') {
+            $here_script = CORE::substr $_, pos $_;
+            $here_script =~ s/.*?\n//oxm;
+        }
+        if ($here_script =~ s/\A (.*?) \n $delimiter \n //xms) {
+            push @heredoc, $1 . qq{\n$delimiter\n};
+            push @heredoc_delimiter, $delimiter;
+        }
+        else {
+            die __FILE__, ": Can't find string terminator $delimiter anywhere before EOF";
+        }
+        return $here_quote;
+    }
+
+# <<"HEREDOC"
+    elsif (/\G ( << "([a-zA-Z_0-9]*)" ) /oxgc) {
+        $slash = 'm//';
+        my $here_quote = $1;
+        my $delimiter  = $2;
+
+        # get here document
+        if ($here_script eq '') {
+            $here_script = CORE::substr $_, pos $_;
+            $here_script =~ s/.*?\n//oxm;
+        }
+        if ($here_script =~ s/\A (.*?) \n $delimiter \n //xms) {
+            push @heredoc, e_heredoc($1) . qq{\n$delimiter\n};
+            push @heredoc_delimiter, $delimiter;
+        }
+        else {
+            die __FILE__, ": Can't find string terminator $delimiter anywhere before EOF";
+        }
+        return $here_quote;
+    }
+
+# <<HEREDOC
+    elsif (/\G ( << ([a-zA-Z_0-9]+) ) /oxgc) {
+        $slash = 'm//';
+        my $here_quote = $1;
+        my $delimiter  = $2;
+
+        # get here document
+        if ($here_script eq '') {
+            $here_script = CORE::substr $_, pos $_;
+            $here_script =~ s/.*?\n//oxm;
+        }
+        if ($here_script =~ s/\A (.*?) \n $delimiter \n //xms) {
+            push @heredoc, e_heredoc($1) . qq{\n$delimiter\n};
+            push @heredoc_delimiter, $delimiter;
+        }
+        else {
+            die __FILE__, ": Can't find string terminator $delimiter anywhere before EOF";
+        }
+        return $here_quote;
+    }
+
+# <<`HEREDOC`
+    elsif (/\G ( << `([a-zA-Z_0-9]*)` ) /oxgc) {
+        $slash = 'm//';
+        my $here_quote = $1;
+        my $delimiter  = $2;
+
+        # get here document
+        if ($here_script eq '') {
+            $here_script = CORE::substr $_, pos $_;
+            $here_script =~ s/.*?\n//oxm;
+        }
+        if ($here_script =~ s/\A (.*?) \n $delimiter \n //xms) {
+            push @heredoc, e_heredoc($1) . qq{\n$delimiter\n};
+            push @heredoc_delimiter, $delimiter;
+        }
+        else {
+            die __FILE__, ": Can't find string terminator $delimiter anywhere before EOF";
+        }
+        return $here_quote;
+    }
+
+# <<= <=> <= < operator
+    elsif (/\G ( <<= | <=> | <= | < ) (?= \s* [A-Za-z_0-9'"`\$\@\&\*\(\+\-] )/oxgc) {
+        return $1;
+    }
+
+# <FILEHANDLE>
+    elsif (/\G (<[\$]?[A-Za-z_][A-Za-z_0-9]*>) /oxgc) {
+        return $1;
+    }
+
+# <WILDCARD> --- glob
+
+    # avoid "Error: Runtime exception" of perl version 5.005_03
+
+    elsif (/\G < ((?:[^>\0\a\e\f\n\r\t])+?) > /oxgc) {
+        return 'Elatin2::glob("' . $1 . '")';
+    }
+
+# __DATA__
+    elsif (/\G ^ ( __DATA__ \n .*) \z /oxmsgc) { return $1; }
+
+# __END__
+    elsif (/\G ^ ( __END__  \n .*) \z /oxmsgc) { return $1; }
+
+# \cD Control-D
+
+    # P.68 2.6.8. Other Literal Tokens
+    # in Chapter 2: Bits and Pieces
+    # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
+    # P.76 Other Literal Tokens
+    # in Chapter 2: Bits and Pieces
+    # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+
+    elsif (/\G   ( \cD         .*) \z /oxmsgc) { return $1; }
+
+# \cZ Control-Z
+    elsif (/\G   ( \cZ         .*) \z /oxmsgc) { return $1; }
+
+    # any operator before div
+    elsif (/\G (
+            -- | \+\+ |
+            [\)\}\]]
+
+            ) /oxgc) { $slash = 'div'; return $1; }
+
+    # yada-yada or triple-dot operator
+    elsif (/\G (
+            \.\.\.
+
+            ) /oxgc) { $slash = 'm//'; return q{die('Unimplemented')}; }
+
+    # any operator before m//
+
+    # //, //= (defined-or)
+
+    # P.164 Logical Operators
+    # in Chapter 10: More Control Structures
+    # of ISBN 978-0-596-52010-6 Learning Perl, Fifth Edition
+
+    # P.119 C-Style Logical (Short-Circuit) Operators
+    # in Chapter 3: Unary and Binary Operators
+    # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+
+    # (and so on)
+
+    # ~~
+
+    # P.221 The Smart Match Operator
+    # in Chapter 15: Smart Matching and given-when
+    # of ISBN 978-0-596-52010-6 Learning Perl, Fifth Edition
+
+    # P.112 Smartmatch Operator
+    # in Chapter 3: Unary and Binary Operators
+    # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+
+    # (and so on)
+
+    elsif (/\G (
+
+            !~~ | !~ | != | ! |
+            %= | % |
+            &&= | && | &= | & |
+            -= | -> | - |
+            :\s*= |
+            : |
+            <<= | <=> | <= | < |
+            == | => | =~ | = |
+            >>= | >> | >= | > |
+            \*\*= | \*\* | \*= | \* |
+            \+= | \+ |
+            \.\. | \.= | \. |
+            \/\/= | \/\/ |
+            \/= | \/ |
+            \? |
+            \\ |
+            \^= | \^ |
+            \b x= |
+            \|\|= | \|\| | \|= | \| |
+            ~~ | ~ |
+            \b(?: and | cmp | eq | ge | gt | le | lt | ne | not | or | xor | x )\b |
+            \b(?: print )\b |
+
+            [,;\(\{\[]
+
+            ) /oxgc) { $slash = 'm//'; return $1; }
+
+    # other any character
+    elsif (/\G ($q_char) /oxgc) { $slash = 'div'; return $1; }
+
+    # system error
+    else {
+        die __FILE__, ": Oops, this shouldn't happen!";
+    }
+}
+
+# escape Latin-2 string
+sub e_string {
+    my($string) = @_;
+    my $e_string = '';
+
+    local $slash = 'm//';
+
+    # P.1024 Appendix W.10 Multibyte Processing
+    # of ISBN 1-56592-224-7 CJKV Information Processing
+    # (and so on)
+
+    my @char = $string =~ / \G (\\?(?:$q_char)) /oxmsg;
+
+    # without { ... }
+    if (not (grep(/\A \{ \z/xms, @char) and grep(/\A \} \z/xms, @char))) {
+        if ($string !~ /<</oxms) {
+            return $string;
+        }
+    }
+
+E_STRING_LOOP:
+    while ($string !~ /\G \z/oxgc) {
+        if (0) {
+        }
+
+# $`, ${`}, $PREMATCH, ${PREMATCH}, ${^PREMATCH} --> @{[Elatin2::PREMATCH()]}
+        elsif ($string =~ /\G ( \$` | \$\{`\} | \$ \s* PREMATCH  \b | \$ \s* \{ \s* PREMATCH  \s* \} | \$ \s* \{\^PREMATCH\}  ) /oxmsgc) {
+            $e_string .= q{Elatin2::PREMATCH()};
+            $slash = 'div';
+        }
+
+# $&, ${&}, $MATCH, ${MATCH}, ${^MATCH} --> @{[Elatin2::MATCH()]}
+        elsif ($string =~ /\G ( \$& | \$\{&\} | \$ \s* MATCH     \b | \$ \s* \{ \s* MATCH     \s* \} | \$ \s* \{\^MATCH\}     ) /oxmsgc) {
+            $e_string .= q{Elatin2::MATCH()};
+            $slash = 'div';
+        }
+
+# $', ${'} --> $', ${'}
+        elsif ($string =~ /\G ( \$' | \$\{'\}                                                                                 ) /oxmsgc) {
+            $e_string .= $1;
+            $slash = 'div';
+        }
+
+# $POSTMATCH, ${POSTMATCH}, ${^POSTMATCH} --> @{[Elatin2::POSTMATCH()]}
+        elsif ($string =~ /\G (                 \$ \s* POSTMATCH \b | \$ \s* \{ \s* POSTMATCH \s* \} | \$ \s* \{\^POSTMATCH\} ) /oxmsgc) {
+            $e_string .= q{Elatin2::POSTMATCH()};
+            $slash = 'div';
+        }
+
+# bareword
+        elsif ($string =~ /\G ( \{ \s* (?: tr | index | rindex | reverse ) \s* \} ) /oxmsgc) {
+            $e_string .= $1;
+            $slash = 'div';
+        }
+
+# $0 --> $0
+        elsif ($string =~ /\G ( \$ 0 ) /oxmsgc) {
+            $e_string .= $1;
+            $slash = 'div';
+        }
+        elsif ($string =~ /\G ( \$ \{ \s* 0 \s* \} ) /oxmsgc) {
+            $e_string .= $1;
+            $slash = 'div';
+        }
+
+# $$ --> $$
+        elsif ($string =~ /\G ( \$ \$ ) (?![\w\{]) /oxmsgc) {
+            $e_string .= $1;
+            $slash = 'div';
+        }
+
+# $1, $2, $3 --> $2, $3, $4 after s/// with multibyte anchoring
+# $1, $2, $3 --> $1, $2, $3 otherwise
+        elsif ($string =~ /\G \$ ([1-9][0-9]*) /oxmsgc) {
+            $e_string .= e_capture($1);
+            $slash = 'div';
+        }
+        elsif ($string =~ /\G \$ \{ \s* ([1-9][0-9]*) \s* \} /oxmsgc) {
+            $e_string .= e_capture($1);
+            $slash = 'div';
+        }
+
+# $$foo[ ... ] --> $ $foo->[ ... ]
+        elsif ($string =~ /\G \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \[ .+? \] ) /oxmsgc) {
+            $e_string .= e_capture($1.'->'.$2);
+            $slash = 'div';
+        }
+
+# $$foo{ ... } --> $ $foo->{ ... }
+        elsif ($string =~ /\G \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \{ .+? \} ) /oxmsgc) {
+            $e_string .= e_capture($1.'->'.$2);
+            $slash = 'div';
+        }
+
+# $$foo
+        elsif ($string =~ /\G \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) /oxmsgc) {
+            $e_string .= e_capture($1);
+            $slash = 'div';
+        }
+
+# ${ foo }
+        elsif ($string =~ /\G \$ \s* \{ ( \s* [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* \s* ) \} /oxmsgc) {
+            $e_string .= '${' . $1 . '}';
+            $slash = 'div';
+        }
+
+# ${ ... }
+        elsif ($string =~ /\G \$ \s* \{ \s* ( $qq_brace ) \s* \} /oxmsgc) {
+            $e_string .= e_capture($1);
+            $slash = 'div';
+        }
+
+# variable or function
+        #                             $ @ % & *     $ #
+        elsif ($string =~ /\G ( (?: [\$\@\%\&\*] | \$\# | -> | \b sub \b) \s* (?: split | chop | index | rindex | lc | uc | fc | chr | ord | reverse | getc | tr | y | q | qq | qx | qw | m | s | qr | glob | lstat | opendir | stat | unlink | chdir ) ) \b /oxmsgc) {
+            $e_string .= $1;
+            $slash = 'div';
+        }
+        #                           $ $ $ $ $ $ $ $ $ $ $ $ $ $
+        #                           $ @ # \ ' " / ? ( ) [ ] < >
+        elsif ($string =~ /\G ( \$[\$\@\#\\\'\"\/\?\(\)\[\]\<\>] ) /oxmsgc) {
+            $e_string .= $1;
+            $slash = 'div';
+        }
+
+# subroutines of package Elatin2
+        elsif ($string =~ /\G \b (CORE:: | ->[ ]* (?: atan2 | [a-z]{2,})) \b  /oxgc) { $e_string .= $1;                  $slash = 'm//'; }
+        elsif ($string =~ /\G \b Latin2::eval       (?= \s* \{ )                /oxgc) { $e_string .= 'eval';              $slash = 'm//'; }
+        elsif ($string =~ /\G \b Latin2::eval \b                                /oxgc) { $e_string .= 'eval Latin2::escape'; $slash = 'm//'; }
+        elsif ($string =~ /\G \b bytes::substr \b                             /oxgc) { $e_string .= 'substr';            $slash = 'm//'; }
+        elsif ($string =~ /\G \b chop \b                                      /oxgc) { $e_string .= 'Elatin2::chop';       $slash = 'm//'; }
+        elsif ($string =~ /\G \b bytes::index \b                              /oxgc) { $e_string .= 'index';             $slash = 'm//'; }
+        elsif ($string =~ /\G \b Latin2::index \b                               /oxgc) { $e_string .= 'Latin2::index';       $slash = 'm//'; }
+        elsif ($string =~ /\G \b index \b                                     /oxgc) { $e_string .= 'Elatin2::index';      $slash = 'm//'; }
+        elsif ($string =~ /\G \b bytes::rindex \b                             /oxgc) { $e_string .= 'rindex';            $slash = 'm//'; }
+        elsif ($string =~ /\G \b Latin2::rindex \b                              /oxgc) { $e_string .= 'Latin2::rindex';      $slash = 'm//'; }
+        elsif ($string =~ /\G \b rindex \b                                    /oxgc) { $e_string .= 'Elatin2::rindex';     $slash = 'm//'; }
+        elsif ($string =~ /\G \b lc      (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $e_string .= 'Elatin2::lc';         $slash = 'm//'; }
+        elsif ($string =~ /\G \b lcfirst (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $e_string .= 'Elatin2::lcfirst';    $slash = 'm//'; }
+        elsif ($string =~ /\G \b uc      (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $e_string .= 'Elatin2::uc';         $slash = 'm//'; }
+        elsif ($string =~ /\G \b ucfirst (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $e_string .= 'Elatin2::ucfirst';    $slash = 'm//'; }
+        elsif ($string =~ /\G \b fc      (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $e_string .= 'Elatin2::fc';         $slash = 'm//'; }
+
+        # "-s '' ..." means file test "-s 'filename' ..." (not means "- s/// ...")
+        elsif ($string =~ /\G -s                               \s+    \s* (\") ((?:$qq_char)+?)                (\") /oxgc) { $e_string .= '-s ' . e_qq('',  $1,$3,$2); $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ qq \s* (\#) ((?:$qq_char)+?)                (\#) /oxgc) { $e_string .= '-s ' . e_qq('qq',$1,$3,$2); $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ qq \s* (\() ((?:$qq_paren)+?)               (\)) /oxgc) { $e_string .= '-s ' . e_qq('qq',$1,$3,$2); $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ qq \s* (\{) ((?:$qq_brace)+?)               (\}) /oxgc) { $e_string .= '-s ' . e_qq('qq',$1,$3,$2); $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ qq \s* (\[) ((?:$qq_bracket)+?)             (\]) /oxgc) { $e_string .= '-s ' . e_qq('qq',$1,$3,$2); $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ qq \s* (\<) ((?:$qq_angle)+?)               (\>) /oxgc) { $e_string .= '-s ' . e_qq('qq',$1,$3,$2); $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ qq \s* (\S) ((?:$qq_char)+?)                (\1) /oxgc) { $e_string .= '-s ' . e_qq('qq',$1,$3,$2); $slash = 'm//'; }
+
+        elsif ($string =~ /\G -s                               \s+    \s* (\') ((?:\\\'|\\\\|$q_char)+?)       (\') /oxgc) { $e_string .= '-s ' . e_q ('',  $1,$3,$2); $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ q  \s* (\#) ((?:\\\#|\\\\|$q_char)+?)       (\#) /oxgc) { $e_string .= '-s ' . e_q ('q', $1,$3,$2); $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ q  \s* (\() ((?:\\\)|\\\\|$q_paren)+?)      (\)) /oxgc) { $e_string .= '-s ' . e_q ('q', $1,$3,$2); $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ q  \s* (\{) ((?:\\\}|\\\\|$q_brace)+?)      (\}) /oxgc) { $e_string .= '-s ' . e_q ('q', $1,$3,$2); $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ q  \s* (\[) ((?:\\\]|\\\\|$q_bracket)+?)    (\]) /oxgc) { $e_string .= '-s ' . e_q ('q', $1,$3,$2); $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ q  \s* (\<) ((?:\\\>|\\\\|$q_angle)+?)      (\>) /oxgc) { $e_string .= '-s ' . e_q ('q', $1,$3,$2); $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ q  \s* (\S) ((?:\\\1|\\\\|$q_char)+?)       (\1) /oxgc) { $e_string .= '-s ' . e_q ('q', $1,$3,$2); $slash = 'm//'; }
+
+        elsif ($string =~ /\G -s                               \s* (\$ \w+(?: ::\w+)* (?: (?: ->)? (?: [\$\@\%\&\*]\* | \$\#\* | \( (?:$qq_paren)*? \) | [\@\%\*]? \{ (?:$qq_brace)+? \} | [\@\%]? \[ (?:$qq_bracket)+? \] ) )*) /oxgc)
+                                                                                                                           { $e_string .= "-s $1";   $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s* \( ((?:$qq_paren)*?) \)                          /oxgc) { $e_string .= "-s ($1)"; $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               (?= \s+ [a-z]+)                                      /oxgc) { $e_string .= '-s';      $slash = 'm//'; }
+        elsif ($string =~ /\G -s                               \s+ (\w+)                                            /oxgc) { $e_string .= "-s $1";   $slash = 'm//'; }
+
+        elsif ($string =~ /\G \b bytes::length (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $e_string .= 'length';                   $slash = 'm//'; }
+        elsif ($string =~ /\G \b bytes::chr    (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $e_string .= 'chr';                      $slash = 'm//'; }
+        elsif ($string =~ /\G \b chr           (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $e_string .= 'Elatin2::chr';               $slash = 'm//'; }
+        elsif ($string =~ /\G \b bytes::ord    (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $e_string .= 'ord';                      $slash = 'div'; }
+        elsif ($string =~ /\G \b ord           (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $e_string .= $function_ord;              $slash = 'div'; }
+        elsif ($string =~ /\G \b glob          (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) /oxgc) { $e_string .= 'Elatin2::glob';              $slash = 'm//'; }
+        elsif ($string =~ /\G \b lc \b                                              /oxgc) { $e_string .= 'Elatin2::lc_';               $slash = 'm//'; }
+        elsif ($string =~ /\G \b lcfirst \b                                         /oxgc) { $e_string .= 'Elatin2::lcfirst_';          $slash = 'm//'; }
+        elsif ($string =~ /\G \b uc \b                                              /oxgc) { $e_string .= 'Elatin2::uc_';               $slash = 'm//'; }
+        elsif ($string =~ /\G \b ucfirst \b                                         /oxgc) { $e_string .= 'Elatin2::ucfirst_';          $slash = 'm//'; }
+        elsif ($string =~ /\G \b fc \b                                              /oxgc) { $e_string .= 'Elatin2::fc_';               $slash = 'm//'; }
+        elsif ($string =~ /\G    -s                              \b                 /oxgc) { $e_string .= '-s ';                      $slash = 'm//'; }
+
+        elsif ($string =~ /\G \b bytes::length \b                                   /oxgc) { $e_string .= 'length';                   $slash = 'm//'; }
+        elsif ($string =~ /\G \b bytes::chr \b                                      /oxgc) { $e_string .= 'chr';                      $slash = 'm//'; }
+        elsif ($string =~ /\G \b chr \b                                             /oxgc) { $e_string .= 'Elatin2::chr_';              $slash = 'm//'; }
+        elsif ($string =~ /\G \b bytes::ord \b                                      /oxgc) { $e_string .= 'ord';                      $slash = 'div'; }
+        elsif ($string =~ /\G \b ord \b                                             /oxgc) { $e_string .= $function_ord_;             $slash = 'div'; }
+        elsif ($string =~ /\G \b glob \b                                            /oxgc) { $e_string .= 'Elatin2::glob_';             $slash = 'm//'; }
+        elsif ($string =~ /\G \b reverse \b                                         /oxgc) { $e_string .= $function_reverse;          $slash = 'm//'; }
+        elsif ($string =~ /\G \b getc \b                                            /oxgc) { $e_string .= $function_getc;             $slash = 'm//'; }
+# split
+        elsif ($string =~ /\G \b (split) \b (?! \s* => ) /oxgc) {
+            $slash = 'm//';
+
+            my $e = '';
+            while ($string =~ /\G ( \s+ | \( | \#.* ) /oxgc) {
+                $e .= $1;
+            }
+
+# end of split
+            if    ($string =~ /\G (?= [,;\)\}\]] )          /oxgc) { return 'Elatin2::split' . $e;                                           }
+
+# split scalar value
+            elsif ($string =~ /\G ( [\$\@\&\*] $qq_scalar ) /oxgc) { $e_string .= 'Elatin2::split' . $e . e_string($1);  next E_STRING_LOOP; }
+
+# split literal space
+            elsif ($string =~ /\G \b qq       (\#) [ ] (\#) /oxgc) { $e_string .= 'Elatin2::split' . $e . qq  {qq$1 $2}; next E_STRING_LOOP; }
+            elsif ($string =~ /\G \b qq (\s*) (\() [ ] (\)) /oxgc) { $e_string .= 'Elatin2::split' . $e . qq{$1qq$2 $3}; next E_STRING_LOOP; }
+            elsif ($string =~ /\G \b qq (\s*) (\{) [ ] (\}) /oxgc) { $e_string .= 'Elatin2::split' . $e . qq{$1qq$2 $3}; next E_STRING_LOOP; }
+            elsif ($string =~ /\G \b qq (\s*) (\[) [ ] (\]) /oxgc) { $e_string .= 'Elatin2::split' . $e . qq{$1qq$2 $3}; next E_STRING_LOOP; }
+            elsif ($string =~ /\G \b qq (\s*) (\<) [ ] (\>) /oxgc) { $e_string .= 'Elatin2::split' . $e . qq{$1qq$2 $3}; next E_STRING_LOOP; }
+            elsif ($string =~ /\G \b qq (\s*) (\S) [ ] (\2) /oxgc) { $e_string .= 'Elatin2::split' . $e . qq{$1qq$2 $3}; next E_STRING_LOOP; }
+            elsif ($string =~ /\G \b q        (\#) [ ] (\#) /oxgc) { $e_string .= 'Elatin2::split' . $e . qq   {q$1 $2}; next E_STRING_LOOP; }
+            elsif ($string =~ /\G \b q  (\s*) (\() [ ] (\)) /oxgc) { $e_string .= 'Elatin2::split' . $e . qq {$1q$2 $3}; next E_STRING_LOOP; }
+            elsif ($string =~ /\G \b q  (\s*) (\{) [ ] (\}) /oxgc) { $e_string .= 'Elatin2::split' . $e . qq {$1q$2 $3}; next E_STRING_LOOP; }
+            elsif ($string =~ /\G \b q  (\s*) (\[) [ ] (\]) /oxgc) { $e_string .= 'Elatin2::split' . $e . qq {$1q$2 $3}; next E_STRING_LOOP; }
+            elsif ($string =~ /\G \b q  (\s*) (\<) [ ] (\>) /oxgc) { $e_string .= 'Elatin2::split' . $e . qq {$1q$2 $3}; next E_STRING_LOOP; }
+            elsif ($string =~ /\G \b q  (\s*) (\S) [ ] (\2) /oxgc) { $e_string .= 'Elatin2::split' . $e . qq {$1q$2 $3}; next E_STRING_LOOP; }
+            elsif ($string =~ /\G                ' [ ] '    /oxgc) { $e_string .= 'Elatin2::split' . $e . qq     {' '};  next E_STRING_LOOP; }
+            elsif ($string =~ /\G                " [ ] "    /oxgc) { $e_string .= 'Elatin2::split' . $e . qq     {" "};  next E_STRING_LOOP; }
+
+# split qq//
+            elsif ($string =~ /\G \b (qq) \b /oxgc) {
+                if ($string =~ /\G (\#) ((?:$qq_char)*?) (\#) /oxgc)                        { $e_string .= e_split($e.'qr',$1,$3,$2,'');   next E_STRING_LOOP; } # qq# #  --> qr # #
+                else {
+                    while ($string !~ /\G \z/oxgc) {
+                        if    ($string =~ /\G (\s+|\#.*)                             /oxgc) { $e_string .= $e . $1; }
+                        elsif ($string =~ /\G (\()          ((?:$qq_paren)*?)   (\)) /oxgc) { $e_string .= e_split($e.'qr',$1,$3,$2,'');   next E_STRING_LOOP; } # qq ( ) --> qr ( )
+                        elsif ($string =~ /\G (\{)          ((?:$qq_brace)*?)   (\}) /oxgc) { $e_string .= e_split($e.'qr',$1,$3,$2,'');   next E_STRING_LOOP; } # qq { } --> qr { }
+                        elsif ($string =~ /\G (\[)          ((?:$qq_bracket)*?) (\]) /oxgc) { $e_string .= e_split($e.'qr',$1,$3,$2,'');   next E_STRING_LOOP; } # qq [ ] --> qr [ ]
+                        elsif ($string =~ /\G (\<)          ((?:$qq_angle)*?)   (\>) /oxgc) { $e_string .= e_split($e.'qr',$1,$3,$2,'');   next E_STRING_LOOP; } # qq < > --> qr < >
+                        elsif ($string =~ /\G ([*\-:?\\^|]) ((?:$qq_char)*?)    (\1) /oxgc) { $e_string .= e_split($e.'qr','{','}',$2,''); next E_STRING_LOOP; } # qq | | --> qr { }
+                        elsif ($string =~ /\G (\S)          ((?:$qq_char)*?)    (\1) /oxgc) { $e_string .= e_split($e.'qr',$1,$3,$2,'');   next E_STRING_LOOP; } # qq * * --> qr * *
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+            }
+
+# split qr//
+            elsif ($string =~ /\G \b (qr) \b /oxgc) {
+                if ($string =~ /\G (\#) ((?:$qq_char)*?) (\#) ([imosxpadlubB]*) /oxgc)                        { $e_string .= e_split  ($e.'qr',$1,$3,$2,$4);   next E_STRING_LOOP; } # qr# #
+                else {
+                    while ($string !~ /\G \z/oxgc) {
+                        if    ($string =~ /\G (\s+|\#.*)                                               /oxgc) { $e_string .= $e . $1; }
+                        elsif ($string =~ /\G (\()          ((?:$qq_paren)*?)   (\)) ([imosxpadlubB]*) /oxgc) { $e_string .= e_split  ($e.'qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr ( )
+                        elsif ($string =~ /\G (\{)          ((?:$qq_brace)*?)   (\}) ([imosxpadlubB]*) /oxgc) { $e_string .= e_split  ($e.'qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr { }
+                        elsif ($string =~ /\G (\[)          ((?:$qq_bracket)*?) (\]) ([imosxpadlubB]*) /oxgc) { $e_string .= e_split  ($e.'qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr [ ]
+                        elsif ($string =~ /\G (\<)          ((?:$qq_angle)*?)   (\>) ([imosxpadlubB]*) /oxgc) { $e_string .= e_split  ($e.'qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr < >
+                        elsif ($string =~ /\G (\')          ((?:$qq_char)*?)    (\') ([imosxpadlubB]*) /oxgc) { $e_string .= e_split_q($e.'qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr ' '
+                        elsif ($string =~ /\G ([*\-:?\\^|]) ((?:$qq_char)*?)    (\1) ([imosxpadlubB]*) /oxgc) { $e_string .= e_split  ($e.'qr','{','}',$2,$4); next E_STRING_LOOP; } # qr | | --> qr { }
+                        elsif ($string =~ /\G (\S)          ((?:$qq_char)*?)    (\1) ([imosxpadlubB]*) /oxgc) { $e_string .= e_split  ($e.'qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr * *
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+            }
+
+# split q//
+            elsif ($string =~ /\G \b (q) \b /oxgc) {
+                if ($string =~ /\G (\#) ((?:\\\#|\\\\|$q_char)*?) (\#) /oxgc)                    { $e_string .= e_split_q($e.'qr',$1,$3,$2,'');   next E_STRING_LOOP; } # q# #  --> qr # #
+                else {
+                    while ($string !~ /\G \z/oxgc) {
+                        if    ($string =~ /\G (\s+|\#.*)                                  /oxgc) { $e_string .= $e . $1; }
+                        elsif ($string =~ /\G (\() ((?:\\\\|\\\)|\\\(|$q_paren)*?)   (\)) /oxgc) { $e_string .= e_split_q($e.'qr',$1,$3,$2,'');   next E_STRING_LOOP; } # q ( ) --> qr ( )
+                        elsif ($string =~ /\G (\{) ((?:\\\\|\\\}|\\\{|$q_brace)*?)   (\}) /oxgc) { $e_string .= e_split_q($e.'qr',$1,$3,$2,'');   next E_STRING_LOOP; } # q { } --> qr { }
+                        elsif ($string =~ /\G (\[) ((?:\\\\|\\\]|\\\[|$q_bracket)*?) (\]) /oxgc) { $e_string .= e_split_q($e.'qr',$1,$3,$2,'');   next E_STRING_LOOP; } # q [ ] --> qr [ ]
+                        elsif ($string =~ /\G (\<) ((?:\\\\|\\\>|\\\<|$q_angle)*?)   (\>) /oxgc) { $e_string .= e_split_q($e.'qr',$1,$3,$2,'');   next E_STRING_LOOP; } # q < > --> qr < >
+                        elsif ($string =~ /\G ([*\-:?\\^|])       ((?:$q_char)*?)    (\1) /oxgc) { $e_string .= e_split_q($e.'qr','{','}',$2,''); next E_STRING_LOOP; } # q | | --> qr { }
+                        elsif ($string =~ /\G (\S) ((?:\\\\|\\\1|     $q_char)*?)    (\1) /oxgc) { $e_string .= e_split_q($e.'qr',$1,$3,$2,'');   next E_STRING_LOOP; } # q * * --> qr * *
+                    }
+                    die __FILE__, ": Can't find string terminator anywhere before EOF";
+                }
+            }
+
+# split m//
+            elsif ($string =~ /\G \b (m) \b /oxgc) {
+                if ($string =~ /\G (\#) ((?:$qq_char)*?) (\#) ([cgimosxpadlubB]*) /oxgc)                        { $e_string .= e_split  ($e.'qr',$1,$3,$2,$4);   next E_STRING_LOOP; } # m# #  --> qr # #
+                else {
+                    while ($string !~ /\G \z/oxgc) {
+                        if    ($string =~ /\G (\s+|\#.*)                                                 /oxgc) { $e_string .= $e . $1; }
+                        elsif ($string =~ /\G (\()          ((?:$qq_paren)*?)   (\)) ([cgimosxpadlubB]*) /oxgc) { $e_string .= e_split  ($e.'qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m ( ) --> qr ( )
+                        elsif ($string =~ /\G (\{)          ((?:$qq_brace)*?)   (\}) ([cgimosxpadlubB]*) /oxgc) { $e_string .= e_split  ($e.'qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m { } --> qr { }
+                        elsif ($string =~ /\G (\[)          ((?:$qq_bracket)*?) (\]) ([cgimosxpadlubB]*) /oxgc) { $e_string .= e_split  ($e.'qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m [ ] --> qr [ ]
+                        elsif ($string =~ /\G (\<)          ((?:$qq_angle)*?)   (\>) ([cgimosxpadlubB]*) /oxgc) { $e_string .= e_split  ($e.'qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m < > --> qr < >
+                        elsif ($string =~ /\G (\')          ((?:$qq_char)*?)    (\') ([cgimosxpadlubB]*) /oxgc) { $e_string .= e_split_q($e.'qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m ' ' --> qr ' '
+                        elsif ($string =~ /\G ([*\-:?\\^|]) ((?:$qq_char)*?)    (\1) ([cgimosxpadlubB]*) /oxgc) { $e_string .= e_split  ($e.'qr','{','}',$2,$4); next E_STRING_LOOP; } # m | | --> qr { }
+                        elsif ($string =~ /\G (\S)          ((?:$qq_char)*?)    (\1) ([cgimosxpadlubB]*) /oxgc) { $e_string .= e_split  ($e.'qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m * * --> qr * *
+                    }
+                    die __FILE__, ": Search pattern not terminated";
+                }
+            }
+
+# split ''
+            elsif ($string =~ /\G (\') /oxgc) {
+                my $q_string = '';
+                while ($string !~ /\G \z/oxgc) {
+                    if    ($string =~ /\G (\\\\)    /oxgc) { $q_string .= $1; }
+                    elsif ($string =~ /\G (\\\')    /oxgc) { $q_string .= $1; } # splitqr'' --> split qr''
+                    elsif ($string =~ /\G \'        /oxgc)                      { $e_string .= e_split_q($e.q{ qr},"'","'",$q_string,''); next E_STRING_LOOP; } # ' ' --> qr ' '
+                    elsif ($string =~ /\G ($q_char) /oxgc) { $q_string .= $1; }
+                }
+                die __FILE__, ": Can't find string terminator anywhere before EOF";
+            }
+
+# split ""
+            elsif ($string =~ /\G (\") /oxgc) {
+                my $qq_string = '';
+                while ($string !~ /\G \z/oxgc) {
+                    if    ($string =~ /\G (\\\\)    /oxgc) { $qq_string .= $1; }
+                    elsif ($string =~ /\G (\\\")    /oxgc) { $qq_string .= $1; } # splitqr"" --> split qr""
+                    elsif ($string =~ /\G \"        /oxgc)                       { $e_string .= e_split($e.q{ qr},'"','"',$qq_string,''); next E_STRING_LOOP; } # " " --> qr " "
+                    elsif ($string =~ /\G ($q_char) /oxgc) { $qq_string .= $1; }
+                }
+                die __FILE__, ": Can't find string terminator anywhere before EOF";
+            }
+
+# split //
+            elsif ($string =~ /\G (\/) /oxgc) {
+                my $regexp = '';
+                while ($string !~ /\G \z/oxgc) {
+                    if    ($string =~ /\G (\\\\)                 /oxgc) { $regexp .= $1; }
+                    elsif ($string =~ /\G (\\\/)                 /oxgc) { $regexp .= $1; } # splitqr// --> split qr//
+                    elsif ($string =~ /\G \/ ([cgimosxpadlubB]*) /oxgc)                    { $e_string .= e_split($e.q{ qr}, '/','/',$regexp,$1); next E_STRING_LOOP; } # / / --> qr / /
+                    elsif ($string =~ /\G ($q_char)              /oxgc) { $regexp .= $1; }
+                }
+                die __FILE__, ": Search pattern not terminated";
+            }
+        }
+
+# qq//
+        elsif ($string =~ /\G \b (qq) \b /oxgc) {
+            my $ope = $1;
+            if ($string =~ /\G (\#) ((?:$qq_char)*?) (\#) /oxgc) { # qq# #
+                $e_string .= e_qq($ope,$1,$3,$2);
+            }
+            else {
+                my $e = '';
+                while ($string !~ /\G \z/oxgc) {
+                    if    ($string =~ /\G (\s+|\#.*)                    /oxgc) { $e .= $1; }
+                    elsif ($string =~ /\G (\() ((?:$qq_paren)*?)   (\)) /oxgc) { $e_string .= $e . e_qq($ope,$1,$3,$2); next E_STRING_LOOP; } # qq ( )
+                    elsif ($string =~ /\G (\{) ((?:$qq_brace)*?)   (\}) /oxgc) { $e_string .= $e . e_qq($ope,$1,$3,$2); next E_STRING_LOOP; } # qq { }
+                    elsif ($string =~ /\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) { $e_string .= $e . e_qq($ope,$1,$3,$2); next E_STRING_LOOP; } # qq [ ]
+                    elsif ($string =~ /\G (\<) ((?:$qq_angle)*?)   (\>) /oxgc) { $e_string .= $e . e_qq($ope,$1,$3,$2); next E_STRING_LOOP; } # qq < >
+                    elsif ($string =~ /\G (\S) ((?:$qq_char)*?)    (\1) /oxgc) { $e_string .= $e . e_qq($ope,$1,$3,$2); next E_STRING_LOOP; } # qq * *
+                }
+                die __FILE__, ": Can't find string terminator anywhere before EOF";
+            }
+        }
+
+# qx//
+        elsif ($string =~ /\G \b (qx) \b /oxgc) {
+            my $ope = $1;
+            if ($string =~ /\G (\#) ((?:$qq_char)*?) (\#) /oxgc) { # qx# #
+                $e_string .= e_qq($ope,$1,$3,$2);
+            }
+            else {
+                my $e = '';
+                while ($string !~ /\G \z/oxgc) {
+                    if    ($string =~ /\G (\s+|\#.*)                    /oxgc) { $e .= $1; }
+                    elsif ($string =~ /\G (\() ((?:$qq_paren)*?)   (\)) /oxgc) { $e_string .= $e . e_qq($ope,$1,$3,$2); next E_STRING_LOOP; } # qx ( )
+                    elsif ($string =~ /\G (\{) ((?:$qq_brace)*?)   (\}) /oxgc) { $e_string .= $e . e_qq($ope,$1,$3,$2); next E_STRING_LOOP; } # qx { }
+                    elsif ($string =~ /\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) { $e_string .= $e . e_qq($ope,$1,$3,$2); next E_STRING_LOOP; } # qx [ ]
+                    elsif ($string =~ /\G (\<) ((?:$qq_angle)*?)   (\>) /oxgc) { $e_string .= $e . e_qq($ope,$1,$3,$2); next E_STRING_LOOP; } # qx < >
+                    elsif ($string =~ /\G (\') ((?:$qq_char)*?)    (\') /oxgc) { $e_string .= $e . e_q ($ope,$1,$3,$2); next E_STRING_LOOP; } # qx ' '
+                    elsif ($string =~ /\G (\S) ((?:$qq_char)*?)    (\1) /oxgc) { $e_string .= $e . e_qq($ope,$1,$3,$2); next E_STRING_LOOP; } # qx * *
+                }
+                die __FILE__, ": Can't find string terminator anywhere before EOF";
+            }
+        }
+
+# q//
+        elsif ($string =~ /\G \b (q) \b /oxgc) {
+            my $ope = $1;
+            if ($string =~ /\G (\#) ((?:\\\#|\\\\|$q_char)*?) (\#) /oxgc) { # q# #
+                $e_string .= e_q($ope,$1,$3,$2);
+            }
+            else {
+                my $e = '';
+                while ($string !~ /\G \z/oxgc) {
+                    if    ($string =~ /\G (\s+|\#.*)                                  /oxgc) { $e .= $1; }
+                    elsif ($string =~ /\G (\() ((?:\\\\|\\\)|\\\(|$q_paren)*?)   (\)) /oxgc) { $e_string .= $e . e_q($ope,$1,$3,$2); next E_STRING_LOOP; } # q ( )
+                    elsif ($string =~ /\G (\{) ((?:\\\\|\\\}|\\\{|$q_brace)*?)   (\}) /oxgc) { $e_string .= $e . e_q($ope,$1,$3,$2); next E_STRING_LOOP; } # q { }
+                    elsif ($string =~ /\G (\[) ((?:\\\\|\\\]|\\\[|$q_bracket)*?) (\]) /oxgc) { $e_string .= $e . e_q($ope,$1,$3,$2); next E_STRING_LOOP; } # q [ ]
+                    elsif ($string =~ /\G (\<) ((?:\\\\|\\\>|\\\<|$q_angle)*?)   (\>) /oxgc) { $e_string .= $e . e_q($ope,$1,$3,$2); next E_STRING_LOOP; } # q < >
+                    elsif ($string =~ /\G (\S) ((?:\\\\|\\\1|     $q_char)*?)    (\1) /oxgc) { $e_string .= $e . e_q($ope,$1,$3,$2); next E_STRING_LOOP; } # q * *
+                }
+                die __FILE__, ": Can't find string terminator anywhere before EOF";
+            }
+        }
+
+# ''
+        elsif ($string =~ /\G (?<![\w\$\@\%\&\*]) (\') ((?:\\\'|\\\\|$q_char)*?) (\') /oxgc) { $e_string .= e_q('',$1,$3,$2);  }
+
+# ""
+        elsif ($string =~ /\G (\") ((?:$qq_char)*?) (\")                              /oxgc) { $e_string .= e_qq('',$1,$3,$2); }
+
+# ``
+        elsif ($string =~ /\G (\`) ((?:$qq_char)*?) (\`)                              /oxgc) { $e_string .= e_qq('',$1,$3,$2); }
+
+# <<= <=> <= < operator
+        elsif ($string =~ /\G ( <<= | <=> | <= | < ) (?= \s* [A-Za-z_0-9'"`\$\@\&\*\(\+\-] )/oxgc)
+                                                                                             { $e_string .= $1;                }
+
+# <FILEHANDLE>
+        elsif ($string =~ /\G (<[\$]?[A-Za-z_][A-Za-z_0-9]*>)                         /oxgc) { $e_string .= $1;                }
+
+# <WILDCARD>   --- glob
+        elsif ($string =~ /\G < ((?:$q_char)+?) > /oxgc) {
+            $e_string .= 'Elatin2::glob("' . $1 . '")';
+        }
+
+# << (bit shift)   --- not here document
+        elsif ($string =~ /\G ( << \s* ) (?= [0-9\$\@\&] ) /oxgc) { $slash = 'm//'; $e_string .= $1; }
+
+# <<'HEREDOC'
+        elsif ($string =~ /\G ( << '([a-zA-Z_0-9]*)' ) /oxgc) {
+            $slash = 'm//';
+            my $here_quote = $1;
+            my $delimiter  = $2;
+
+            # get here document
+            if ($here_script eq '') {
+                $here_script = CORE::substr $_, pos $_;
+                $here_script =~ s/.*?\n//oxm;
+            }
+            if ($here_script =~ s/\A (.*?) \n $delimiter \n //xms) {
+                push @heredoc, $1 . qq{\n$delimiter\n};
+                push @heredoc_delimiter, $delimiter;
+            }
+            else {
+                die __FILE__, ": Can't find string terminator $delimiter anywhere before EOF";
+            }
+            $e_string .= $here_quote;
+        }
+
+# <<\HEREDOC
+        elsif ($string =~ /\G ( << \\([a-zA-Z_0-9]+) ) /oxgc) {
+            $slash = 'm//';
+            my $here_quote = $1;
+            my $delimiter  = $2;
+
+            # get here document
+            if ($here_script eq '') {
+                $here_script = CORE::substr $_, pos $_;
+                $here_script =~ s/.*?\n//oxm;
+            }
+            if ($here_script =~ s/\A (.*?) \n $delimiter \n //xms) {
+                push @heredoc, $1 . qq{\n$delimiter\n};
+                push @heredoc_delimiter, $delimiter;
+            }
+            else {
+                die __FILE__, ": Can't find string terminator $delimiter anywhere before EOF";
+            }
+            $e_string .= $here_quote;
+        }
+
+# <<"HEREDOC"
+        elsif ($string =~ /\G ( << "([a-zA-Z_0-9]*)" ) /oxgc) {
+            $slash = 'm//';
+            my $here_quote = $1;
+            my $delimiter  = $2;
+
+            # get here document
+            if ($here_script eq '') {
+                $here_script = CORE::substr $_, pos $_;
+                $here_script =~ s/.*?\n//oxm;
+            }
+            if ($here_script =~ s/\A (.*?) \n $delimiter \n //xms) {
+                push @heredoc, e_heredoc($1) . qq{\n$delimiter\n};
+                push @heredoc_delimiter, $delimiter;
+            }
+            else {
+                die __FILE__, ": Can't find string terminator $delimiter anywhere before EOF";
+            }
+            $e_string .= $here_quote;
+        }
+
+# <<HEREDOC
+        elsif ($string =~ /\G ( << ([a-zA-Z_0-9]+) ) /oxgc) {
+            $slash = 'm//';
+            my $here_quote = $1;
+            my $delimiter  = $2;
+
+            # get here document
+            if ($here_script eq '') {
+                $here_script = CORE::substr $_, pos $_;
+                $here_script =~ s/.*?\n//oxm;
+            }
+            if ($here_script =~ s/\A (.*?) \n $delimiter \n //xms) {
+                push @heredoc, e_heredoc($1) . qq{\n$delimiter\n};
+                push @heredoc_delimiter, $delimiter;
+            }
+            else {
+                die __FILE__, ": Can't find string terminator $delimiter anywhere before EOF";
+            }
+            $e_string .= $here_quote;
+        }
+
+# <<`HEREDOC`
+        elsif ($string =~ /\G ( << `([a-zA-Z_0-9]*)` ) /oxgc) {
+            $slash = 'm//';
+            my $here_quote = $1;
+            my $delimiter  = $2;
+
+            # get here document
+            if ($here_script eq '') {
+                $here_script = CORE::substr $_, pos $_;
+                $here_script =~ s/.*?\n//oxm;
+            }
+            if ($here_script =~ s/\A (.*?) \n $delimiter \n //xms) {
+                push @heredoc, e_heredoc($1) . qq{\n$delimiter\n};
+                push @heredoc_delimiter, $delimiter;
+            }
+            else {
+                die __FILE__, ": Can't find string terminator $delimiter anywhere before EOF";
+            }
+            $e_string .= $here_quote;
+        }
+
+        # any operator before div
+        elsif ($string =~ /\G (
+            -- | \+\+ |
+            [\)\}\]]
+
+            ) /oxgc) { $slash = 'div'; $e_string .= $1; }
+
+        # yada-yada or triple-dot operator
+        elsif ($string =~ /\G (
+            \.\.\.
+
+            ) /oxgc) { $slash = 'm//'; $e_string .= q{die('Unimplemented')}; }
+
+        # any operator before m//
+        elsif ($string =~ /\G (
+
+            !~~ | !~ | != | ! |
+            %= | % |
+            &&= | && | &= | & |
+            -= | -> | - |
+            :\s*= |
+            : |
+            <<= | <=> | <= | < |
+            == | => | =~ | = |
+            >>= | >> | >= | > |
+            \*\*= | \*\* | \*= | \* |
+            \+= | \+ |
+            \.\. | \.= | \. |
+            \/\/= | \/\/ |
+            \/= | \/ |
+            \? |
+            \\ |
+            \^= | \^ |
+            \b x= |
+            \|\|= | \|\| | \|= | \| |
+            ~~ | ~ |
+            \b(?: and | cmp | eq | ge | gt | le | lt | ne | not | or | xor | x )\b |
+            \b(?: print )\b |
+
+            [,;\(\{\[]
+
+            ) /oxgc) { $slash = 'm//'; $e_string .= $1; }
+
+        # other any character
+        elsif ($string =~ /\G ($q_char) /oxgc) { $e_string .= $1; }
+
+        # system error
+        else {
+            die __FILE__, ": Oops, this shouldn't happen!";
+        }
+    }
+
+    return $e_string;
+}
+
+#
+# character class
+#
+sub character_class {
+    my($char,$modifier) = @_;
+
+    if ($char eq '.') {
+        if ($modifier =~ /s/) {
+            return '${Elatin2::dot_s}';
+        }
+        else {
+            return '${Elatin2::dot}';
+        }
+    }
+    else {
+        return Elatin2::classic_character_class($char);
+    }
+}
+
+#
+# escape capture ($1, $2, $3, ...)
+#
+sub e_capture {
+
+    return join '', '${',                $_[0],  '}';
+}
+
+#
+# escape transliteration (tr/// or y///)
+#
+sub e_tr {
+    my($variable,$charclass,$e,$charclass2,$modifier) = @_;
+    my $e_tr = '';
+    $modifier ||= '';
+
+    $slash = 'div';
+
+    # quote character class 1
+    $charclass  = q_tr($charclass);
+
+    # quote character class 2
+    $charclass2 = q_tr($charclass2);
+
+    # /b /B modifier
+    if ($modifier =~ tr/bB//d) {
+        if ($variable eq '') {
+            $e_tr = qq{tr$charclass$e$charclass2$modifier};
+        }
+        else {
+            $e_tr = qq{$variable${bind_operator}tr$charclass$e$charclass2$modifier};
+        }
+    }
+    else {
+        if ($variable eq '') {
+            $e_tr = qq{Elatin2::tr(\$_,' =~ ',$charclass,$e$charclass2,'$modifier')};
+        }
+        else {
+            $e_tr = qq{Elatin2::tr($variable,'$bind_operator',$charclass,$e$charclass2,'$modifier')};
+        }
+    }
+
+    # clear tr/// variable
+    $tr_variable = '';
+    $bind_operator = '';
+
+    return $e_tr;
+}
+
+#
+# quote for escape transliteration (tr/// or y///)
+#
+sub q_tr {
+    my($charclass) = @_;
+
+    # quote character class
+    if ($charclass !~ /'/oxms) {
+        return e_q('',  "'", "'", $charclass); # --> q' '
+    }
+    elsif ($charclass !~ /\//oxms) {
+        return e_q('q',  '/', '/', $charclass); # --> q/ /
+    }
+    elsif ($charclass !~ /\#/oxms) {
+        return e_q('q',  '#', '#', $charclass); # --> q# #
+    }
+    elsif ($charclass !~ /[\<\>]/oxms) {
+        return e_q('q', '<', '>', $charclass); # --> q< >
+    }
+    elsif ($charclass !~ /[\(\)]/oxms) {
+        return e_q('q', '(', ')', $charclass); # --> q( )
+    }
+    elsif ($charclass !~ /[\{\}]/oxms) {
+        return e_q('q', '{', '}', $charclass); # --> q{ }
+    }
+    else {
+        for my $char (qw( ! " $ % & * + . : = ? @ ^ ` | ~ ), "\x00".."\x1F", "\x7F", "\xFF") {
+            if ($charclass !~ /\Q$char\E/xms) {
+                return e_q('q', $char, $char, $charclass);
+            }
+        }
+    }
+
+    return e_q('q', '{', '}', $charclass);
+}
+
+#
+# escape q string (q//, '')
+#
+sub e_q {
+    my($ope,$delimiter,$end_delimiter,$string) = @_;
+
+    $slash = 'div';
+
+    return join '', $ope, $delimiter, $string, $end_delimiter;
+}
+
+#
+# escape qq string (qq//, "", qx//, ``)
+#
+sub e_qq {
+    my($ope,$delimiter,$end_delimiter,$string) = @_;
+
+    $slash = 'div';
+
+    my $left_e  = 0;
+    my $right_e = 0;
+    my @char = $string =~ /\G(
+        \\o\{ [0-7]+          \}   |
+        \\x\{ [0-9A-Fa-f]+    \}   |
+        \\N\{ [^0-9\}][^\}]* \} |
+        \$` | \$\{`\} | \$ \s* PREMATCH  | \$ \s* \{ \s* PREMATCH  \s* \} | \$ \s* \{\^PREMATCH\}  |
+        \$& | \$\{&\} | \$ \s* MATCH     | \$ \s* \{ \s* MATCH     \s* \} | \$ \s* \{\^MATCH\}     |
+                        \$ \s* POSTMATCH | \$ \s* \{ \s* POSTMATCH \s* \} | \$ \s* \{\^POSTMATCH\} |
+        \$ \s* \d+                 |
+        \$ \s* \{ \s* \d+ \s* \}   |
+        \$ \$ (?![\w\{])           |
+        \$ \s* \$ \s* $qq_variable |
+        \\?(?:$q_char)
+    )/oxmsg;
+
+    for (my $i=0; $i <= $#char; $i++) {
+
+        # "\L\u" --> "\u\L"
+        if (($char[$i] eq '\L') and ($char[$i+1] eq '\u')) {
+            @char[$i,$i+1] = @char[$i+1,$i];
+        }
+
+        # "\U\l" --> "\l\U"
+        elsif (($char[$i] eq '\U') and ($char[$i+1] eq '\l')) {
+            @char[$i,$i+1] = @char[$i+1,$i];
+        }
+
+        # octal escape sequence
+        elsif ($char[$i] =~ /\A \\o \{ ([0-7]+) \} \z/oxms) {
+            $char[$i] = Elatin2::octchr($1);
+        }
+
+        # hexadecimal escape sequence
+        elsif ($char[$i] =~ /\A \\x \{ ([0-9A-Fa-f]+) \} \z/oxms) {
+            $char[$i] = Elatin2::hexchr($1);
+        }
+
+        # \N{CHARNAME} --> N{CHARNAME}
+        elsif ($char[$i] =~ /\A \\ ( N\{ ([^0-9\}][^\}]*) \} ) \z/oxms) {
+            $char[$i] = $1;
+        }
+
+        if (0) {
+        }
+
+        # \F
+        #
+        # P.69 Table 2-6. Translation escapes
+        # in Chapter 2: Bits and Pieces
+        # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+        # (and so on)
+
+        # \u \l \U \L \F \Q \E
+        elsif ($char[$i] =~ /\A ([<>]) \z/oxms) {
+            if ($right_e < $left_e) {
+                $char[$i] = '\\' . $char[$i];
+            }
+        }
+        elsif ($char[$i] eq '\u') {
+
+            # "STRING @{[ LIST EXPR ]} MORE STRING"
+
+            # P.257 Other Tricks You Can Do with Hard References
+            # in Chapter 8: References
+            # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
+            # P.353 Other Tricks You Can Do with Hard References
+            # in Chapter 8: References
+            # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+
+            # (and so on)
+
+            $char[$i] = '@{[Elatin2::ucfirst qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\l') {
+            $char[$i] = '@{[Elatin2::lcfirst qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\U') {
+            $char[$i] = '@{[Elatin2::uc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\L') {
+            $char[$i] = '@{[Elatin2::lc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\F') {
+            $char[$i] = '@{[Elatin2::fc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\Q') {
+            $char[$i] = '@{[CORE::quotemeta qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\E') {
+            if ($right_e < $left_e) {
+                $char[$i] = '>]}';
+                $right_e++;
+            }
+            else {
+                $char[$i] = '';
+            }
+        }
+        elsif ($char[$i] eq '\Q') {
+            while (1) {
+                if (++$i > $#char) {
+                    last;
+                }
+                if ($char[$i] eq '\E') {
+                    last;
+                }
+            }
+        }
+        elsif ($char[$i] eq '\E') {
+        }
+
+        # $0 --> $0
+        elsif ($char[$i] =~ /\A \$ 0 \z/oxms) {
+        }
+        elsif ($char[$i] =~ /\A \$ \{ \s* 0 \s* \} \z/oxms) {
+        }
+
+        # $$ --> $$
+        elsif ($char[$i] =~ /\A \$\$ \z/oxms) {
+        }
+
+        # $1, $2, $3 --> $2, $3, $4 after s/// with multibyte anchoring
+        # $1, $2, $3 --> $1, $2, $3 otherwise
+        elsif ($char[$i] =~ /\A \$ ([1-9][0-9]*) \z/oxms) {
+            $char[$i] = e_capture($1);
+        }
+        elsif ($char[$i] =~ /\A \$ \{ \s* ([1-9][0-9]*) \s* \} \z/oxms) {
+            $char[$i] = e_capture($1);
+        }
+
+        # $$foo[ ... ] --> $ $foo->[ ... ]
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \[ (?:$qq_bracket)*? \] ) \z/oxms) {
+            $char[$i] = e_capture($1.'->'.$2);
+        }
+
+        # $$foo{ ... } --> $ $foo->{ ... }
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \{ (?:$qq_brace)*? \} ) \z/oxms) {
+            $char[$i] = e_capture($1.'->'.$2);
+        }
+
+        # $$foo
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) \z/oxms) {
+            $char[$i] = e_capture($1);
+        }
+
+        # $`, ${`}, $PREMATCH, ${PREMATCH}, ${^PREMATCH} --> Elatin2::PREMATCH()
+        elsif ($char[$i] =~ /\A ( \$` | \$\{`\} | \$ \s* PREMATCH  | \$ \s* \{ \s* PREMATCH \s* \}  | \$ \s* \{\^PREMATCH\}  ) \z/oxmsgc) {
+            $char[$i] = '@{[Elatin2::PREMATCH()]}';
+        }
+
+        # $&, ${&}, $MATCH, ${MATCH}, ${^MATCH} --> Elatin2::MATCH()
+        elsif ($char[$i] =~ /\A ( \$& | \$\{&\} | \$ \s* MATCH     | \$ \s* \{ \s* MATCH     \s* \} | \$ \s* \{\^MATCH\}     ) \z/oxmsgc) {
+            $char[$i] = '@{[Elatin2::MATCH()]}';
+        }
+
+        # $POSTMATCH, ${POSTMATCH}, ${^POSTMATCH} --> Elatin2::POSTMATCH()
+        elsif ($char[$i] =~ /\A (                 \$ \s* POSTMATCH | \$ \s* \{ \s* POSTMATCH \s* \} | \$ \s* \{\^POSTMATCH\} ) \z/oxmsgc) {
+            $char[$i] = '@{[Elatin2::POSTMATCH()]}';
+        }
+
+        # ${ foo } --> ${ foo }
+        elsif ($char[$i] =~ /\A \$ \s* \{ \s* [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* \s* \} \z/oxms) {
+        }
+
+        # ${ ... }
+        elsif ($char[$i] =~ /\A \$ \s* \{ \s* ( .+ ) \s* \} \z/oxms) {
+            $char[$i] = e_capture($1);
+        }
+    }
+
+    # return string
+    if ($left_e > $right_e) {
+        return join '', $ope, $delimiter, @char, '>]}' x ($left_e - $right_e), $end_delimiter;
+    }
+    return     join '', $ope, $delimiter, @char,                               $end_delimiter;
+}
+
+#
+# escape qw string (qw//)
+#
+sub e_qw {
+    my($ope,$delimiter,$end_delimiter,$string) = @_;
+
+    $slash = 'div';
+
+    # choice again delimiter
+    my %octet = map {$_ => 1} ($string =~ /\G ([\x00-\xFF]) /oxmsg);
+    if (not $octet{$end_delimiter}) {
+        return join '', $ope, $delimiter, $string, $end_delimiter;
+    }
+    elsif (not $octet{')'}) {
+        return join '', $ope, '(',        $string, ')';
+    }
+    elsif (not $octet{'}'}) {
+        return join '', $ope, '{',        $string, '}';
+    }
+    elsif (not $octet{']'}) {
+        return join '', $ope, '[',        $string, ']';
+    }
+    elsif (not $octet{'>'}) {
+        return join '', $ope, '<',        $string, '>';
+    }
+    else {
+        for my $char (qw( ! " $ % & * + - . / : = ? @ ^ ` | ~ ), "\x00".."\x1F", "\x7F", "\xFF") {
+            if (not $octet{$char}) {
+                return join '', $ope,      $char, $string, $char;
+            }
+        }
+    }
+
+    # qw/AAA BBB C'CC/ --> ('AAA', 'BBB', 'C\'CC')
+    my @string = CORE::split(/\s+/, $string);
+    for my $string (@string) {
+        my @octet = $string =~ /\G ([\x00-\xFF]) /oxmsg;
+        for my $octet (@octet) {
+            if ($octet =~ /\A (['\\]) \z/oxms) {
+                $octet = '\\' . $1;
+            }
+        }
+        $string = join '', @octet;
+    }
+    return join '', '(', (join ', ', map { "'$_'" } @string), ')';
+}
+
+#
+# escape here document (<<"HEREDOC", <<HEREDOC, <<`HEREDOC`)
+#
+sub e_heredoc {
+    my($string) = @_;
+
+    $slash = 'm//';
+
+    my $metachar = qr/[\@\\|]/oxms; # '|' is for <<`HEREDOC`
+
+    my $left_e  = 0;
+    my $right_e = 0;
+    my @char = $string =~ /\G(
+        \\o\{ [0-7]+          \}   |
+        \\x\{ [0-9A-Fa-f]+    \}   |
+        \\N\{ [^0-9\}][^\}]* \} |
+        \$` | \$\{`\} | \$ \s* PREMATCH  | \$ \s* \{ \s* PREMATCH  \s* \} | \$ \s* \{\^PREMATCH\}  |
+        \$& | \$\{&\} | \$ \s* MATCH     | \$ \s* \{ \s* MATCH     \s* \} | \$ \s* \{\^MATCH\}     |
+                        \$ \s* POSTMATCH | \$ \s* \{ \s* POSTMATCH \s* \} | \$ \s* \{\^POSTMATCH\} |
+        \$ \s* \d+                 |
+        \$ \s* \{ \s* \d+ \s* \}   |
+        \$ \$ (?![\w\{])           |
+        \$ \s* \$ \s* $qq_variable |
+        \\?(?:$q_char)
+    )/oxmsg;
+
+    for (my $i=0; $i <= $#char; $i++) {
+
+        # "\L\u" --> "\u\L"
+        if (($char[$i] eq '\L') and ($char[$i+1] eq '\u')) {
+            @char[$i,$i+1] = @char[$i+1,$i];
+        }
+
+        # "\U\l" --> "\l\U"
+        elsif (($char[$i] eq '\U') and ($char[$i+1] eq '\l')) {
+            @char[$i,$i+1] = @char[$i+1,$i];
+        }
+
+        # octal escape sequence
+        elsif ($char[$i] =~ /\A \\o \{ ([0-7]+) \} \z/oxms) {
+            $char[$i] = Elatin2::octchr($1);
+        }
+
+        # hexadecimal escape sequence
+        elsif ($char[$i] =~ /\A \\x \{ ([0-9A-Fa-f]+) \} \z/oxms) {
+            $char[$i] = Elatin2::hexchr($1);
+        }
+
+        # \N{CHARNAME} --> N{CHARNAME}
+        elsif ($char[$i] =~ /\A \\ ( N\{ ([^0-9\}][^\}]*) \} ) \z/oxms) {
+            $char[$i] = $1;
+        }
+
+        if (0) {
+        }
+
+        # \u \l \U \L \F \Q \E
+        elsif ($char[$i] =~ /\A ([<>]) \z/oxms) {
+            if ($right_e < $left_e) {
+                $char[$i] = '\\' . $char[$i];
+            }
+        }
+        elsif ($char[$i] eq '\u') {
+            $char[$i] = '@{[Elatin2::ucfirst qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\l') {
+            $char[$i] = '@{[Elatin2::lcfirst qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\U') {
+            $char[$i] = '@{[Elatin2::uc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\L') {
+            $char[$i] = '@{[Elatin2::lc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\F') {
+            $char[$i] = '@{[Elatin2::fc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\Q') {
+            $char[$i] = '@{[CORE::quotemeta qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\E') {
+            if ($right_e < $left_e) {
+                $char[$i] = '>]}';
+                $right_e++;
+            }
+            else {
+                $char[$i] = '';
+            }
+        }
+        elsif ($char[$i] eq '\Q') {
+            while (1) {
+                if (++$i > $#char) {
+                    last;
+                }
+                if ($char[$i] eq '\E') {
+                    last;
+                }
+            }
+        }
+        elsif ($char[$i] eq '\E') {
+        }
+
+        # $0 --> $0
+        elsif ($char[$i] =~ /\A \$ 0 \z/oxms) {
+        }
+        elsif ($char[$i] =~ /\A \$ \{ \s* 0 \s* \} \z/oxms) {
+        }
+
+        # $$ --> $$
+        elsif ($char[$i] =~ /\A \$\$ \z/oxms) {
+        }
+
+        # $1, $2, $3 --> $2, $3, $4 after s/// with multibyte anchoring
+        # $1, $2, $3 --> $1, $2, $3 otherwise
+        elsif ($char[$i] =~ /\A \$ ([1-9][0-9]*) \z/oxms) {
+            $char[$i] = e_capture($1);
+        }
+        elsif ($char[$i] =~ /\A \$ \{ \s* ([1-9][0-9]*) \s* \} \z/oxms) {
+            $char[$i] = e_capture($1);
+        }
+
+        # $$foo[ ... ] --> $ $foo->[ ... ]
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \[ (?:$qq_bracket)*? \] ) \z/oxms) {
+            $char[$i] = e_capture($1.'->'.$2);
+        }
+
+        # $$foo{ ... } --> $ $foo->{ ... }
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \{ (?:$qq_brace)*? \} ) \z/oxms) {
+            $char[$i] = e_capture($1.'->'.$2);
+        }
+
+        # $$foo
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) \z/oxms) {
+            $char[$i] = e_capture($1);
+        }
+
+        # $`, ${`}, $PREMATCH, ${PREMATCH}, ${^PREMATCH} --> Elatin2::PREMATCH()
+        elsif ($char[$i] =~ /\A ( \$` | \$\{`\} | \$ \s* PREMATCH  | \$ \s* \{ \s* PREMATCH  \s* \} | \$ \s* \{\^PREMATCH\}  ) \z/oxmsgc) {
+            $char[$i] = '@{[Elatin2::PREMATCH()]}';
+        }
+
+        # $&, ${&}, $MATCH, ${MATCH}, ${^MATCH} --> Elatin2::MATCH()
+        elsif ($char[$i] =~ /\A ( \$& | \$\{&\} | \$ \s* MATCH     | \$ \s* \{ \s* MATCH     \s* \} | \$ \s* \{\^MATCH\}     ) \z/oxmsgc) {
+            $char[$i] = '@{[Elatin2::MATCH()]}';
+        }
+
+        # $POSTMATCH, ${POSTMATCH}, ${^POSTMATCH} --> Elatin2::POSTMATCH()
+        elsif ($char[$i] =~ /\A (                 \$ \s* POSTMATCH | \$ \s* \{ \s* POSTMATCH \s* \} | \$ \s* \{\^POSTMATCH\} ) \z/oxmsgc) {
+            $char[$i] = '@{[Elatin2::POSTMATCH()]}';
+        }
+
+        # ${ foo } --> ${ foo }
+        elsif ($char[$i] =~ /\A \$ \s* \{ \s* [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* \s* \} \z/oxms) {
+        }
+
+        # ${ ... }
+        elsif ($char[$i] =~ /\A \$ \s* \{ \s* ( .+ ) \s* \} \z/oxms) {
+            $char[$i] = e_capture($1);
+        }
+    }
+
+    # return string
+    if ($left_e > $right_e) {
+        return join '', @char, '>]}' x ($left_e - $right_e);
+    }
+    return     join '', @char;
+}
+
+#
+# escape regexp (m//, qr//)
+#
+sub e_qr {
+    my($ope,$delimiter,$end_delimiter,$string,$modifier) = @_;
+    $modifier ||= '';
+
+    $modifier =~ tr/p//d;
+    if ($modifier =~ /([adlu])/oxms) {
+        my $line = 0;
+        for (my $i=0; my($package,$filename,$use_line,$subroutine) = caller($i); $i++) {
+            if ($filename ne __FILE__) {
+                $line = $use_line + (CORE::substr($_,0,pos($_)) =~ tr/\n//) + 1;
+                last;
+            }
+        }
+        die qq{Unsupported modifier "$1" used at line $line.\n};
+    }
+
+    $slash = 'div';
+
+    # literal null string pattern
+    if ($string eq '') {
+        $modifier =~ tr/bB//d;
+        $modifier =~ tr/i//d;
+        return join '', $ope, $delimiter, $end_delimiter, $modifier;
+    }
+
+    # /b /B modifier
+    elsif ($modifier =~ tr/bB//d) {
+
+        # choice again delimiter
+        if ($delimiter =~ / [\@:] /oxms) {
+            my @char = $string =~ /\G([\x00-\xFF])/oxmsg;
+            my %octet = map {$_ => 1} @char;
+            if (not $octet{')'}) {
+                $delimiter     = '(';
+                $end_delimiter = ')';
+            }
+            elsif (not $octet{'}'}) {
+                $delimiter     = '{';
+                $end_delimiter = '}';
+            }
+            elsif (not $octet{']'}) {
+                $delimiter     = '[';
+                $end_delimiter = ']';
+            }
+            elsif (not $octet{'>'}) {
+                $delimiter     = '<';
+                $end_delimiter = '>';
+            }
+            else {
+                for my $char (qw( ! " $ % & * + - . / = ? ^ ` | ~ ), "\x00".."\x1F", "\x7F", "\xFF") {
+                    if (not $octet{$char}) {
+                        $delimiter     = $char;
+                        $end_delimiter = $char;
+                        last;
+                    }
+                }
+            }
+        }
+
+        if (($ope =~ /\A m? \z/oxms) and ($delimiter eq '?')) {
+            return join '', $ope, $delimiter,        $string,      $matched, $end_delimiter, $modifier;
+        }
+        else {
+            return join '', $ope, $delimiter, '(?:', $string, ')', $matched, $end_delimiter, $modifier;
+        }
+    }
+
+    my $ignorecase = ($modifier =~ /i/oxms) ? 1 : 0;
+    my $metachar = qr/[\@\\|[\]{^]/oxms;
+
+    # split regexp
+    my @char = $string =~ /\G(
+        \\o\{ [0-7]+           \}  |
+        \\    [0-7]{2,3}           |
+        \\x\{ [0-9A-Fa-f]+     \}  |
+        \\x   [0-9A-Fa-f]{1,2}     |
+        \\c   [\x40-\x5F]          |
+        \\N\{ [^0-9\}][^\}]* \} |
+        \\p\{ [^0-9\}][^\}]* \} |
+        \\P\{ [^0-9\}][^\}]* \} |
+        \\  (?:$q_char)            |
+        \$` | \$\{`\} | \$ \s* PREMATCH  | \$ \s* \{ \s* PREMATCH  \s* \} | \$ \s* \{\^PREMATCH\}  |
+        \$& | \$\{&\} | \$ \s* MATCH     | \$ \s* \{ \s* MATCH     \s* \} | \$ \s* \{\^MATCH\}     |
+                        \$ \s* POSTMATCH | \$ \s* \{ \s* POSTMATCH \s* \} | \$ \s* \{\^POSTMATCH\} |
+        [\$\@] $qq_variable        |
+        \$ \s* \d+                 |
+        \$ \s* \{ \s* \d+ \s* \}   |
+        \$ \$ (?![\w\{])           |
+        \$ \s* \$ \s* $qq_variable |
+        \[\:\^ (?:alnum|alpha|ascii|blank|cntrl|digit|graph|lower|print|punct|space|upper|word|xdigit) :\] |
+        \[\:   (?:alnum|alpha|ascii|blank|cntrl|digit|graph|lower|print|punct|space|upper|word|xdigit) :\] |
+        \[\^                       |
+        \(\?                       |
+            (?:$q_char)
+    )/oxmsg;
+
+    # choice again delimiter
+    if ($delimiter =~ / [\@:] /oxms) {
+        my %octet = map {$_ => 1} @char;
+        if (not $octet{')'}) {
+            $delimiter     = '(';
+            $end_delimiter = ')';
+        }
+        elsif (not $octet{'}'}) {
+            $delimiter     = '{';
+            $end_delimiter = '}';
+        }
+        elsif (not $octet{']'}) {
+            $delimiter     = '[';
+            $end_delimiter = ']';
+        }
+        elsif (not $octet{'>'}) {
+            $delimiter     = '<';
+            $end_delimiter = '>';
+        }
+        else {
+            for my $char (qw( ! " $ % & * + - . / = ? ^ ` | ~ ), "\x00".."\x1F", "\x7F", "\xFF") {
+                if (not $octet{$char}) {
+                    $delimiter     = $char;
+                    $end_delimiter = $char;
+                    last;
+                }
+            }
+        }
+    }
+
+    my $left_e  = 0;
+    my $right_e = 0;
+    for (my $i=0; $i <= $#char; $i++) {
+
+        # "\L\u" --> "\u\L"
+        if (($char[$i] eq '\L') and ($char[$i+1] eq '\u')) {
+            @char[$i,$i+1] = @char[$i+1,$i];
+        }
+
+        # "\U\l" --> "\l\U"
+        elsif (($char[$i] eq '\U') and ($char[$i+1] eq '\l')) {
+            @char[$i,$i+1] = @char[$i+1,$i];
+        }
+
+        # octal escape sequence
+        elsif ($char[$i] =~ /\A \\o \{ ([0-7]+) \} \z/oxms) {
+            $char[$i] = Elatin2::octchr($1);
+        }
+
+        # hexadecimal escape sequence
+        elsif ($char[$i] =~ /\A \\x \{ ([0-9A-Fa-f]+) \} \z/oxms) {
+            $char[$i] = Elatin2::hexchr($1);
+        }
+
+        # \N{CHARNAME} --> N\{CHARNAME}
+        elsif ($char[$i] =~ /\A \\ (N) ( \{ ([^0-9\}][^\}]*) \} ) \z/oxms) {
+            $char[$i] = $1 . '\\' . $2;
+        }
+
+        # \p{PROPERTY} --> p\{PROPERTY}
+        elsif ($char[$i] =~ /\A \\ (p) ( \{ ([^0-9\}][^\}]*) \} ) \z/oxms) {
+            $char[$i] = $1 . '\\' . $2;
+        }
+
+        # \P{PROPERTY} --> P\{PROPERTY}
+        elsif ($char[$i] =~ /\A \\ (P) ( \{ ([^0-9\}][^\}]*) \} ) \z/oxms) {
+            $char[$i] = $1 . '\\' . $2;
+        }
+
+        # \p, \P, \X --> p, P, X
+        elsif ($char[$i] =~ /\A \\ ( [pPX] ) \z/oxms) {
+            $char[$i] = $1;
+        }
+
+        if (0) {
+        }
+
+        # join separated multiple-octet
+        elsif ($char[$i] =~ /\A (?: \\ [0-7]{2,3} | \\x [0-9A-Fa-f]{1,2}) \z/oxms) {
+            if (   ($i+3 <= $#char) and (grep(/\A (?: \\ [0-7]{2,3} | \\x [0-9A-Fa-f]{1,2}) \z/oxms, @char[$i+1..$i+3]) == 3) and (CORE::eval(sprintf '"%s%s%s%s"', @char[$i..$i+3]) =~ /\A $q_char \z/oxms)) {
+                $char[$i] .= join '', splice @char, $i+1, 3;
+            }
+            elsif (($i+2 <= $#char) and (grep(/\A (?: \\ [0-7]{2,3} | \\x [0-9A-Fa-f]{1,2}) \z/oxms, @char[$i+1..$i+2]) == 2) and (CORE::eval(sprintf '"%s%s%s"',   @char[$i..$i+2]) =~ /\A $q_char \z/oxms)) {
+                $char[$i] .= join '', splice @char, $i+1, 2;
+            }
+            elsif (($i+1 <= $#char) and (grep(/\A (?: \\ [0-7]{2,3} | \\x [0-9A-Fa-f]{1,2}) \z/oxms, $char[$i+1      ]) == 1) and (CORE::eval(sprintf '"%s%s"',     @char[$i..$i+1]) =~ /\A $q_char \z/oxms)) {
+                $char[$i] .= join '', splice @char, $i+1, 1;
+            }
+        }
+
+        # open character class [...]
+        elsif ($char[$i] eq '[') {
+            my $left = $i;
+
+            # [] make die "Unmatched [] in regexp ..."
+            # (and so on)
+
+            if ($char[$i+1] eq ']') {
+                $i++;
+            }
+
+            while (1) {
+                if (++$i > $#char) {
+                    die __FILE__, ": Unmatched [] in regexp";
+                }
+                if ($char[$i] eq ']') {
+                    my $right = $i;
+
+                    # [...]
+                    if (grep(/\A [\$\@]/oxms,@char[$left+1..$right-1]) >= 1) {
+                        splice @char, $left, $right-$left+1, sprintf(q{@{[Elatin2::charlist_qr(%s,'%s')]}}, join(',', map {qq_stuff($delimiter,$end_delimiter,$_)} @char[$left+1..$right-1]), $modifier);
+                    }
+                    else {
+                        splice @char, $left, $right-$left+1, Elatin2::charlist_qr(@char[$left+1..$right-1], $modifier);
+                    }
+
+                    $i = $left;
+                    last;
+                }
+            }
+        }
+
+        # open character class [^...]
+        elsif ($char[$i] eq '[^') {
+            my $left = $i;
+
+            # [^] make die "Unmatched [] in regexp ..."
+            # (and so on)
+
+            if ($char[$i+1] eq ']') {
+                $i++;
+            }
+
+            while (1) {
+                if (++$i > $#char) {
+                    die __FILE__, ": Unmatched [] in regexp";
+                }
+                if ($char[$i] eq ']') {
+                    my $right = $i;
+
+                    # [^...]
+                    if (grep(/\A [\$\@]/oxms,@char[$left+1..$right-1]) >= 1) {
+                        splice @char, $left, $right-$left+1, sprintf(q{@{[Elatin2::charlist_not_qr(%s,'%s')]}}, join(',', map {qq_stuff($delimiter,$end_delimiter,$_)} @char[$left+1..$right-1]), $modifier);
+                    }
+                    else {
+                        splice @char, $left, $right-$left+1, Elatin2::charlist_not_qr(@char[$left+1..$right-1], $modifier);
+                    }
+
+                    $i = $left;
+                    last;
+                }
+            }
+        }
+
+        # rewrite character class or escape character
+        elsif (my $char = character_class($char[$i],$modifier)) {
+            $char[$i] = $char;
+        }
+
+        # /i modifier
+        elsif ($ignorecase and ($char[$i] =~ /\A [\x00-\xFF] \z/oxms) and (Elatin2::uc($char[$i]) ne Elatin2::fc($char[$i]))) {
+            if (CORE::length(Elatin2::fc($char[$i])) == 1) {
+                $char[$i] = '['   . Elatin2::uc($char[$i])       . Elatin2::fc($char[$i]) . ']';
+            }
+            else {
+                $char[$i] = '(?:' . Elatin2::uc($char[$i]) . '|' . Elatin2::fc($char[$i]) . ')';
+            }
+        }
+
+        # \u \l \U \L \F \Q \E
+        elsif ($char[$i] =~ /\A [<>] \z/oxms) {
+            if ($right_e < $left_e) {
+                $char[$i] = '\\' . $char[$i];
+            }
+        }
+        elsif ($char[$i] eq '\u') {
+            $char[$i] = '@{[Elatin2::ucfirst qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\l') {
+            $char[$i] = '@{[Elatin2::lcfirst qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\U') {
+            $char[$i] = '@{[Elatin2::uc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\L') {
+            $char[$i] = '@{[Elatin2::lc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\F') {
+            $char[$i] = '@{[Elatin2::fc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\Q') {
+            $char[$i] = '@{[CORE::quotemeta qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\E') {
+            if ($right_e < $left_e) {
+                $char[$i] = '>]}';
+                $right_e++;
+            }
+            else {
+                $char[$i] = '';
+            }
+        }
+        elsif ($char[$i] eq '\Q') {
+            while (1) {
+                if (++$i > $#char) {
+                    last;
+                }
+                if ($char[$i] eq '\E') {
+                    last;
+                }
+            }
+        }
+        elsif ($char[$i] eq '\E') {
+        }
+
+        # $0 --> $0
+        elsif ($char[$i] =~ /\A \$ 0 \z/oxms) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+        elsif ($char[$i] =~ /\A \$ \{ \s* 0 \s* \} \z/oxms) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $$ --> $$
+        elsif ($char[$i] =~ /\A \$\$ \z/oxms) {
+        }
+
+        # $1, $2, $3 --> $2, $3, $4 after s/// with multibyte anchoring
+        # $1, $2, $3 --> $1, $2, $3 otherwise
+        elsif ($char[$i] =~ /\A \$ ([1-9][0-9]*) \z/oxms) {
+            $char[$i] = e_capture($1);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+        elsif ($char[$i] =~ /\A \$ \{ \s* ([1-9][0-9]*) \s* \} \z/oxms) {
+            $char[$i] = e_capture($1);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $$foo[ ... ] --> $ $foo->[ ... ]
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \[ (?:$qq_bracket)*? \] ) \z/oxms) {
+            $char[$i] = e_capture($1.'->'.$2);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $$foo{ ... } --> $ $foo->{ ... }
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \{ (?:$qq_brace)*? \} ) \z/oxms) {
+            $char[$i] = e_capture($1.'->'.$2);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $$foo
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) \z/oxms) {
+            $char[$i] = e_capture($1);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $`, ${`}, $PREMATCH, ${PREMATCH}, ${^PREMATCH} --> Elatin2::PREMATCH()
+        elsif ($char[$i] =~ /\A ( \$` | \$\{`\} | \$ \s* PREMATCH  | \$ \s* \{ \s* PREMATCH  \s* \} | \$ \s* \{\^PREMATCH\}  ) \z/oxmsgc) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(Elatin2::PREMATCH())]}';
+            }
+            else {
+                $char[$i] = '@{[Elatin2::PREMATCH()]}';
+            }
+        }
+
+        # $&, ${&}, $MATCH, ${MATCH}, ${^MATCH} --> Elatin2::MATCH()
+        elsif ($char[$i] =~ /\A ( \$& | \$\{&\} | \$ \s* MATCH     | \$ \s* \{ \s* MATCH     \s* \} | \$ \s* \{\^MATCH\}     ) \z/oxmsgc) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(Elatin2::MATCH())]}';
+            }
+            else {
+                $char[$i] = '@{[Elatin2::MATCH()]}';
+            }
+        }
+
+        # $POSTMATCH, ${POSTMATCH}, ${^POSTMATCH} --> Elatin2::POSTMATCH()
+        elsif ($char[$i] =~ /\A (                 \$ \s* POSTMATCH | \$ \s* \{ \s* POSTMATCH \s* \} | \$ \s* \{\^POSTMATCH\} ) \z/oxmsgc) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(Elatin2::POSTMATCH())]}';
+            }
+            else {
+                $char[$i] = '@{[Elatin2::POSTMATCH()]}';
+            }
+        }
+
+        # ${ foo }
+        elsif ($char[$i] =~ /\A \$ \s* \{ ( \s* [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* \s* ) \} \z/oxms) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # ${ ... }
+        elsif ($char[$i] =~ /\A \$ \s* \{ \s* ( .+ ) \s* \} \z/oxms) {
+            $char[$i] = e_capture($1);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $scalar or @array
+        elsif ($char[$i] =~ /\A [\$\@].+ /oxms) {
+            $char[$i] = e_string($char[$i]);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # quote character before ? + * {
+        elsif (($i >= 1) and ($char[$i] =~ /\A [\?\+\*\{] \z/oxms)) {
+            if ($char[$i-1] =~ /\A (?:\\[0-7]{2,3}|\\x[0-9-A-Fa-f]{1,2}) \z/oxms) {
+            }
+            elsif (($ope =~ /\A m? \z/oxms) and ($delimiter eq '?')) {
+                my $char = $char[$i-1];
+                if ($char[$i] eq '{') {
+                    die __FILE__, qq{: "MULTIBYTE{n}" should be "(MULTIBYTE){n}" in m?? (and shift \$1,\$2,\$3,...) ($char){n}};
+                }
+                else {
+                    die __FILE__, qq{: "MULTIBYTE$char[$i]" should be "(MULTIBYTE)$char[$i]" in m?? (and shift \$1,\$2,\$3,...) ($char)$char[$i]};
+                }
+            }
+            else {
+                $char[$i-1] = '(?:' . $char[$i-1] . ')';
+            }
+        }
+    }
+
+    # make regexp string
+    $modifier =~ tr/i//d;
+    if ($left_e > $right_e) {
+        if (($ope =~ /\A m? \z/oxms) and ($delimiter eq '?')) {
+            return join '', $ope, $delimiter, $anchor,        @char, '>]}' x ($left_e - $right_e),      $matched, $end_delimiter, $modifier;
+        }
+        else {
+            return join '', $ope, $delimiter, $anchor, '(?:', @char, '>]}' x ($left_e - $right_e), ')', $matched, $end_delimiter, $modifier;
+        }
+    }
+    if (($ope =~ /\A m? \z/oxms) and ($delimiter eq '?')) {
+        return     join '', $ope, $delimiter, $anchor,        @char,                                    $matched, $end_delimiter, $modifier;
+    }
+    else {
+        return     join '', $ope, $delimiter, $anchor, '(?:', @char,                               ')', $matched, $end_delimiter, $modifier;
+    }
+}
+
+#
+# double quote stuff
+#
+sub qq_stuff {
+    my($delimiter,$end_delimiter,$stuff) = @_;
+
+    # scalar variable or array variable
+    if ($stuff =~ /\A [\$\@] /oxms) {
+        return $stuff;
+    }
+
+    # quote by delimiter
+    my %octet = map {$_ => 1} ($stuff =~ /\G ([\x00-\xFF]) /oxmsg);
+    for my $char (qw( ! " $ % & * + - . / : = ? @ ^ ` | ~ ), "\x00".."\x1F", "\x7F", "\xFF") {
+        next if $char eq $delimiter;
+        next if $char eq $end_delimiter;
+        if (not $octet{$char}) {
+            return join '', 'qq', $char, $stuff, $char;
+        }
+    }
+    return join '', 'qq', '<', $stuff, '>';
+}
+
+#
+# escape regexp (m'', qr'', and m''b, qr''b)
+#
+sub e_qr_q {
+    my($ope,$delimiter,$end_delimiter,$string,$modifier) = @_;
+    $modifier ||= '';
+
+    $modifier =~ tr/p//d;
+    if ($modifier =~ /([adlu])/oxms) {
+        my $line = 0;
+        for (my $i=0; my($package,$filename,$use_line,$subroutine) = caller($i); $i++) {
+            if ($filename ne __FILE__) {
+                $line = $use_line + (CORE::substr($_,0,pos($_)) =~ tr/\n//) + 1;
+                last;
+            }
+        }
+        die qq{Unsupported modifier "$1" used at line $line.\n};
+    }
+
+    $slash = 'div';
+
+    # literal null string pattern
+    if ($string eq '') {
+        $modifier =~ tr/bB//d;
+        $modifier =~ tr/i//d;
+        return join '', $ope, $delimiter, $end_delimiter, $modifier;
+    }
+
+    # with /b /B modifier
+    elsif ($modifier =~ tr/bB//d) {
+        return e_qr_qb($ope,$delimiter,$end_delimiter,$string,$modifier);
+    }
+
+    # without /b /B modifier
+    else {
+        return e_qr_qt($ope,$delimiter,$end_delimiter,$string,$modifier);
+    }
+}
+
+#
+# escape regexp (m'', qr'')
+#
+sub e_qr_qt {
+    my($ope,$delimiter,$end_delimiter,$string,$modifier) = @_;
+
+    my $ignorecase = ($modifier =~ /i/oxms) ? 1 : 0;
+
+    # split regexp
+    my @char = $string =~ /\G(
+        \[\:\^ [a-z]+ \:\] |
+        \[\:   [a-z]+ \:\] |
+        \[\^               |
+        [\$\@\/\\]         |
+        \\?    (?:$q_char)
+    )/oxmsg;
+
+    # unescape character
+    for (my $i=0; $i <= $#char; $i++) {
+        if (0) {
+        }
+
+        # open character class [...]
+        elsif ($char[$i] eq '[') {
+            my $left = $i;
+            if ($char[$i+1] eq ']') {
+                $i++;
+            }
+            while (1) {
+                if (++$i > $#char) {
+                    die __FILE__, ": Unmatched [] in regexp";
+                }
+                if ($char[$i] eq ']') {
+                    my $right = $i;
+
+                    # [...]
+                    splice @char, $left, $right-$left+1, Elatin2::charlist_qr(@char[$left+1..$right-1], $modifier);
+
+                    $i = $left;
+                    last;
+                }
+            }
+        }
+
+        # open character class [^...]
+        elsif ($char[$i] eq '[^') {
+            my $left = $i;
+            if ($char[$i+1] eq ']') {
+                $i++;
+            }
+            while (1) {
+                if (++$i > $#char) {
+                    die __FILE__, ": Unmatched [] in regexp";
+                }
+                if ($char[$i] eq ']') {
+                    my $right = $i;
+
+                    # [^...]
+                    splice @char, $left, $right-$left+1, Elatin2::charlist_not_qr(@char[$left+1..$right-1], $modifier);
+
+                    $i = $left;
+                    last;
+                }
+            }
+        }
+
+        # escape $ @ / and \
+        elsif ($char[$i] =~ /\A [\$\@\/\\] \z/oxms) {
+            $char[$i] = '\\' . $char[$i];
+        }
+
+        # rewrite character class or escape character
+        elsif (my $char = character_class($char[$i],$modifier)) {
+            $char[$i] = $char;
+        }
+
+        # /i modifier
+        elsif ($ignorecase and ($char[$i] =~ /\A [\x00-\xFF] \z/oxms) and (Elatin2::uc($char[$i]) ne Elatin2::fc($char[$i]))) {
+            if (CORE::length(Elatin2::fc($char[$i])) == 1) {
+                $char[$i] = '['   . Elatin2::uc($char[$i])       . Elatin2::fc($char[$i]) . ']';
+            }
+            else {
+                $char[$i] = '(?:' . Elatin2::uc($char[$i]) . '|' . Elatin2::fc($char[$i]) . ')';
+            }
+        }
+
+        # quote character before ? + * {
+        elsif (($i >= 1) and ($char[$i] =~ /\A [\?\+\*\{] \z/oxms)) {
+            if ($char[$i-1] =~ /\A [\x00-\xFF] \z/oxms) {
+            }
+            else {
+                $char[$i-1] = '(?:' . $char[$i-1] . ')';
+            }
+        }
+    }
+
+    $delimiter     = '/';
+    $end_delimiter = '/';
+
+    $modifier =~ tr/i//d;
+    return join '', $ope, $delimiter, $anchor, '(?:', @char, ')', $matched, $end_delimiter, $modifier;
+}
+
+#
+# escape regexp (m''b, qr''b)
+#
+sub e_qr_qb {
+    my($ope,$delimiter,$end_delimiter,$string,$modifier) = @_;
+
+    # split regexp
+    my @char = $string =~ /\G(
+        \\\\        |
+        [\$\@\/\\]  |
+        [\x00-\xFF]
+    )/oxmsg;
+
+    # unescape character
+    for (my $i=0; $i <= $#char; $i++) {
+        if (0) {
+        }
+
+        # remain \\
+        elsif ($char[$i] eq '\\\\') {
+        }
+
+        # escape $ @ / and \
+        elsif ($char[$i] =~ /\A [\$\@\/\\] \z/oxms) {
+            $char[$i] = '\\' . $char[$i];
+        }
+    }
+
+    $delimiter     = '/';
+    $end_delimiter = '/';
+    return join '', $ope, $delimiter, '(?:', @char, ')', $matched, $end_delimiter, $modifier;
+}
+
+#
+# escape regexp (s/here//)
+#
+sub e_s1 {
+    my($ope,$delimiter,$end_delimiter,$string,$modifier) = @_;
+    $modifier ||= '';
+
+    $modifier =~ tr/p//d;
+    if ($modifier =~ /([adlu])/oxms) {
+        my $line = 0;
+        for (my $i=0; my($package,$filename,$use_line,$subroutine) = caller($i); $i++) {
+            if ($filename ne __FILE__) {
+                $line = $use_line + (CORE::substr($_,0,pos($_)) =~ tr/\n//) + 1;
+                last;
+            }
+        }
+        die qq{Unsupported modifier "$1" used at line $line.\n};
+    }
+
+    $slash = 'div';
+
+    # literal null string pattern
+    if ($string eq '') {
+        $modifier =~ tr/bB//d;
+        $modifier =~ tr/i//d;
+        return join '', $ope, $delimiter, $end_delimiter, $modifier;
+    }
+
+    # /b /B modifier
+    elsif ($modifier =~ tr/bB//d) {
+
+        # choice again delimiter
+        if ($delimiter =~ / [\@:] /oxms) {
+            my @char = $string =~ /\G([\x00-\xFF])/oxmsg;
+            my %octet = map {$_ => 1} @char;
+            if (not $octet{')'}) {
+                $delimiter     = '(';
+                $end_delimiter = ')';
+            }
+            elsif (not $octet{'}'}) {
+                $delimiter     = '{';
+                $end_delimiter = '}';
+            }
+            elsif (not $octet{']'}) {
+                $delimiter     = '[';
+                $end_delimiter = ']';
+            }
+            elsif (not $octet{'>'}) {
+                $delimiter     = '<';
+                $end_delimiter = '>';
+            }
+            else {
+                for my $char (qw( ! " $ % & * + - . / = ? ^ ` | ~ ), "\x00".."\x1F", "\x7F", "\xFF") {
+                    if (not $octet{$char}) {
+                        $delimiter     = $char;
+                        $end_delimiter = $char;
+                        last;
+                    }
+                }
+            }
+        }
+
+        my $prematch = '';
+        return join '', $ope, $delimiter, $prematch, '(?:', $string, ')', $matched, $end_delimiter, $modifier;
+    }
+
+    my $ignorecase = ($modifier =~ /i/oxms) ? 1 : 0;
+    my $metachar = qr/[\@\\|[\]{^]/oxms;
+
+    # split regexp
+    my @char = $string =~ /\G(
+        \\g \s* \{ \s* - \s* [1-9][0-9]* \s* \} |
+        \\g \s* \{ \s*       [1-9][0-9]* \s* \} |
+        \\g \s*              [1-9][0-9]*        |
+        \\o\{                [0-7]+          \} |
+        \\                   [1-9][0-9]*        |
+        \\                   [0-7]{2,3}         |
+        \\x\{                [0-9A-Fa-f]+    \} |
+        \\x                  [0-9A-Fa-f]{1,2}   |
+        \\c                  [\x40-\x5F]        |
+        \\N\{                [^0-9\}][^\}]* \} |
+        \\p\{                [^0-9\}][^\}]* \} |
+        \\P\{                [^0-9\}][^\}]* \} |
+        \\  (?:$q_char)                         |
+        \$` | \$\{`\} | \$ \s* PREMATCH  | \$ \s* \{ \s* PREMATCH  \s* \} | \$ \s* \{\^PREMATCH\}  |
+        \$& | \$\{&\} | \$ \s* MATCH     | \$ \s* \{ \s* MATCH     \s* \} | \$ \s* \{\^MATCH\}     |
+                        \$ \s* POSTMATCH | \$ \s* \{ \s* POSTMATCH \s* \} | \$ \s* \{\^POSTMATCH\} |
+        [\$\@] $qq_variable                     |
+        \$ \s* \d+                              |
+        \$ \s* \{ \s* \d+ \s* \}                |
+        \$ \$ (?![\w\{])                        |
+        \$ \s* \$ \s* $qq_variable              |
+        \[\:\^ (?:alnum|alpha|ascii|blank|cntrl|digit|graph|lower|print|punct|space|upper|word|xdigit) :\] |
+        \[\:   (?:alnum|alpha|ascii|blank|cntrl|digit|graph|lower|print|punct|space|upper|word|xdigit) :\] |
+        \[\^                                    |
+        \(\?                                    |
+            (?:$q_char)
+    )/oxmsg;
+
+    # choice again delimiter
+    if ($delimiter =~ / [\@:] /oxms) {
+        my %octet = map {$_ => 1} @char;
+        if (not $octet{')'}) {
+            $delimiter     = '(';
+            $end_delimiter = ')';
+        }
+        elsif (not $octet{'}'}) {
+            $delimiter     = '{';
+            $end_delimiter = '}';
+        }
+        elsif (not $octet{']'}) {
+            $delimiter     = '[';
+            $end_delimiter = ']';
+        }
+        elsif (not $octet{'>'}) {
+            $delimiter     = '<';
+            $end_delimiter = '>';
+        }
+        else {
+            for my $char (qw( ! " $ % & * + - . / = ? ^ ` | ~ ), "\x00".."\x1F", "\x7F", "\xFF") {
+                if (not $octet{$char}) {
+                    $delimiter     = $char;
+                    $end_delimiter = $char;
+                    last;
+                }
+            }
+        }
+    }
+
+    # count '('
+    my $parens = grep { $_ eq '(' } @char;
+
+    my $left_e  = 0;
+    my $right_e = 0;
+    for (my $i=0; $i <= $#char; $i++) {
+
+        # "\L\u" --> "\u\L"
+        if (($char[$i] eq '\L') and ($char[$i+1] eq '\u')) {
+            @char[$i,$i+1] = @char[$i+1,$i];
+        }
+
+        # "\U\l" --> "\l\U"
+        elsif (($char[$i] eq '\U') and ($char[$i+1] eq '\l')) {
+            @char[$i,$i+1] = @char[$i+1,$i];
+        }
+
+        # octal escape sequence
+        elsif ($char[$i] =~ /\A \\o \{ ([0-7]+) \} \z/oxms) {
+            $char[$i] = Elatin2::octchr($1);
+        }
+
+        # hexadecimal escape sequence
+        elsif ($char[$i] =~ /\A \\x \{ ([0-9A-Fa-f]+) \} \z/oxms) {
+            $char[$i] = Elatin2::hexchr($1);
+        }
+
+        # \N{CHARNAME} --> N\{CHARNAME}
+        elsif ($char[$i] =~ /\A \\ (N) ( \{ ([^0-9\}][^\}]*) \} ) \z/oxms) {
+            $char[$i] = $1 . '\\' . $2;
+        }
+
+        # \p{PROPERTY} --> p\{PROPERTY}
+        elsif ($char[$i] =~ /\A \\ (p) ( \{ ([^0-9\}][^\}]*) \} ) \z/oxms) {
+            $char[$i] = $1 . '\\' . $2;
+        }
+
+        # \P{PROPERTY} --> P\{PROPERTY}
+        elsif ($char[$i] =~ /\A \\ (P) ( \{ ([^0-9\}][^\}]*) \} ) \z/oxms) {
+            $char[$i] = $1 . '\\' . $2;
+        }
+
+        # \p, \P, \X --> p, P, X
+        elsif ($char[$i] =~ /\A \\ ( [pPX] ) \z/oxms) {
+            $char[$i] = $1;
+        }
+
+        if (0) {
+        }
+
+        # join separated multiple-octet
+        elsif ($char[$i] =~ /\A (?: \\ [0-7]{2,3} | \\x [0-9A-Fa-f]{1,2}) \z/oxms) {
+            if (   ($i+3 <= $#char) and (grep(/\A (?: \\ [0-7]{2,3} | \\x [0-9A-Fa-f]{1,2}) \z/oxms, @char[$i+1..$i+3]) == 3) and (CORE::eval(sprintf '"%s%s%s%s"', @char[$i..$i+3]) =~ /\A $q_char \z/oxms)) {
+                $char[$i] .= join '', splice @char, $i+1, 3;
+            }
+            elsif (($i+2 <= $#char) and (grep(/\A (?: \\ [0-7]{2,3} | \\x [0-9A-Fa-f]{1,2}) \z/oxms, @char[$i+1..$i+2]) == 2) and (CORE::eval(sprintf '"%s%s%s"',   @char[$i..$i+2]) =~ /\A $q_char \z/oxms)) {
+                $char[$i] .= join '', splice @char, $i+1, 2;
+            }
+            elsif (($i+1 <= $#char) and (grep(/\A (?: \\ [0-7]{2,3} | \\x [0-9A-Fa-f]{1,2}) \z/oxms, $char[$i+1      ]) == 1) and (CORE::eval(sprintf '"%s%s"',     @char[$i..$i+1]) =~ /\A $q_char \z/oxms)) {
+                $char[$i] .= join '', splice @char, $i+1, 1;
+            }
+        }
+
+        # open character class [...]
+        elsif ($char[$i] eq '[') {
+            my $left = $i;
+            if ($char[$i+1] eq ']') {
+                $i++;
+            }
+            while (1) {
+                if (++$i > $#char) {
+                    die __FILE__, ": Unmatched [] in regexp";
+                }
+                if ($char[$i] eq ']') {
+                    my $right = $i;
+
+                    # [...]
+                    if (grep(/\A [\$\@]/oxms,@char[$left+1..$right-1]) >= 1) {
+                        splice @char, $left, $right-$left+1, sprintf(q{@{[Elatin2::charlist_qr(%s,'%s')]}}, join(',', map {qq_stuff($delimiter,$end_delimiter,$_)} @char[$left+1..$right-1]), $modifier);
+                    }
+                    else {
+                        splice @char, $left, $right-$left+1, Elatin2::charlist_qr(@char[$left+1..$right-1], $modifier);
+                    }
+
+                    $i = $left;
+                    last;
+                }
+            }
+        }
+
+        # open character class [^...]
+        elsif ($char[$i] eq '[^') {
+            my $left = $i;
+            if ($char[$i+1] eq ']') {
+                $i++;
+            }
+            while (1) {
+                if (++$i > $#char) {
+                    die __FILE__, ": Unmatched [] in regexp";
+                }
+                if ($char[$i] eq ']') {
+                    my $right = $i;
+
+                    # [^...]
+                    if (grep(/\A [\$\@]/oxms,@char[$left+1..$right-1]) >= 1) {
+                        splice @char, $left, $right-$left+1, sprintf(q{@{[Elatin2::charlist_not_qr(%s,'%s')]}}, join(',', map {qq_stuff($delimiter,$end_delimiter,$_)} @char[$left+1..$right-1]), $modifier);
+                    }
+                    else {
+                        splice @char, $left, $right-$left+1, Elatin2::charlist_not_qr(@char[$left+1..$right-1], $modifier);
+                    }
+
+                    $i = $left;
+                    last;
+                }
+            }
+        }
+
+        # rewrite character class or escape character
+        elsif (my $char = character_class($char[$i],$modifier)) {
+            $char[$i] = $char;
+        }
+
+        # /i modifier
+        elsif ($ignorecase and ($char[$i] =~ /\A [\x00-\xFF] \z/oxms) and (Elatin2::uc($char[$i]) ne Elatin2::fc($char[$i]))) {
+            if (CORE::length(Elatin2::fc($char[$i])) == 1) {
+                $char[$i] = '['   . Elatin2::uc($char[$i])       . Elatin2::fc($char[$i]) . ']';
+            }
+            else {
+                $char[$i] = '(?:' . Elatin2::uc($char[$i]) . '|' . Elatin2::fc($char[$i]) . ')';
+            }
+        }
+
+        # \u \l \U \L \F \Q \E
+        elsif ($char[$i] =~ /\A [<>] \z/oxms) {
+            if ($right_e < $left_e) {
+                $char[$i] = '\\' . $char[$i];
+            }
+        }
+        elsif ($char[$i] eq '\u') {
+            $char[$i] = '@{[Elatin2::ucfirst qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\l') {
+            $char[$i] = '@{[Elatin2::lcfirst qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\U') {
+            $char[$i] = '@{[Elatin2::uc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\L') {
+            $char[$i] = '@{[Elatin2::lc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\F') {
+            $char[$i] = '@{[Elatin2::fc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\Q') {
+            $char[$i] = '@{[CORE::quotemeta qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\E') {
+            if ($right_e < $left_e) {
+                $char[$i] = '>]}';
+                $right_e++;
+            }
+            else {
+                $char[$i] = '';
+            }
+        }
+        elsif ($char[$i] eq '\Q') {
+            while (1) {
+                if (++$i > $#char) {
+                    last;
+                }
+                if ($char[$i] eq '\E') {
+                    last;
+                }
+            }
+        }
+        elsif ($char[$i] eq '\E') {
+        }
+
+        # \0 --> \0
+        elsif ($char[$i] =~ /\A \\ \s* 0 \z/oxms) {
+        }
+
+        # \g{N}, \g{-N}
+
+        # P.108 Using Simple Patterns
+        # in Chapter 7: In the World of Regular Expressions
+        # of ISBN 978-0-596-52010-6 Learning Perl, Fifth Edition
+
+        # P.221 Capturing
+        # in Chapter 5: Pattern Matching
+        # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+
+        # \g{-1}, \g{-2}, \g{-3} --> \g{-1}, \g{-2}, \g{-3}
+        elsif ($char[$i] =~ /\A \\g \s* \{ \s* - \s* ([1-9][0-9]*) \s* \} \z/oxms) {
+        }
+
+        # \g{1}, \g{2}, \g{3} --> \g{2}, \g{3}, \g{4} (only when multibyte anchoring is enable)
+        elsif ($char[$i] =~ /\A \\g \s* \{ \s* ([1-9][0-9]*) \s* \} \z/oxms) {
+        }
+
+        # \g1, \g2, \g3 --> \g2, \g3, \g4 (only when multibyte anchoring is enable)
+        elsif ($char[$i] =~ /\A \\g \s* ([1-9][0-9]*) \z/oxms) {
+        }
+
+        # \1, \2, \3 --> \2, \3, \4 (only when multibyte anchoring is enable)
+        elsif ($char[$i] =~ /\A \\ \s* ([1-9][0-9]*) \z/oxms) {
+        }
+
+        # $0 --> $0
+        elsif ($char[$i] =~ /\A \$ 0 \z/oxms) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+        elsif ($char[$i] =~ /\A \$ \{ \s* 0 \s* \} \z/oxms) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $$ --> $$
+        elsif ($char[$i] =~ /\A \$\$ \z/oxms) {
+        }
+
+        # $1, $2, $3 --> $2, $3, $4 after s/// with multibyte anchoring
+        # $1, $2, $3 --> $1, $2, $3 otherwise
+        elsif ($char[$i] =~ /\A \$ ([1-9][0-9]*) \z/oxms) {
+            $char[$i] = e_capture($1);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+        elsif ($char[$i] =~ /\A \$ \{ \s* ([1-9][0-9]*) \s* \} \z/oxms) {
+            $char[$i] = e_capture($1);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $$foo[ ... ] --> $ $foo->[ ... ]
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \[ (?:$qq_bracket)*? \] ) \z/oxms) {
+            $char[$i] = e_capture($1.'->'.$2);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $$foo{ ... } --> $ $foo->{ ... }
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \{ (?:$qq_brace)*? \} ) \z/oxms) {
+            $char[$i] = e_capture($1.'->'.$2);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $$foo
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) \z/oxms) {
+            $char[$i] = e_capture($1);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $`, ${`}, $PREMATCH, ${PREMATCH}, ${^PREMATCH} --> Elatin2::PREMATCH()
+        elsif ($char[$i] =~ /\A ( \$` | \$\{`\} | \$ \s* PREMATCH  | \$ \s* \{ \s* PREMATCH  \s* \} | \$ \s* \{\^PREMATCH\}  ) \z/oxmsgc) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(Elatin2::PREMATCH())]}';
+            }
+            else {
+                $char[$i] = '@{[Elatin2::PREMATCH()]}';
+            }
+        }
+
+        # $&, ${&}, $MATCH, ${MATCH}, ${^MATCH} --> Elatin2::MATCH()
+        elsif ($char[$i] =~ /\A ( \$& | \$\{&\} | \$ \s* MATCH     | \$ \s* \{ \s* MATCH     \s* \} | \$ \s* \{\^MATCH\}     ) \z/oxmsgc) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(Elatin2::MATCH())]}';
+            }
+            else {
+                $char[$i] = '@{[Elatin2::MATCH()]}';
+            }
+        }
+
+        # $POSTMATCH, ${POSTMATCH}, ${^POSTMATCH} --> Elatin2::POSTMATCH()
+        elsif ($char[$i] =~ /\A (                 \$ \s* POSTMATCH | \$ \s* \{ \s* POSTMATCH \s* \} | \$ \s* \{\^POSTMATCH\} ) \z/oxmsgc) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(Elatin2::POSTMATCH())]}';
+            }
+            else {
+                $char[$i] = '@{[Elatin2::POSTMATCH()]}';
+            }
+        }
+
+        # ${ foo }
+        elsif ($char[$i] =~ /\A \$ \s* \{ ( \s* [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* \s* ) \} \z/oxms) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # ${ ... }
+        elsif ($char[$i] =~ /\A \$ \s* \{ \s* ( .+ ) \s* \} \z/oxms) {
+            $char[$i] = e_capture($1);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $scalar or @array
+        elsif ($char[$i] =~ /\A [\$\@].+ /oxms) {
+            $char[$i] = e_string($char[$i]);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # quote character before ? + * {
+        elsif (($i >= 1) and ($char[$i] =~ /\A [\?\+\*\{] \z/oxms)) {
+            if ($char[$i-1] =~ /\A (?:\\[0-7]{2,3}|\\x[0-9-A-Fa-f]{1,2}) \z/oxms) {
+            }
+            else {
+                $char[$i-1] = '(?:' . $char[$i-1] . ')';
+            }
+        }
+    }
+
+    # make regexp string
+    my $prematch = '';
+    $modifier =~ tr/i//d;
+    if ($left_e > $right_e) {
+        return join '', $ope, $delimiter, $prematch, '(?:', @char, '>]}' x ($left_e - $right_e), ')', $matched, $end_delimiter, $modifier;
+    }
+    return     join '', $ope, $delimiter, $prematch, '(?:', @char,                               ')', $matched, $end_delimiter, $modifier;
+}
+
+#
+# escape regexp (s'here'' or s'here''b)
+#
+sub e_s1_q {
+    my($ope,$delimiter,$end_delimiter,$string,$modifier) = @_;
+    $modifier ||= '';
+
+    $modifier =~ tr/p//d;
+    if ($modifier =~ /([adlu])/oxms) {
+        my $line = 0;
+        for (my $i=0; my($package,$filename,$use_line,$subroutine) = caller($i); $i++) {
+            if ($filename ne __FILE__) {
+                $line = $use_line + (CORE::substr($_,0,pos($_)) =~ tr/\n//) + 1;
+                last;
+            }
+        }
+        die qq{Unsupported modifier "$1" used at line $line.\n};
+    }
+
+    $slash = 'div';
+
+    # literal null string pattern
+    if ($string eq '') {
+        $modifier =~ tr/bB//d;
+        $modifier =~ tr/i//d;
+        return join '', $ope, $delimiter, $end_delimiter, $modifier;
+    }
+
+    # with /b /B modifier
+    elsif ($modifier =~ tr/bB//d) {
+        return e_s1_qb($ope,$delimiter,$end_delimiter,$string,$modifier);
+    }
+
+    # without /b /B modifier
+    else {
+        return e_s1_qt($ope,$delimiter,$end_delimiter,$string,$modifier);
+    }
+}
+
+#
+# escape regexp (s'here'')
+#
+sub e_s1_qt {
+    my($ope,$delimiter,$end_delimiter,$string,$modifier) = @_;
+
+    my $ignorecase = ($modifier =~ /i/oxms) ? 1 : 0;
+
+    # split regexp
+    my @char = $string =~ /\G(
+        \[\:\^ [a-z]+ \:\] |
+        \[\:   [a-z]+ \:\] |
+        \[\^               |
+        [\$\@\/\\]         |
+        \\?    (?:$q_char)
+    )/oxmsg;
+
+    # unescape character
+    for (my $i=0; $i <= $#char; $i++) {
+        if (0) {
+        }
+
+        # open character class [...]
+        elsif ($char[$i] eq '[') {
+            my $left = $i;
+            if ($char[$i+1] eq ']') {
+                $i++;
+            }
+            while (1) {
+                if (++$i > $#char) {
+                    die __FILE__, ": Unmatched [] in regexp";
+                }
+                if ($char[$i] eq ']') {
+                    my $right = $i;
+
+                    # [...]
+                    splice @char, $left, $right-$left+1, Elatin2::charlist_qr(@char[$left+1..$right-1], $modifier);
+
+                    $i = $left;
+                    last;
+                }
+            }
+        }
+
+        # open character class [^...]
+        elsif ($char[$i] eq '[^') {
+            my $left = $i;
+            if ($char[$i+1] eq ']') {
+                $i++;
+            }
+            while (1) {
+                if (++$i > $#char) {
+                    die __FILE__, ": Unmatched [] in regexp";
+                }
+                if ($char[$i] eq ']') {
+                    my $right = $i;
+
+                    # [^...]
+                    splice @char, $left, $right-$left+1, Elatin2::charlist_not_qr(@char[$left+1..$right-1], $modifier);
+
+                    $i = $left;
+                    last;
+                }
+            }
+        }
+
+        # escape $ @ / and \
+        elsif ($char[$i] =~ /\A [\$\@\/\\] \z/oxms) {
+            $char[$i] = '\\' . $char[$i];
+        }
+
+        # rewrite character class or escape character
+        elsif (my $char = character_class($char[$i],$modifier)) {
+            $char[$i] = $char;
+        }
+
+        # /i modifier
+        elsif ($ignorecase and ($char[$i] =~ /\A [\x00-\xFF] \z/oxms) and (Elatin2::uc($char[$i]) ne Elatin2::fc($char[$i]))) {
+            if (CORE::length(Elatin2::fc($char[$i])) == 1) {
+                $char[$i] = '['   . Elatin2::uc($char[$i])       . Elatin2::fc($char[$i]) . ']';
+            }
+            else {
+                $char[$i] = '(?:' . Elatin2::uc($char[$i]) . '|' . Elatin2::fc($char[$i]) . ')';
+            }
+        }
+
+        # quote character before ? + * {
+        elsif (($i >= 1) and ($char[$i] =~ /\A [\?\+\*\{] \z/oxms)) {
+            if ($char[$i-1] =~ /\A [\x00-\xFF] \z/oxms) {
+            }
+            else {
+                $char[$i-1] = '(?:' . $char[$i-1] . ')';
+            }
+        }
+    }
+
+    $modifier =~ tr/i//d;
+    $delimiter     = '/';
+    $end_delimiter = '/';
+    my $prematch = '';
+    return join '', $ope, $delimiter, $prematch, '(?:', @char, ')', $matched, $end_delimiter, $modifier;
+}
+
+#
+# escape regexp (s'here''b)
+#
+sub e_s1_qb {
+    my($ope,$delimiter,$end_delimiter,$string,$modifier) = @_;
+
+    # split regexp
+    my @char = $string =~ /\G(
+        \\\\        |
+        [\$\@\/\\]  |
+        [\x00-\xFF]
+    )/oxmsg;
+
+    # unescape character
+    for (my $i=0; $i <= $#char; $i++) {
+        if (0) {
+        }
+
+        # remain \\
+        elsif ($char[$i] eq '\\\\') {
+        }
+
+        # escape $ @ / and \
+        elsif ($char[$i] =~ /\A [\$\@\/\\] \z/oxms) {
+            $char[$i] = '\\' . $char[$i];
+        }
+    }
+
+    $delimiter     = '/';
+    $end_delimiter = '/';
+    my $prematch = '';
+    return join '', $ope, $delimiter, $prematch, '(?:', @char, ')', $matched, $end_delimiter, $modifier;
+}
+
+#
+# escape regexp (s''here')
+#
+sub e_s2_q {
+    my($ope,$delimiter,$end_delimiter,$string) = @_;
+
+    $slash = 'div';
+
+    my @char = $string =~ / \G (\\\\|[\$\@\/\\]|$q_char) /oxmsg;
+    for (my $i=0; $i <= $#char; $i++) {
+        if (0) {
+        }
+
+        # not escape \\
+        elsif ($char[$i] =~ /\A \\\\ \z/oxms) {
+        }
+
+        # escape $ @ / and \
+        elsif ($char[$i] =~ /\A [\$\@\/\\] \z/oxms) {
+            $char[$i] = '\\' . $char[$i];
+        }
+    }
+
+    return join '', $ope, $delimiter, @char,   $end_delimiter;
+}
+
+#
+# escape regexp (s/here/and here/modifier)
+#
+sub e_sub {
+    my($variable,$delimiter1,$pattern,$end_delimiter1,$delimiter2,$replacement,$end_delimiter2,$modifier) = @_;
+    $modifier ||= '';
+
+    $modifier =~ tr/p//d;
+    if ($modifier =~ /([adlu])/oxms) {
+        my $line = 0;
+        for (my $i=0; my($package,$filename,$use_line,$subroutine) = caller($i); $i++) {
+            if ($filename ne __FILE__) {
+                $line = $use_line + (CORE::substr($_,0,pos($_)) =~ tr/\n//) + 1;
+                last;
+            }
+        }
+        die qq{Unsupported modifier "$1" used at line $line.\n};
+    }
+
+    if ($variable eq '') {
+        $variable      = '$_';
+        $bind_operator = ' =~ ';
+    }
+
+    $slash = 'div';
+
+    # P.128 Start of match (or end of previous match): \G
+    # P.130 Advanced Use of \G with Perl
+    # in Chapter 3: Overview of Regular Expression Features and Flavors
+    # P.312 Iterative Matching: Scalar Context, with /g
+    # in Chapter 7: Perl
+    # of ISBN 0-596-00289-0 Mastering Regular Expressions, Second edition
+
+    # P.181 Where You Left Off: The \G Assertion
+    # in Chapter 5: Pattern Matching
+    # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
+    # P.220 Where You Left Off: The \G Assertion
+    # in Chapter 5: Pattern Matching
+    # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+
+    my $e_modifier = $modifier =~ tr/e//d;
+    my $r_modifier = $modifier =~ tr/r//d;
+
+    my $my = '';
+    if ($variable =~ s/\A \( \s* ( (?: local \b | my \b | our \b | state \b )? .+ ) \) \z/$1/oxms) {
+        $my = $variable;
+        $variable =~ s/ (?: local \b | my \b | our \b | state \b ) \s* //oxms;
+        $variable =~ s/ = .+ \z//oxms;
+    }
+
+    (my $variable_basename = $variable) =~ s/ [\[\{].* \z//oxms;
+    $variable_basename =~ s/ \s+ \z//oxms;
+
+    # quote replacement string
+    my $e_replacement = '';
+    if ($e_modifier >= 1) {
+        $e_replacement = e_qq('', '', '', $replacement);
+        $e_modifier--;
+    }
+    else {
+        if ($delimiter2 eq "'") {
+            $e_replacement = e_s2_q('qq', '/',         '/',             $replacement);
+        }
+        else {
+            $e_replacement = e_qq  ('qq', $delimiter2, $end_delimiter2, $replacement);
+        }
+    }
+
+    my $sub = '';
+
+    # with /r
+    if ($r_modifier) {
+        if (0) {
+        }
+
+        # s///gr without multibyte anchoring
+        elsif ($modifier =~ /g/oxms) {
+            $sub = sprintf(
+                #                              1                        2   3                                 4   5
+                q<CORE::eval{local $Latin2::re_t=%s; while($Latin2::re_t =~ %s){%s local $^W=0; local $Latin2::re_r=%s; %s$Latin2::re_t="$`$Latin2::re_r$'"; pos($Latin2::re_t)=length "$`$Latin2::re_r"; } return $Latin2::re_t}>,
+
+                $variable,                                                       #  1
+                ($delimiter1 eq "'") ?                                           #  2
+                e_s1_q('m', $delimiter1, $end_delimiter1, $pattern, $modifier) : #  :
+                e_s1  ('m', $delimiter1, $end_delimiter1, $pattern, $modifier),  #  :
+                $s_matched,                                                      #  3
+                $e_replacement,                                                  #  4
+                '$Latin2::re_r=CORE::eval $Latin2::re_r; ' x $e_modifier,            #  5
+            );
+        }
+
+        # s///r
+        else {
+
+            my $prematch = q{$`};
+
+            $sub = sprintf(
+                #  1     2                3                                 4   5  6                    7
+                q<(%s =~ %s) ? CORE::eval{%s local $^W=0; local $Latin2::re_r=%s; %s"%s$Latin2::re_r$'" } : %s>,
+
+                $variable,                                                       #  1
+                ($delimiter1 eq "'") ?                                           #  2
+                e_s1_q('m', $delimiter1, $end_delimiter1, $pattern, $modifier) : #  :
+                e_s1  ('m', $delimiter1, $end_delimiter1, $pattern, $modifier),  #  :
+                $s_matched,                                                      #  3
+                $e_replacement,                                                  #  4
+                '$Latin2::re_r=CORE::eval $Latin2::re_r; ' x $e_modifier,            #  5
+                $prematch,                                                       #  6
+                $variable,                                                       #  7
+            );
+        }
+
+        # $var !~ s///r doesn't make sense
+        if ($bind_operator =~ / !~ /oxms) {
+            $sub = q{die("$0: Using !~ with s///r doesn't make sense"), } . $sub;
+        }
+    }
+
+    # without /r
+    else {
+        if (0) {
+        }
+
+        # s///g without multibyte anchoring
+        elsif ($modifier =~ /g/oxms) {
+            $sub = sprintf(
+                #                                       1     2   3                                 4   5 6                         7                                                 8
+                q<CORE::eval{local $Latin2::re_n=0; while(%s =~ %s){%s local $^W=0; local $Latin2::re_r=%s; %s%s="$`$Latin2::re_r$'"; pos(%s)=length "$`$Latin2::re_r"; $Latin2::re_n++} return %s$Latin2::re_n}>,
+
+                $variable,                                                       #  1
+                ($delimiter1 eq "'") ?                                           #  2
+                e_s1_q('m', $delimiter1, $end_delimiter1, $pattern, $modifier) : #  :
+                e_s1  ('m', $delimiter1, $end_delimiter1, $pattern, $modifier),  #  :
+                $s_matched,                                                      #  3
+                $e_replacement,                                                  #  4
+                '$Latin2::re_r=CORE::eval $Latin2::re_r; ' x $e_modifier,            #  5
+                $variable,                                                       #  6
+                $variable,                                                       #  7
+                ($bind_operator =~ / !~ /oxms) ? '!' : '',                       #  8
+            );
+        }
+
+        # s///
+        else {
+
+            my $prematch = q{$`};
+
+            $sub = sprintf(
+
+                ($bind_operator =~ / =~ /oxms) ?
+
+                #  1 2 3                4                                 5   6 7   8
+                q<(%s%s%s) ? CORE::eval{%s local $^W=0; local $Latin2::re_r=%s; %s%s="%s$Latin2::re_r$'"; 1 } : undef> :
+
+                #  1 2 3                    4                                 5   6 7   8
+                q<(%s%s%s) ? 1 : CORE::eval{%s local $^W=0; local $Latin2::re_r=%s; %s%s="%s$Latin2::re_r$'"; undef }>,
+
+                $variable,                                                       #  1
+                $bind_operator,                                                  #  2
+                ($delimiter1 eq "'") ?                                           #  3
+                e_s1_q('m', $delimiter1, $end_delimiter1, $pattern, $modifier) : #  :
+                e_s1  ('m', $delimiter1, $end_delimiter1, $pattern, $modifier),  #  :
+                $s_matched,                                                      #  4
+                $e_replacement,                                                  #  5
+                '$Latin2::re_r=CORE::eval $Latin2::re_r; ' x $e_modifier,            #  6
+                $variable,                                                       #  7
+                $prematch,                                                       #  8
+            );
+        }
+    }
+
+    # (my $foo = $bar) =~ s///   -->   (my $foo = $bar, CORE::eval { ... })[1]
+    if ($my ne '') {
+        $sub = "($my, $sub)[1]";
+    }
+
+    # clear s/// variable
+    $sub_variable = '';
+    $bind_operator = '';
+
+    return $sub;
+}
+
+#
+# escape regexp of split qr//
+#
+sub e_split {
+    my($ope,$delimiter,$end_delimiter,$string,$modifier) = @_;
+    $modifier ||= '';
+
+    $modifier =~ tr/p//d;
+    if ($modifier =~ /([adlu])/oxms) {
+        my $line = 0;
+        for (my $i=0; my($package,$filename,$use_line,$subroutine) = caller($i); $i++) {
+            if ($filename ne __FILE__) {
+                $line = $use_line + (CORE::substr($_,0,pos($_)) =~ tr/\n//) + 1;
+                last;
+            }
+        }
+        die qq{Unsupported modifier "$1" used at line $line.\n};
+    }
+
+    $slash = 'div';
+
+    # /b /B modifier
+    if ($modifier =~ tr/bB//d) {
+        return join '', 'split', $ope, $delimiter, $string, $end_delimiter, $modifier;
+    }
+
+    my $ignorecase = ($modifier =~ /i/oxms) ? 1 : 0;
+    my $metachar = qr/[\@\\|[\]{^]/oxms;
+
+    # split regexp
+    my @char = $string =~ /\G(
+        \\o\{ [0-7]+           \}  |
+        \\    [0-7]{2,3}           |
+        \\x\{ [0-9A-Fa-f]+     \}  |
+        \\x   [0-9A-Fa-f]{1,2}     |
+        \\c   [\x40-\x5F]          |
+        \\N\{ [^0-9\}][^\}]* \} |
+        \\p\{ [^0-9\}][^\}]* \} |
+        \\P\{ [^0-9\}][^\}]* \} |
+        \\  (?:$q_char)            |
+        \$` | \$\{`\} | \$ \s* PREMATCH  | \$ \s* \{ \s* PREMATCH  \s* \} | \$ \s* \{\^PREMATCH\}  |
+        \$& | \$\{&\} | \$ \s* MATCH     | \$ \s* \{ \s* MATCH     \s* \} | \$ \s* \{\^MATCH\}     |
+                        \$ \s* POSTMATCH | \$ \s* \{ \s* POSTMATCH \s* \} | \$ \s* \{\^POSTMATCH\} |
+        [\$\@] $qq_variable        |
+        \$ \s* \d+                 |
+        \$ \s* \{ \s* \d+ \s* \}   |
+        \$ \$ (?![\w\{])           |
+        \$ \s* \$ \s* $qq_variable |
+        \[\:\^ (?:alnum|alpha|ascii|blank|cntrl|digit|graph|lower|print|punct|space|upper|word|xdigit) :\] |
+        \[\:   (?:alnum|alpha|ascii|blank|cntrl|digit|graph|lower|print|punct|space|upper|word|xdigit) :\] |
+        \[\^                       |
+        \(\?                       |
+            (?:$q_char)
+    )/oxmsg;
+
+    my $left_e  = 0;
+    my $right_e = 0;
+    for (my $i=0; $i <= $#char; $i++) {
+
+        # "\L\u" --> "\u\L"
+        if (($char[$i] eq '\L') and ($char[$i+1] eq '\u')) {
+            @char[$i,$i+1] = @char[$i+1,$i];
+        }
+
+        # "\U\l" --> "\l\U"
+        elsif (($char[$i] eq '\U') and ($char[$i+1] eq '\l')) {
+            @char[$i,$i+1] = @char[$i+1,$i];
+        }
+
+        # octal escape sequence
+        elsif ($char[$i] =~ /\A \\o \{ ([0-7]+) \} \z/oxms) {
+            $char[$i] = Elatin2::octchr($1);
+        }
+
+        # hexadecimal escape sequence
+        elsif ($char[$i] =~ /\A \\x \{ ([0-9A-Fa-f]+) \} \z/oxms) {
+            $char[$i] = Elatin2::hexchr($1);
+        }
+
+        # \N{CHARNAME} --> N\{CHARNAME}
+        elsif ($char[$i] =~ /\A \\ (N) ( \{ ([^0-9\}][^\}]*) \} ) \z/oxms) {
+            $char[$i] = $1 . '\\' . $2;
+        }
+
+        # \p{PROPERTY} --> p\{PROPERTY}
+        elsif ($char[$i] =~ /\A \\ (p) ( \{ ([^0-9\}][^\}]*) \} ) \z/oxms) {
+            $char[$i] = $1 . '\\' . $2;
+        }
+
+        # \P{PROPERTY} --> P\{PROPERTY}
+        elsif ($char[$i] =~ /\A \\ (P) ( \{ ([^0-9\}][^\}]*) \} ) \z/oxms) {
+            $char[$i] = $1 . '\\' . $2;
+        }
+
+        # \p, \P, \X --> p, P, X
+        elsif ($char[$i] =~ /\A \\ ( [pPX] ) \z/oxms) {
+            $char[$i] = $1;
+        }
+
+        if (0) {
+        }
+
+        # join separated multiple-octet
+        elsif ($char[$i] =~ /\A (?: \\ [0-7]{2,3} | \\x [0-9A-Fa-f]{1,2}) \z/oxms) {
+            if (   ($i+3 <= $#char) and (grep(/\A (?: \\ [0-7]{2,3} | \\x [0-9A-Fa-f]{1,2}) \z/oxms, @char[$i+1..$i+3]) == 3) and (CORE::eval(sprintf '"%s%s%s%s"', @char[$i..$i+3]) =~ /\A $q_char \z/oxms)) {
+                $char[$i] .= join '', splice @char, $i+1, 3;
+            }
+            elsif (($i+2 <= $#char) and (grep(/\A (?: \\ [0-7]{2,3} | \\x [0-9A-Fa-f]{1,2}) \z/oxms, @char[$i+1..$i+2]) == 2) and (CORE::eval(sprintf '"%s%s%s"',   @char[$i..$i+2]) =~ /\A $q_char \z/oxms)) {
+                $char[$i] .= join '', splice @char, $i+1, 2;
+            }
+            elsif (($i+1 <= $#char) and (grep(/\A (?: \\ [0-7]{2,3} | \\x [0-9A-Fa-f]{1,2}) \z/oxms, $char[$i+1      ]) == 1) and (CORE::eval(sprintf '"%s%s"',     @char[$i..$i+1]) =~ /\A $q_char \z/oxms)) {
+                $char[$i] .= join '', splice @char, $i+1, 1;
+            }
+        }
+
+        # open character class [...]
+        elsif ($char[$i] eq '[') {
+            my $left = $i;
+            if ($char[$i+1] eq ']') {
+                $i++;
+            }
+            while (1) {
+                if (++$i > $#char) {
+                    die __FILE__, ": Unmatched [] in regexp";
+                }
+                if ($char[$i] eq ']') {
+                    my $right = $i;
+
+                    # [...]
+                    if (grep(/\A [\$\@]/oxms,@char[$left+1..$right-1]) >= 1) {
+                        splice @char, $left, $right-$left+1, sprintf(q{@{[Elatin2::charlist_qr(%s,'%s')]}}, join(',', map {qq_stuff($delimiter,$end_delimiter,$_)} @char[$left+1..$right-1]), $modifier);
+                    }
+                    else {
+                        splice @char, $left, $right-$left+1, Elatin2::charlist_qr(@char[$left+1..$right-1], $modifier);
+                    }
+
+                    $i = $left;
+                    last;
+                }
+            }
+        }
+
+        # open character class [^...]
+        elsif ($char[$i] eq '[^') {
+            my $left = $i;
+            if ($char[$i+1] eq ']') {
+                $i++;
+            }
+            while (1) {
+                if (++$i > $#char) {
+                    die __FILE__, ": Unmatched [] in regexp";
+                }
+                if ($char[$i] eq ']') {
+                    my $right = $i;
+
+                    # [^...]
+                    if (grep(/\A [\$\@]/oxms,@char[$left+1..$right-1]) >= 1) {
+                        splice @char, $left, $right-$left+1, sprintf(q{@{[Elatin2::charlist_not_qr(%s,'%s')]}}, join(',', map {qq_stuff($delimiter,$end_delimiter,$_)} @char[$left+1..$right-1]), $modifier);
+                    }
+                    else {
+                        splice @char, $left, $right-$left+1, Elatin2::charlist_not_qr(@char[$left+1..$right-1], $modifier);
+                    }
+
+                    $i = $left;
+                    last;
+                }
+            }
+        }
+
+        # rewrite character class or escape character
+        elsif (my $char = character_class($char[$i],$modifier)) {
+            $char[$i] = $char;
+        }
+
+        # P.794 29.2.161. split
+        # in Chapter 29: Functions
+        # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
+        # P.951 split
+        # in Chapter 27: Functions
+        # of ISBN 978-0-596-00492-7 Programming Perl 4th Edition.
+
+        # said "The //m modifier is assumed when you split on the pattern /^/",
+        # but perl5.008 is not so. Therefore, this software adds //m.
+        # (and so on)
+
+        # split(m/^/) --> split(m/^/m)
+        elsif (($char[$i] eq '^') and ($modifier !~ /m/oxms)) {
+            $modifier .= 'm';
+        }
+
+        # /i modifier
+        elsif ($ignorecase and ($char[$i] =~ /\A [\x00-\xFF] \z/oxms) and (Elatin2::uc($char[$i]) ne Elatin2::fc($char[$i]))) {
+            if (CORE::length(Elatin2::fc($char[$i])) == 1) {
+                $char[$i] = '['   . Elatin2::uc($char[$i])       . Elatin2::fc($char[$i]) . ']';
+            }
+            else {
+                $char[$i] = '(?:' . Elatin2::uc($char[$i]) . '|' . Elatin2::fc($char[$i]) . ')';
+            }
+        }
+
+        # \u \l \U \L \F \Q \E
+        elsif ($char[$i] =~ /\A ([<>]) \z/oxms) {
+            if ($right_e < $left_e) {
+                $char[$i] = '\\' . $char[$i];
+            }
+        }
+        elsif ($char[$i] eq '\u') {
+            $char[$i] = '@{[Elatin2::ucfirst qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\l') {
+            $char[$i] = '@{[Elatin2::lcfirst qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\U') {
+            $char[$i] = '@{[Elatin2::uc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\L') {
+            $char[$i] = '@{[Elatin2::lc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\F') {
+            $char[$i] = '@{[Elatin2::fc qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\Q') {
+            $char[$i] = '@{[CORE::quotemeta qq<';
+            $left_e++;
+        }
+        elsif ($char[$i] eq '\E') {
+            if ($right_e < $left_e) {
+                $char[$i] = '>]}';
+                $right_e++;
+            }
+            else {
+                $char[$i] = '';
+            }
+        }
+        elsif ($char[$i] eq '\Q') {
+            while (1) {
+                if (++$i > $#char) {
+                    last;
+                }
+                if ($char[$i] eq '\E') {
+                    last;
+                }
+            }
+        }
+        elsif ($char[$i] eq '\E') {
+        }
+
+        # $0 --> $0
+        elsif ($char[$i] =~ /\A \$ 0 \z/oxms) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+        elsif ($char[$i] =~ /\A \$ \{ \s* 0 \s* \} \z/oxms) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $$ --> $$
+        elsif ($char[$i] =~ /\A \$\$ \z/oxms) {
+        }
+
+        # $1, $2, $3 --> $2, $3, $4 after s/// with multibyte anchoring
+        # $1, $2, $3 --> $1, $2, $3 otherwise
+        elsif ($char[$i] =~ /\A \$ ([1-9][0-9]*) \z/oxms) {
+            $char[$i] = e_capture($1);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+        elsif ($char[$i] =~ /\A \$ \{ \s* ([1-9][0-9]*) \s* \} \z/oxms) {
+            $char[$i] = e_capture($1);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $$foo[ ... ] --> $ $foo->[ ... ]
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \[ (?:$qq_bracket)*? \] ) \z/oxms) {
+            $char[$i] = e_capture($1.'->'.$2);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $$foo{ ... } --> $ $foo->{ ... }
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) ( \{ (?:$qq_brace)*? \} ) \z/oxms) {
+            $char[$i] = e_capture($1.'->'.$2);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $$foo
+        elsif ($char[$i] =~ /\A \$ ( \$ [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* ) \z/oxms) {
+            $char[$i] = e_capture($1);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $`, ${`}, $PREMATCH, ${PREMATCH}, ${^PREMATCH} --> Elatin2::PREMATCH()
+        elsif ($char[$i] =~ /\A ( \$` | \$\{`\} | \$ \s* PREMATCH  | \$ \s* \{ \s* PREMATCH  \s* \} | \$ \s* \{\^PREMATCH\}  ) \z/oxmsgc) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(Elatin2::PREMATCH())]}';
+            }
+            else {
+                $char[$i] = '@{[Elatin2::PREMATCH()]}';
+            }
+        }
+
+        # $&, ${&}, $MATCH, ${MATCH}, ${^MATCH} --> Elatin2::MATCH()
+        elsif ($char[$i] =~ /\A ( \$& | \$\{&\} | \$ \s* MATCH     | \$ \s* \{ \s* MATCH     \s* \} | \$ \s* \{\^MATCH\}     ) \z/oxmsgc) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(Elatin2::MATCH())]}';
+            }
+            else {
+                $char[$i] = '@{[Elatin2::MATCH()]}';
+            }
+        }
+
+        # $POSTMATCH, ${POSTMATCH}, ${^POSTMATCH} --> Elatin2::POSTMATCH()
+        elsif ($char[$i] =~ /\A (                 \$ \s* POSTMATCH | \$ \s* \{ \s* POSTMATCH \s* \} | \$ \s* \{\^POSTMATCH\} ) \z/oxmsgc) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(Elatin2::POSTMATCH())]}';
+            }
+            else {
+                $char[$i] = '@{[Elatin2::POSTMATCH()]}';
+            }
+        }
+
+        # ${ foo }
+        elsif ($char[$i] =~ /\A \$ \s* \{ ( \s* [A-Za-z_][A-Za-z0-9_]*(?: ::[A-Za-z_][A-Za-z0-9_]*)* \s* ) \} \z/oxms) {
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $1 . ')]}';
+            }
+        }
+
+        # ${ ... }
+        elsif ($char[$i] =~ /\A \$ \s* \{ \s* ( .+ ) \s* \} \z/oxms) {
+            $char[$i] = e_capture($1);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # $scalar or @array
+        elsif ($char[$i] =~ /\A [\$\@].+ /oxms) {
+            $char[$i] = e_string($char[$i]);
+            if ($ignorecase) {
+                $char[$i] = '@{[Elatin2::ignorecase(' . $char[$i] . ')]}';
+            }
+        }
+
+        # quote character before ? + * {
+        elsif (($i >= 1) and ($char[$i] =~ /\A [\?\+\*\{] \z/oxms)) {
+            if ($char[$i-1] =~ /\A (?:\\[0-7]{2,3}|\\x[0-9-A-Fa-f]{1,2}) \z/oxms) {
+            }
+            else {
+                $char[$i-1] = '(?:' . $char[$i-1] . ')';
+            }
+        }
+    }
+
+    # make regexp string
+    $modifier =~ tr/i//d;
+    if ($left_e > $right_e) {
+        return join '', 'Elatin2::split', $ope, $delimiter, @char, '>]}' x ($left_e - $right_e), $end_delimiter, $modifier;
+    }
+    return     join '', 'Elatin2::split', $ope, $delimiter, @char,                               $end_delimiter, $modifier;
+}
+
+#
+# escape regexp of split qr''
+#
+sub e_split_q {
+    my($ope,$delimiter,$end_delimiter,$string,$modifier) = @_;
+    $modifier ||= '';
+
+    $modifier =~ tr/p//d;
+    if ($modifier =~ /([adlu])/oxms) {
+        my $line = 0;
+        for (my $i=0; my($package,$filename,$use_line,$subroutine) = caller($i); $i++) {
+            if ($filename ne __FILE__) {
+                $line = $use_line + (CORE::substr($_,0,pos($_)) =~ tr/\n//) + 1;
+                last;
+            }
+        }
+        die qq{Unsupported modifier "$1" used at line $line.\n};
+    }
+
+    $slash = 'div';
+
+    # /b /B modifier
+    if ($modifier =~ tr/bB//d) {
+        return join '', 'split', $ope, $delimiter, $string, $end_delimiter, $modifier;
+    }
+
+    my $ignorecase = ($modifier =~ /i/oxms) ? 1 : 0;
+
+    # split regexp
+    my @char = $string =~ /\G(
+        \[\:\^ [a-z]+ \:\] |
+        \[\:   [a-z]+ \:\] |
+        \[\^               |
+        \\?    (?:$q_char)
+    )/oxmsg;
+
+    # unescape character
+    for (my $i=0; $i <= $#char; $i++) {
+        if (0) {
+        }
+
+        # open character class [...]
+        elsif ($char[$i] eq '[') {
+            my $left = $i;
+            if ($char[$i+1] eq ']') {
+                $i++;
+            }
+            while (1) {
+                if (++$i > $#char) {
+                    die __FILE__, ": Unmatched [] in regexp";
+                }
+                if ($char[$i] eq ']') {
+                    my $right = $i;
+
+                    # [...]
+                    splice @char, $left, $right-$left+1, Elatin2::charlist_qr(@char[$left+1..$right-1], $modifier);
+
+                    $i = $left;
+                    last;
+                }
+            }
+        }
+
+        # open character class [^...]
+        elsif ($char[$i] eq '[^') {
+            my $left = $i;
+            if ($char[$i+1] eq ']') {
+                $i++;
+            }
+            while (1) {
+                if (++$i > $#char) {
+                    die __FILE__, ": Unmatched [] in regexp";
+                }
+                if ($char[$i] eq ']') {
+                    my $right = $i;
+
+                    # [^...]
+                    splice @char, $left, $right-$left+1, Elatin2::charlist_not_qr(@char[$left+1..$right-1], $modifier);
+
+                    $i = $left;
+                    last;
+                }
+            }
+        }
+
+        # rewrite character class or escape character
+        elsif (my $char = character_class($char[$i],$modifier)) {
+            $char[$i] = $char;
+        }
+
+        # split(m/^/) --> split(m/^/m)
+        elsif (($char[$i] eq '^') and ($modifier !~ /m/oxms)) {
+            $modifier .= 'm';
+        }
+
+        # /i modifier
+        elsif ($ignorecase and ($char[$i] =~ /\A [\x00-\xFF] \z/oxms) and (Elatin2::uc($char[$i]) ne Elatin2::fc($char[$i]))) {
+            if (CORE::length(Elatin2::fc($char[$i])) == 1) {
+                $char[$i] = '['   . Elatin2::uc($char[$i])       . Elatin2::fc($char[$i]) . ']';
+            }
+            else {
+                $char[$i] = '(?:' . Elatin2::uc($char[$i]) . '|' . Elatin2::fc($char[$i]) . ')';
+            }
+        }
+
+        # quote character before ? + * {
+        elsif (($i >= 1) and ($char[$i] =~ /\A [\?\+\*\{] \z/oxms)) {
+            if ($char[$i-1] =~ /\A [\x00-\xFF] \z/oxms) {
+            }
+            else {
+                $char[$i-1] = '(?:' . $char[$i-1] . ')';
+            }
+        }
+    }
+
+    $modifier =~ tr/i//d;
+    return join '', 'Elatin2::split', $ope, $delimiter, @char, $end_delimiter, $modifier;
+}
+
 #
 # instead of Carp::carp
 #
@@ -2951,8 +7522,8 @@ Elatin2 - Run-time routines for Latin2.pm
 
 =head1 ABSTRACT
 
-This module is a run-time routines of the Latin2.pm.
-Because the Latin2.pm automatically uses this module, you need not use directly.
+This module has run-time routines for use Latin2 software automatically, you
+do not have to use.
 
 =head1 BUGS AND LIMITATIONS
 
